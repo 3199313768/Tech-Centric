@@ -31,7 +31,7 @@ export function Skills({ compact = false }: SkillsProps) {
         padding: compact ? '0 40px 120px' : '120px 40px 120px',
         maxWidth: '1400px',
         margin: '0 auto',
-        color: '#fff',
+        color: 'var(--color-text-primary)',
       }}
     >
       {/* 杂志式标题 */}
@@ -45,8 +45,8 @@ export function Skills({ compact = false }: SkillsProps) {
           fontFamily: 'var(--font-space-mono), monospace',
           textTransform: 'uppercase',
           letterSpacing: '4px',
-          color: '#00d9ff',
-          textShadow: '0 0 30px rgba(0, 217, 255, 0.6)',
+          color: 'var(--color-headline)',
+          textShadow: 'var(--color-headline-shadow)',
           scrollMarginTop: compact ? '100px' : '140px',
         }}
         initial={{ opacity: 0, y: 50 }}
@@ -64,7 +64,7 @@ export function Skills({ compact = false }: SkillsProps) {
           gap: '16px',
           marginBottom: '48px',
           flexWrap: 'wrap',
-          borderBottom: '2px solid rgba(0, 217, 255, 0.2)',
+          borderBottom: '2px solid var(--color-cyan-20)',
           paddingBottom: '16px',
         }}
         initial={{ opacity: 0, y: 20 }}
@@ -79,9 +79,9 @@ export function Skills({ compact = false }: SkillsProps) {
             fontSize: '14px',
             fontFamily: 'var(--font-space-mono), monospace',
             fontWeight: selectedCategory === null ? 'bold' : 'normal',
-            color: selectedCategory === null ? '#00d9ff' : 'rgba(255, 255, 255, 0.7)',
-            backgroundColor: selectedCategory === null ? 'rgba(0, 217, 255, 0.15)' : 'transparent',
-            border: `2px solid ${selectedCategory === null ? 'rgba(0, 217, 255, 0.6)' : 'rgba(255, 255, 255, 0.2)'}`,
+            color: selectedCategory === null ? 'var(--color-cyan)' : 'var(--color-btn-inactive-text)',
+            backgroundColor: selectedCategory === null ? 'var(--color-cyan-15)' : 'transparent',
+            border: `2px solid ${selectedCategory === null ? 'var(--color-cyan-50)' : 'var(--color-btn-inactive-border)'}`,
             borderRadius: '0',
             cursor: 'pointer',
             textTransform: 'uppercase',
@@ -91,7 +91,7 @@ export function Skills({ compact = false }: SkillsProps) {
           }}
           whileHover={{
             scale: 1.05,
-            borderColor: 'rgba(0, 217, 255, 0.6)',
+            borderColor: 'var(--color-cyan-50)',
           }}
           whileTap={{ scale: 0.95 }}
         >
@@ -104,7 +104,7 @@ export function Skills({ compact = false }: SkillsProps) {
                 left: '0',
                 right: '0',
                 height: '2px',
-                backgroundColor: '#00d9ff',
+                backgroundColor: 'var(--color-cyan)',
               }}
               layoutId="activeTab"
             />
@@ -119,9 +119,9 @@ export function Skills({ compact = false }: SkillsProps) {
               fontSize: '14px',
               fontFamily: 'var(--font-space-mono), monospace',
               fontWeight: selectedCategory === category ? 'bold' : 'normal',
-              color: selectedCategory === category ? '#00d9ff' : 'rgba(255, 255, 255, 0.7)',
-              backgroundColor: selectedCategory === category ? 'rgba(0, 217, 255, 0.15)' : 'transparent',
-              border: `2px solid ${selectedCategory === category ? 'rgba(0, 217, 255, 0.6)' : 'rgba(255, 255, 255, 0.2)'}`,
+              color: selectedCategory === category ? 'var(--color-cyan)' : 'var(--color-btn-inactive-text)',
+              backgroundColor: selectedCategory === category ? 'var(--color-cyan-15)' : 'transparent',
+              border: `2px solid ${selectedCategory === category ? 'var(--color-cyan-50)' : 'var(--color-btn-inactive-border)'}`,
               borderRadius: '0',
               cursor: 'pointer',
               textTransform: 'uppercase',
@@ -131,7 +131,7 @@ export function Skills({ compact = false }: SkillsProps) {
             }}
             whileHover={{
               scale: 1.05,
-              borderColor: 'rgba(0, 217, 255, 0.6)',
+              borderColor: 'var(--color-cyan-50)',
             }}
             whileTap={{ scale: 0.95 }}
           >
@@ -144,7 +144,7 @@ export function Skills({ compact = false }: SkillsProps) {
                   left: '0',
                   right: '0',
                   height: '2px',
-                  backgroundColor: '#00d9ff',
+                  backgroundColor: 'var(--color-cyan)',
                 }}
                 layoutId="activeTab"
               />

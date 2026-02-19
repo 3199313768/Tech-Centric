@@ -17,10 +17,10 @@ export function PaperCard({ children, className = '', style = {}, hover = true, 
       className={`paper-card ${className}`}
       style={{
         padding: '24px',
-        border: '1px solid rgba(0, 217, 255, 0.2)',
-        backgroundColor: 'rgba(255, 255, 255, 0.02)',
+        border: '1px solid var(--color-card-border)',
+        backgroundColor: 'var(--color-card-bg)',
         borderRadius: '8px',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+        boxShadow: `0 4px 20px var(--color-card-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.05)`,
         position: 'relative',
         backgroundImage: `
           linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 0%, transparent 100%),
@@ -36,7 +36,7 @@ export function PaperCard({ children, className = '', style = {}, hover = true, 
         rotateY: 2,
         rotateX: -2,
         scale: 1.02,
-        boxShadow: '0 8px 30px rgba(0, 217, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+        boxShadow: `0 8px 30px var(--color-card-shadow-hover), inset 0 1px 0 rgba(255, 255, 255, 0.1)`,
         transition: { duration: 0.3 }
       } : {}}
     >

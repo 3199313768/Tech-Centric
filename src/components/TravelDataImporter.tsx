@@ -211,9 +211,9 @@ export function TravelDataImporter({
         onClick={() => setIsOpen(true)}
         style={{
           padding: '12px 24px',
-          border: '1px solid rgba(0, 217, 255, 0.3)',
-          backgroundColor: 'rgba(0, 217, 255, 0.05)',
-          color: '#00d9ff',
+          border: '1px solid var(--color-cyan-30)',
+          backgroundColor: 'var(--color-cyan-10)',
+          color: 'var(--color-cyan)',
           borderRadius: '8px',
           cursor: 'pointer',
           fontFamily: 'var(--font-space-mono), monospace',
@@ -241,8 +241,8 @@ export function TravelDataImporter({
     <div
       style={{
         padding: '24px',
-        border: '1px solid rgba(0, 217, 255, 0.3)',
-        backgroundColor: 'rgba(0, 217, 255, 0.05)',
+        border: '1px solid var(--color-cyan-30)',
+        backgroundColor: 'var(--color-cyan-10)',
         borderRadius: '8px',
         marginBottom: '24px',
       }}
@@ -259,7 +259,7 @@ export function TravelDataImporter({
           style={{
             fontSize: '20px',
             fontWeight: 'bold',
-            color: '#00d9ff',
+            color: 'var(--color-cyan)',
             fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
             margin: 0,
           }}
@@ -275,7 +275,7 @@ export function TravelDataImporter({
           style={{
             background: 'none',
             border: 'none',
-            color: 'rgba(255, 255, 255, 0.6)',
+            color: 'var(--color-text-muted)',
             cursor: 'pointer',
             fontSize: '24px',
             padding: '0',
@@ -304,7 +304,7 @@ export function TravelDataImporter({
             padding: '8px 16px',
             border: '1px solid rgba(0, 217, 255, 0.3)',
             backgroundColor: 'rgba(0, 217, 255, 0.05)',
-            color: '#00d9ff',
+            color: 'var(--color-cyan)',
             borderRadius: '4px',
             cursor: 'pointer',
             fontFamily: 'var(--font-space-mono), monospace',
@@ -327,7 +327,7 @@ export function TravelDataImporter({
             padding: '8px 16px',
             border: '1px solid rgba(0, 217, 255, 0.3)',
             backgroundColor: 'rgba(0, 217, 255, 0.05)',
-            color: '#00d9ff',
+            color: 'var(--color-cyan)',
             borderRadius: '4px',
             cursor: 'pointer',
             fontFamily: 'var(--font-space-mono), monospace',
@@ -357,9 +357,9 @@ export function TravelDataImporter({
           onClick={handleClear}
           style={{
             padding: '8px 16px',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
+            border: '1px solid var(--color-btn-inactive-border)',
             backgroundColor: 'transparent',
-            color: 'rgba(255, 255, 255, 0.6)',
+            color: 'var(--color-text-muted)',
             borderRadius: '4px',
             cursor: 'pointer',
             fontFamily: 'var(--font-space-mono), monospace',
@@ -389,7 +389,7 @@ export function TravelDataImporter({
           padding: '12px',
           border: '1px solid rgba(0, 217, 255, 0.3)',
           backgroundColor: 'rgba(0, 0, 0, 0.3)',
-          color: '#fff',
+          color: 'var(--color-text-primary)',
           borderRadius: '4px',
           fontFamily: 'var(--font-jetbrains-mono), monospace',
           fontSize: '12px',
@@ -454,9 +454,9 @@ export function TravelDataImporter({
           }}
           style={{
             padding: '8px 16px',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
+            border: '1px solid var(--color-btn-inactive-border)',
             backgroundColor: 'transparent',
-            color: 'rgba(255, 255, 255, 0.6)',
+            color: 'var(--color-text-muted)',
             borderRadius: '4px',
             cursor: 'pointer',
             fontFamily: 'var(--font-space-mono), monospace',
@@ -485,7 +485,7 @@ export function TravelDataImporter({
               : 'rgba(0, 217, 255, 0.2)',
             color: isImporting || !importText.trim()
               ? 'rgba(0, 217, 255, 0.5)'
-              : '#00d9ff',
+              : 'var(--color-cyan)',
             borderRadius: '4px',
             cursor: isImporting || !importText.trim() ? 'not-allowed' : 'pointer',
             fontFamily: 'var(--font-space-mono), monospace',

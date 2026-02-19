@@ -26,7 +26,7 @@ export function Achievements({ compact = false }: AchievementsProps) {
         padding: compact ? '0 40px 120px' : '120px 40px 120px',
         maxWidth: '1400px',
         margin: '0 auto',
-        color: '#fff',
+        color: 'var(--color-text-primary)',
       }}
     >
       {/* 杂志式标题 */}
@@ -40,8 +40,8 @@ export function Achievements({ compact = false }: AchievementsProps) {
           fontFamily: 'var(--font-space-mono), monospace',
           textTransform: 'uppercase',
           letterSpacing: '4px',
-          color: '#00d9ff',
-          textShadow: '0 0 30px rgba(0, 217, 255, 0.6)',
+          color: 'var(--color-headline)',
+          textShadow: 'var(--color-headline-shadow)',
           scrollMarginTop: compact ? '100px' : '140px',
         }}
         initial={{ opacity: 0, y: 50 }}
@@ -62,9 +62,8 @@ export function Achievements({ compact = false }: AchievementsProps) {
         }}
       >
         {achievements.map((achievement, index) => {
-          // 为每个剪报生成不同的旋转角度和位置偏移
-          const rotation = (index % 5) * 2 - 4 // -4 到 4 度
-          const xOffset = (index % 3) * 10 - 10 // -10 到 10px
+          const rotation = (index % 5) * 2 - 4
+          const xOffset = (index % 3) * 10 - 10
           
           return (
             <motion.div
@@ -94,7 +93,7 @@ export function Achievements({ compact = false }: AchievementsProps) {
                   }
                 }}
               >
-                {/* 成就图片 - 纸张边框效果 */}
+                {/* 成就图片 */}
                 {achievement.image && (
                   <motion.div
                     style={{
@@ -107,9 +106,7 @@ export function Achievements({ compact = false }: AchievementsProps) {
                       border: '2px solid rgba(0, 217, 255, 0.2)',
                       position: 'relative',
                     }}
-                    whileHover={{
-                      scale: 1.05,
-                    }}
+                    whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.3 }}
                   >
                     <img
@@ -121,7 +118,6 @@ export function Achievements({ compact = false }: AchievementsProps) {
                         objectFit: 'cover',
                       }}
                     />
-                    {/* 纸张阴影效果 */}
                     <div
                       style={{
                         position: 'absolute',
@@ -234,9 +230,7 @@ export function Achievements({ compact = false }: AchievementsProps) {
                       alignItems: 'center',
                       gap: '8px',
                     }}
-                    whileHover={{
-                      x: 5,
-                    }}
+                    whileHover={{ x: 5 }}
                   >
                     查看详情
                     <motion.span

@@ -1,5 +1,7 @@
 'use client'
 
+import { ThemeToggle } from './ThemeToggle'
+
 interface NavigationProps {
   activeTab: string
   onTabChange: (tab: string) => void
@@ -7,10 +9,7 @@ interface NavigationProps {
 
 const tabs = [
   { id: 'home', label: '首页' },
-  { id: 'blog', label: '博客' },
-  { id: 'lifelog', label: '随笔' },
   { id: 'yearlyreview', label: '年度回顾' },
-  { id: 'recommendations', label: '推荐' },
   { id: 'travel', label: '旅行' },
   { id: 'contact', label: '联系' }
 ]
@@ -24,9 +23,9 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
         left: 0,
         right: 0,
         zIndex: 200,
-        backgroundColor: 'rgba(10, 10, 10, 0.95)',
+        backgroundColor: 'var(--color-nav-bg)',
         backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid rgba(0, 217, 255, 0.2)',
+        borderBottom: '1px solid var(--color-nav-border)',
         padding: '12px 24px',
       }}
     >
@@ -39,8 +38,8 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
           flexWrap: 'wrap',
           maxWidth: '1400px',
           margin: '0 auto',
-        }}
-      >
+          position: 'relative',
+        }}>
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -50,27 +49,27 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
               fontSize: '13px',
               fontFamily: 'var(--font-space-mono), monospace',
               fontWeight: activeTab === tab.id ? 'bold' : 'normal',
-              color: activeTab === tab.id ? '#00d9ff' : 'rgba(255, 255, 255, 0.7)',
-              backgroundColor: activeTab === tab.id ? 'rgba(0, 217, 255, 0.1)' : 'transparent',
-              border: `1px solid ${activeTab === tab.id ? 'rgba(0, 217, 255, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
+              color: activeTab === tab.id ? 'var(--color-cyan)' : 'var(--color-nav-text)',
+              backgroundColor: activeTab === tab.id ? 'var(--color-cyan-10)' : 'transparent',
+              border: `1px solid ${activeTab === tab.id ? 'var(--color-cyan-50)' : 'var(--color-btn-inactive-border)'}`,
               borderRadius: '4px',
               cursor: 'pointer',
               textTransform: 'uppercase',
               letterSpacing: '1px',
               transition: 'all 0.2s ease',
-              boxShadow: activeTab === tab.id ? '0 0 10px rgba(0, 217, 255, 0.3)' : 'none',
+              boxShadow: activeTab === tab.id ? '0 0 10px var(--color-cyan-glow)' : 'none',
             }}
             onMouseEnter={(e) => {
               if (activeTab !== tab.id) {
-                e.currentTarget.style.color = '#00d9ff'
-                e.currentTarget.style.borderColor = 'rgba(0, 217, 255, 0.3)'
-                e.currentTarget.style.backgroundColor = 'rgba(0, 217, 255, 0.05)'
+                e.currentTarget.style.color = 'var(--color-cyan)'
+                e.currentTarget.style.borderColor = 'var(--color-cyan-30)'
+                e.currentTarget.style.backgroundColor = 'var(--color-cyan-10)'
               }
             }}
             onMouseLeave={(e) => {
               if (activeTab !== tab.id) {
-                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)'
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)'
+                e.currentTarget.style.color = 'var(--color-nav-text)'
+                e.currentTarget.style.borderColor = 'var(--color-btn-inactive-border)'
                 e.currentTarget.style.backgroundColor = 'transparent'
               }
             }}
@@ -78,6 +77,10 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
             {tab.label}
           </button>
         ))}
+        {/* 主题切换按钮 */}
+        <div style={{ marginLeft: '16px' }}>
+          <ThemeToggle />
+        </div>
       </div>
     </nav>
   )

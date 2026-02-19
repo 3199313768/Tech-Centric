@@ -24,8 +24,8 @@ export const keywordCategories = {
       '开源项目',
     ],
     style: {
-      color: '#00d9ff',
-      textShadow: '0 0 10px rgba(0, 217, 255, 0.5)',
+      color: 'var(--color-cyan)',
+      textShadow: '0 0 10px var(--color-cyan-glow)',
       fontWeight: 600,
     },
   },
@@ -44,16 +44,16 @@ export const keywordCategories = {
       '设计美感',
     ],
     style: {
-      color: '#ffd700',
-      textShadow: '0 0 8px rgba(255, 215, 0, 0.4)',
+      color: 'var(--color-highlight-gold)',
+      textShadow: '0 0 8px var(--color-highlight-gold-glow)',
       fontWeight: 600,
     },
   },
   personal: {
     keywords: ['Oxygen', '氧气', '3-5年', '前端开发工程师'],
     style: {
-      color: '#ff6b9d',
-      textShadow: '0 0 10px rgba(255, 107, 157, 0.5)',
+      color: 'var(--color-highlight-pink)',
+      textShadow: '0 0 10px var(--color-highlight-pink-glow)',
       fontWeight: 700,
       fontStyle: 'italic',
     },

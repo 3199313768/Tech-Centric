@@ -41,7 +41,7 @@ export function Projects({ compact = false }: ProjectsProps) {
         padding: compact ? '120px 40px 80px' : '120px 40px 80px',
         maxWidth: '1400px',
         margin: '0 auto',
-        color: '#fff',
+        color: 'var(--color-text-primary)',
       }}
     >
       <motion.h2
@@ -54,8 +54,8 @@ export function Projects({ compact = false }: ProjectsProps) {
           fontFamily: 'var(--font-space-mono), monospace',
           textTransform: 'uppercase',
           letterSpacing: '4px',
-          color: '#00d9ff',
-          textShadow: '0 0 30px rgba(0, 217, 255, 0.6)',
+          color: 'var(--color-headline)',
+          textShadow: 'var(--color-headline-shadow)',
           scrollMarginTop: '100px',
         }}
         initial={{ opacity: 0, y: 50 }}
@@ -89,7 +89,7 @@ export function Projects({ compact = false }: ProjectsProps) {
           <span
             style={{
               fontSize: '14px',
-              color: 'rgba(255, 255, 255, 0.7)',
+              color: 'var(--color-text-muted)',
               fontFamily: 'var(--font-space-mono), monospace',
               textTransform: 'uppercase',
               letterSpacing: '1px',
@@ -104,9 +104,9 @@ export function Projects({ compact = false }: ProjectsProps) {
               fontSize: '13px',
               fontFamily: 'var(--font-space-mono), monospace',
               fontWeight: selectedType === 'all' ? 'bold' : 'normal',
-              color: selectedType === 'all' ? '#00d9ff' : 'rgba(255, 255, 255, 0.7)',
-              backgroundColor: selectedType === 'all' ? 'rgba(0, 217, 255, 0.1)' : 'transparent',
-              border: `1px solid ${selectedType === 'all' ? 'rgba(0, 217, 255, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
+              color: selectedType === 'all' ? 'var(--color-cyan)' : 'var(--color-btn-inactive-text)',
+              backgroundColor: selectedType === 'all' ? 'var(--color-cyan-10)' : 'transparent',
+              border: `1px solid ${selectedType === 'all' ? 'var(--color-cyan-50)' : 'var(--color-btn-inactive-border)'}`,
               borderRadius: '4px',
               cursor: 'pointer',
               textTransform: 'uppercase',
@@ -125,9 +125,9 @@ export function Projects({ compact = false }: ProjectsProps) {
                 fontSize: '13px',
                 fontFamily: 'var(--font-space-mono), monospace',
                 fontWeight: selectedType === type ? 'bold' : 'normal',
-                color: selectedType === type ? '#00d9ff' : 'rgba(255, 255, 255, 0.7)',
-                backgroundColor: selectedType === type ? 'rgba(0, 217, 255, 0.1)' : 'transparent',
-                border: `1px solid ${selectedType === type ? 'rgba(0, 217, 255, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
+                color: selectedType === type ? 'var(--color-cyan)' : 'var(--color-btn-inactive-text)',
+                backgroundColor: selectedType === type ? 'var(--color-cyan-10)' : 'transparent',
+                border: `1px solid ${selectedType === type ? 'var(--color-cyan-50)' : 'var(--color-btn-inactive-border)'}`,
                 borderRadius: '4px',
                 cursor: 'pointer',
                 textTransform: 'uppercase',
@@ -152,7 +152,7 @@ export function Projects({ compact = false }: ProjectsProps) {
           <span
             style={{
               fontSize: '14px',
-              color: 'rgba(255, 255, 255, 0.7)',
+              color: 'var(--color-text-muted)',
               fontFamily: 'var(--font-space-mono), monospace',
               textTransform: 'uppercase',
               letterSpacing: '1px',
@@ -169,9 +169,9 @@ export function Projects({ compact = false }: ProjectsProps) {
                 fontSize: '13px',
                 fontFamily: 'var(--font-space-mono), monospace',
                 fontWeight: selectedStatus === status ? 'bold' : 'normal',
-                color: selectedStatus === status ? '#00d9ff' : 'rgba(255, 255, 255, 0.7)',
-                backgroundColor: selectedStatus === status ? 'rgba(0, 217, 255, 0.1)' : 'transparent',
-                border: `1px solid ${selectedStatus === status ? 'rgba(0, 217, 255, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
+                color: selectedStatus === status ? 'var(--color-cyan)' : 'var(--color-btn-inactive-text)',
+                backgroundColor: selectedStatus === status ? 'var(--color-cyan-10)' : 'transparent',
+                border: `1px solid ${selectedStatus === status ? 'var(--color-cyan-50)' : 'var(--color-btn-inactive-border)'}`,
                 borderRadius: '4px',
                 cursor: 'pointer',
                 textTransform: 'uppercase',
@@ -214,7 +214,6 @@ export function Projects({ compact = false }: ProjectsProps) {
                   color: '#0a0a0a',
                 }}
               >
-                {/* 项目标题 */}
                 <h3
                   style={{
                     fontSize: '24px',
@@ -227,7 +226,6 @@ export function Projects({ compact = false }: ProjectsProps) {
                   {project.title}
                 </h3>
 
-                {/* 项目类型和状态 */}
                 <div
                   style={{
                     display: 'flex',
@@ -267,7 +265,6 @@ export function Projects({ compact = false }: ProjectsProps) {
                   </span>
                 </div>
 
-                {/* 项目描述 */}
                 <p
                   style={{
                     fontSize: '14px',
@@ -281,7 +278,6 @@ export function Projects({ compact = false }: ProjectsProps) {
                   {project.description}
                 </p>
 
-                {/* 技术栈预览 */}
                 {project.technologies && project.technologies.length > 0 && (
                   <div
                     style={{
@@ -323,7 +319,6 @@ export function Projects({ compact = false }: ProjectsProps) {
                   </div>
                 )}
 
-                {/* 日期 */}
                 {project.startDate && (
                   <div
                     style={{
@@ -347,7 +342,7 @@ export function Projects({ compact = false }: ProjectsProps) {
           style={{
             fontSize: '18px',
             lineHeight: '1.8',
-            color: 'rgba(255, 255, 255, 0.75)',
+            color: 'var(--color-text-muted)',
             fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
             textAlign: 'center',
             padding: '60px 20px',

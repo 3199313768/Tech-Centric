@@ -12,7 +12,7 @@ export function YearlyReview() {
         padding: '120px 40px 80px',
         maxWidth: '1200px',
         margin: '0 auto',
-        color: '#fff',
+        color: 'var(--color-text-primary)',
       }}
     >
       <h2
@@ -23,8 +23,8 @@ export function YearlyReview() {
           fontFamily: 'var(--font-space-mono), monospace',
           textTransform: 'uppercase',
           letterSpacing: '2px',
-          color: '#00d9ff',
-          textShadow: '0 0 20px rgba(0, 217, 255, 0.5)',
+          color: 'var(--color-headline)',
+          textShadow: 'var(--color-headline-shadow)',
         }}
       >
         年度回顾
@@ -44,7 +44,7 @@ export function YearlyReview() {
             top: '0',
             bottom: '0',
             width: '2px',
-            backgroundColor: 'rgba(0, 217, 255, 0.3)',
+            backgroundColor: 'var(--color-cyan-30)',
           }}
         />
 
@@ -69,9 +69,9 @@ export function YearlyReview() {
                   width: '16px',
                   height: '16px',
                   borderRadius: '50%',
-                  backgroundColor: '#00d9ff',
-                  border: '3px solid #0a0a0a',
-                  boxShadow: '0 0 10px rgba(0, 217, 255, 0.5)',
+                  backgroundColor: 'var(--color-cyan)',
+                  border: '3px solid var(--color-timeline-dot-border)',
+                  boxShadow: '0 0 10px var(--color-cyan-glow)',
                 }}
               />
 
@@ -79,22 +79,21 @@ export function YearlyReview() {
               <div
                 style={{
                   padding: '24px',
-                  border: '1px solid rgba(0, 217, 255, 0.3)',
-                  backgroundColor: 'rgba(0, 217, 255, 0.05)',
+                  border: '1px solid var(--color-card-border)',
+                  backgroundColor: 'var(--color-card-bg)',
                   borderRadius: '8px',
                   transition: 'all 0.3s ease',
                   cursor: 'pointer',
+                  boxShadow: '0 4px 20px var(--color-card-shadow)',
                 }}
                 onClick={() => setExpandedId(isExpanded ? null : review.id)}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(0, 217, 255, 0.6)'
-                  e.currentTarget.style.backgroundColor = 'rgba(0, 217, 255, 0.1)'
-                  e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 217, 255, 0.3)'
+                  e.currentTarget.style.borderColor = 'var(--color-cyan-50)'
+                  e.currentTarget.style.boxShadow = '0 0 20px var(--color-cyan-glow)'
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(0, 217, 255, 0.3)'
-                  e.currentTarget.style.backgroundColor = 'rgba(0, 217, 255, 0.05)'
-                  e.currentTarget.style.boxShadow = 'none'
+                  e.currentTarget.style.borderColor = 'var(--color-card-border)'
+                  e.currentTarget.style.boxShadow = '0 4px 20px var(--color-card-shadow)'
                 }}
               >
                 <div
@@ -112,7 +111,7 @@ export function YearlyReview() {
                       style={{
                         fontSize: '28px',
                         fontWeight: 'bold',
-                        color: '#00d9ff',
+                        color: 'var(--color-cyan)',
                         fontFamily: 'var(--font-space-mono), monospace',
                         marginBottom: '8px',
                       }}
@@ -123,7 +122,7 @@ export function YearlyReview() {
                       style={{
                         fontSize: '20px',
                         fontWeight: 'bold',
-                        color: 'rgba(255, 255, 255, 0.9)',
+                        color: 'var(--color-text-primary)',
                         fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
                         marginBottom: '8px',
                       }}
@@ -137,7 +136,7 @@ export function YearlyReview() {
                   style={{
                     fontSize: '14px',
                     lineHeight: '1.6',
-                    color: 'rgba(255, 255, 255, 0.75)',
+                    color: 'var(--color-text-secondary)',
                     fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
                     marginBottom: '16px',
                   }}
@@ -151,14 +150,14 @@ export function YearlyReview() {
                     style={{
                       marginTop: '16px',
                       paddingTop: '16px',
-                      borderTop: '1px solid rgba(0, 217, 255, 0.2)',
+                      borderTop: '1px solid var(--color-divider)',
                     }}
                   >
                     <h4
                       style={{
                         fontSize: '16px',
                         fontWeight: 'bold',
-                        color: '#00d9ff',
+                        color: 'var(--color-cyan)',
                         fontFamily: 'var(--font-space-mono), monospace',
                         marginBottom: '12px',
                       }}
@@ -178,7 +177,7 @@ export function YearlyReview() {
                           style={{
                             fontSize: '14px',
                             lineHeight: '1.8',
-                            color: 'rgba(255, 255, 255, 0.75)',
+                            color: 'var(--color-text-secondary)',
                             fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
                             marginBottom: '8px',
                             paddingLeft: '20px',
@@ -189,7 +188,7 @@ export function YearlyReview() {
                             style={{
                               position: 'absolute',
                               left: '0',
-                              color: '#00d9ff',
+                              color: 'var(--color-cyan)',
                             }}
                           >
                             ▸
@@ -206,7 +205,7 @@ export function YearlyReview() {
                   style={{
                     marginTop: '12px',
                     fontSize: '12px',
-                    color: 'rgba(255, 255, 255, 0.5)',
+                    color: 'var(--color-text-muted)',
                     fontFamily: 'var(--font-space-mono), monospace',
                     textAlign: 'right',
                   }}

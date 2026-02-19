@@ -60,11 +60,11 @@ export function Hero() {
           fontSize: 'clamp(48px, 8vw, 96px)',
           fontWeight: 'bold',
           lineHeight: '1.1',
-          textShadow: '0 0 30px rgba(0, 217, 255, 0.6)',
+          textShadow: 'var(--color-headline-shadow)',
           position: 'relative',
           display: 'block',
           marginBottom: '16px',
-          color: '#fff',
+          color: 'var(--color-text-hero)',
         }}
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -80,7 +80,7 @@ export function Hero() {
           fontSize: 'clamp(18px, 3vw, 28px)',
           fontWeight: '300',
           lineHeight: '1.6',
-          color: 'rgba(255, 255, 255, 0.9)',
+          color: 'var(--color-text-hero-sub)',
           fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
           marginBottom: '32px',
           letterSpacing: '2px',
@@ -107,7 +107,7 @@ export function Hero() {
             style={{
               fontSize: 'clamp(15px, 2vw, 18px)',
               lineHeight: '1.8',
-              color: 'rgba(255, 255, 255, 0.85)',
+              color: 'var(--color-text-secondary)',
               fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
               marginBottom: '12px',
             }}
@@ -140,13 +140,13 @@ export function Hero() {
               padding: '6px 16px',
               fontSize: '12px',
               fontFamily: 'var(--font-jetbrains-mono), monospace',
-              color: '#00d9ff',
-              border: '1px solid rgba(0, 217, 255, 0.4)',
-              backgroundColor: 'rgba(0, 217, 255, 0.08)',
+              color: 'var(--color-cyan)',
+              border: '1px solid var(--color-cyan-40)',
+              backgroundColor: 'var(--color-cyan-10)',
               borderRadius: '4px',
               textTransform: 'uppercase',
               letterSpacing: '1.5px',
-              boxShadow: '0 0 12px rgba(0, 217, 255, 0.3)',
+              boxShadow: '0 0 12px var(--color-cyan-glow)',
               cursor: 'default',
             }}
             initial={{ opacity: 0, y: -50, rotate: -10 }}
@@ -160,9 +160,9 @@ export function Hero() {
             whileHover={{
               scale: 1.1,
               rotate: Math.random() > 0.5 ? 5 : -5,
-              borderColor: 'rgba(0, 217, 255, 0.8)',
-              backgroundColor: 'rgba(0, 217, 255, 0.15)',
-              boxShadow: '0 0 20px rgba(0, 217, 255, 0.5)',
+              borderColor: 'var(--color-cyan)',
+              backgroundColor: 'var(--color-cyan-15)',
+              boxShadow: '0 0 20px var(--color-cyan-glow-strong)',
               transition: { duration: 0.2 }
             }}
           >
@@ -190,20 +190,18 @@ export function Hero() {
             fontSize: '15px',
             fontFamily: 'var(--font-space-mono), monospace',
             fontWeight: 'bold',
-            color: '#0a0a0a',
-            backgroundColor: '#00d9ff',
-            border: '2px solid #00d9ff',
+            color: 'var(--color-bg)',
+            backgroundColor: 'var(--color-cyan)',
+            border: '2px solid var(--color-cyan)',
             borderRadius: '0',
             cursor: 'pointer',
             textTransform: 'uppercase',
             letterSpacing: '2px',
-            boxShadow: '0 0 25px rgba(0, 217, 255, 0.6)',
+            boxShadow: '0 0 25px var(--color-cyan-glow-strong)',
           }}
           whileHover={{
             scale: 1.05,
-            backgroundColor: '#00b8d9',
-            borderColor: '#00b8d9',
-            boxShadow: '0 0 35px rgba(0, 217, 255, 0.8)',
+            boxShadow: '0 0 35px var(--color-cyan-glow-strong)',
           }}
           whileTap={{ scale: 0.95 }}
         >
@@ -217,19 +215,19 @@ export function Hero() {
               fontSize: '15px',
               fontFamily: 'var(--font-space-mono), monospace',
               fontWeight: 'bold',
-              color: '#00d9ff',
+              color: 'var(--color-cyan)',
               backgroundColor: 'transparent',
-              border: '2px solid #00d9ff',
+              border: '2px solid var(--color-cyan)',
               borderRadius: '0',
               cursor: 'pointer',
               textTransform: 'uppercase',
               letterSpacing: '2px',
-              boxShadow: '0 0 20px rgba(0, 217, 255, 0.4)',
+              boxShadow: '0 0 20px var(--color-cyan-glow)',
             }}
             whileHover={{
               scale: 1.05,
-              backgroundColor: 'rgba(0, 217, 255, 0.15)',
-              boxShadow: '0 0 30px rgba(0, 217, 255, 0.6)',
+              backgroundColor: 'var(--color-cyan-15)',
+              boxShadow: '0 0 30px var(--color-cyan-glow-strong)',
             }}
             whileTap={{ scale: 0.95 }}
           >
@@ -256,13 +254,12 @@ export function Hero() {
             rel="noopener noreferrer"
             style={{
               fontSize: '24px',
-              color: 'rgba(255, 255, 255, 0.7)',
+              color: 'var(--color-text-social)',
               textDecoration: 'none',
             }}
             whileHover={{
               scale: 1.2,
-              color: '#00d9ff',
-              textShadow: '0 0 15px rgba(0, 217, 255, 0.8)',
+              color: 'var(--color-cyan)',
             }}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -277,13 +274,12 @@ export function Hero() {
             rel="noopener noreferrer"
             style={{
               fontSize: '24px',
-              color: 'rgba(255, 255, 255, 0.7)',
+              color: 'var(--color-text-social)',
               textDecoration: 'none',
             }}
             whileHover={{
               scale: 1.2,
-              color: '#00d9ff',
-              textShadow: '0 0 15px rgba(0, 217, 255, 0.8)',
+              color: 'var(--color-cyan)',
             }}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -296,13 +292,12 @@ export function Hero() {
             href={personalInfo.socialLinks.email}
             style={{
               fontSize: '24px',
-              color: 'rgba(255, 255, 255, 0.7)',
+              color: 'var(--color-text-social)',
               textDecoration: 'none',
             }}
             whileHover={{
               scale: 1.2,
-              color: '#00d9ff',
-              textShadow: '0 0 15px rgba(0, 217, 255, 0.8)',
+              color: 'var(--color-cyan)',
             }}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -317,13 +312,12 @@ export function Hero() {
             rel="noopener noreferrer"
             style={{
               fontSize: '24px',
-              color: 'rgba(255, 255, 255, 0.7)',
+              color: 'var(--color-text-social)',
               textDecoration: 'none',
             }}
             whileHover={{
               scale: 1.2,
-              color: '#00d9ff',
-              textShadow: '0 0 15px rgba(0, 217, 255, 0.8)',
+              color: 'var(--color-cyan)',
             }}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">

@@ -55,7 +55,7 @@ export function Stats({ compact = false }: StatsProps) {
         padding: compact ? '0 40px 120px' : '120px 40px 120px',
         maxWidth: '1400px',
         margin: '0 auto',
-        color: '#fff',
+        color: 'var(--color-text-primary)',
       }}
     >
       {/* 杂志式标题 */}
@@ -69,8 +69,8 @@ export function Stats({ compact = false }: StatsProps) {
           fontFamily: 'var(--font-space-mono), monospace',
           textTransform: 'uppercase',
           letterSpacing: '4px',
-          color: '#00d9ff',
-          textShadow: '0 0 30px rgba(0, 217, 255, 0.6)',
+          color: 'var(--color-headline)',
+          textShadow: 'var(--color-headline-shadow)',
           scrollMarginTop: compact ? '100px' : '140px',
         }}
         initial={{ opacity: 0, y: 50 }}
@@ -133,11 +133,11 @@ export function Stats({ compact = false }: StatsProps) {
                 style={{
                   fontSize: 'clamp(48px, 6vw, 72px)',
                   fontWeight: 'bold',
-                  color: '#00d9ff',
+                  color: 'var(--color-cyan)',
                   fontFamily: 'var(--font-space-mono), monospace',
                   marginBottom: '16px',
                   textAlign: 'center',
-                  textShadow: '0 0 25px rgba(0, 217, 255, 0.6)',
+                  textShadow: '0 0 25px var(--color-cyan-glow-strong)',
                   lineHeight: '1.2',
                 }}
                 initial={{ scale: 0 }}
@@ -157,7 +157,7 @@ export function Stats({ compact = false }: StatsProps) {
               <motion.p
                 style={{
                   fontSize: '18px',
-                  color: 'rgba(255, 255, 255, 0.85)',
+                  color: 'var(--color-text-secondary)',
                   fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
                   textTransform: 'uppercase',
                   letterSpacing: '2px',
@@ -178,7 +178,7 @@ export function Stats({ compact = false }: StatsProps) {
                 style={{
                   marginTop: '24px',
                   height: '1px',
-                  background: 'linear-gradient(to right, transparent, rgba(0, 217, 255, 0.4), transparent)',
+                  background: 'linear-gradient(to right, transparent, var(--color-cyan-40), transparent)',
                 }}
                 initial={{ scaleX: 0 }}
                 whileInView={{ scaleX: 1 }}

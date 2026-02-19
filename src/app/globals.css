@@ -1,12 +1,113 @@
 @import "tailwindcss";
 
 :root {
+  /* Light mode defaults */
+  --background: #f8f9fa;
+  --foreground: #1a1a2e;
+  --color-bg: #f8f9fa;
+  --color-fg: #1a1a2e;
+  --color-accent: #22c55e;
+  --color-error: #ef4444;
+
+  /* 语义化颜色 */
+  --color-text-primary: #1a1a2e;
+  --color-text-secondary: rgba(26, 26, 46, 0.75);
+  --color-text-muted: rgba(26, 26, 46, 0.5);
+  --color-text-hero: #1a1a2e;
+  --color-text-hero-sub: rgba(26, 26, 46, 0.85);
+  --color-text-social: rgba(26, 26, 46, 0.7);
+
+  /* 导航 */
+  --color-nav-bg: rgba(248, 249, 250, 0.95);
+  --color-nav-border: rgba(0, 150, 200, 0.2);
+  --color-nav-text: rgba(26, 26, 46, 0.7);
+  --color-nav-text-hover: #0096c8;
+
+  /* 卡片 */
+  --color-card-bg: rgba(255, 255, 255, 0.8);
+  --color-card-border: rgba(0, 150, 200, 0.2);
+  --color-card-shadow: rgba(0, 0, 0, 0.08);
+  --color-card-shadow-hover: rgba(0, 150, 200, 0.12);
+
+  /* 按钮 */
+  --color-btn-inactive-border: rgba(26, 26, 46, 0.15);
+  --color-btn-inactive-text: rgba(26, 26, 46, 0.6);
+
+  /* 主题色 */
+  --color-cyan: #0096c8;
+  --color-cyan-10: rgba(0, 150, 200, 0.1);
+  --color-cyan-15: rgba(0, 150, 200, 0.15);
+  --color-cyan-20: rgba(0, 150, 200, 0.2);
+  --color-cyan-30: rgba(0, 150, 200, 0.3);
+  --color-cyan-40: rgba(0, 150, 200, 0.4);
+  --color-cyan-50: rgba(0, 150, 200, 0.5);
+  --color-cyan-glow: rgba(0, 150, 200, 0.3);
+  --color-cyan-glow-strong: rgba(0, 150, 200, 0.5);
+
+  /* 杂志/装饰 */
+  --color-headline: #0096c8;
+  --color-headline-shadow: 0 0 30px rgba(0, 150, 200, 0.3);
+  --color-divider: rgba(0, 150, 200, 0.2);
+  --color-timeline-dot-border: #f8f9fa;
+  --color-section-bg: transparent;
+
+  /* 关键词高亮 */
+  --color-highlight-gold: #b8860b;
+  --color-highlight-gold-glow: rgba(184, 134, 11, 0.3);
+  --color-highlight-pink: #d63384;
+  --color-highlight-pink-glow: rgba(214, 51, 132, 0.3);
+}
+
+.dark {
+  /* Dark mode overrides */
   --background: #0a0a0a;
   --foreground: #fafafa;
   --color-bg: #0a0a0a;
   --color-fg: #fafafa;
   --color-accent: #22c55e;
   --color-error: #ef4444;
+
+  --color-text-primary: #fafafa;
+  --color-text-secondary: rgba(255, 255, 255, 0.8);
+  --color-text-muted: rgba(255, 255, 255, 0.5);
+  --color-text-hero: #fff;
+  --color-text-hero-sub: rgba(255, 255, 255, 0.9);
+  --color-text-social: rgba(255, 255, 255, 0.7);
+
+  --color-nav-bg: rgba(10, 10, 10, 0.95);
+  --color-nav-border: rgba(0, 217, 255, 0.2);
+  --color-nav-text: rgba(255, 255, 255, 0.7);
+  --color-nav-text-hover: #00d9ff;
+
+  --color-card-bg: rgba(255, 255, 255, 0.02);
+  --color-card-border: rgba(0, 217, 255, 0.2);
+  --color-card-shadow: rgba(0, 0, 0, 0.3);
+  --color-card-shadow-hover: rgba(0, 217, 255, 0.2);
+
+  --color-btn-inactive-border: rgba(255, 255, 255, 0.1);
+  --color-btn-inactive-text: rgba(255, 255, 255, 0.7);
+
+  --color-cyan: #00d9ff;
+  --color-cyan-10: rgba(0, 217, 255, 0.1);
+  --color-cyan-15: rgba(0, 217, 255, 0.15);
+  --color-cyan-20: rgba(0, 217, 255, 0.2);
+  --color-cyan-30: rgba(0, 217, 255, 0.3);
+  --color-cyan-40: rgba(0, 217, 255, 0.4);
+  --color-cyan-50: rgba(0, 217, 255, 0.5);
+  --color-cyan-glow: rgba(0, 217, 255, 0.3);
+  --color-cyan-glow-strong: rgba(0, 217, 255, 0.6);
+
+  --color-headline: #00d9ff;
+  --color-headline-shadow: 0 0 30px rgba(0, 217, 255, 0.6);
+  --color-divider: rgba(0, 217, 255, 0.3);
+  --color-timeline-dot-border: #0a0a0a;
+  --color-section-bg: transparent;
+
+  /* 关键词高亮 */
+  --color-highlight-gold: #ffd700;
+  --color-highlight-gold-glow: rgba(255, 215, 0, 0.4);
+  --color-highlight-pink: #ff6b9d;
+  --color-highlight-pink-glow: rgba(255, 107, 157, 0.5);
 }
 
 @theme inline {
@@ -93,6 +194,7 @@ body {
   background: var(--color-bg);
   color: var(--color-fg);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .glitch {
@@ -253,14 +355,14 @@ html {
 /* 纸张纹理背景 */
 body {
   background:
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.01) 0%, transparent 100%),
+    linear-gradient(to bottom, rgba(128, 128, 128, 0.01) 0%, transparent 100%),
     repeating-linear-gradient(0deg,
       transparent,
       transparent 2px,
-      rgba(255, 255, 255, 0.01) 2px,
-      rgba(255, 255, 255, 0.01) 4px),
-    radial-gradient(circle at 20% 50%, rgba(0, 217, 255, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(0, 217, 255, 0.02) 0%, transparent 50%),
+      rgba(128, 128, 128, 0.01) 2px,
+      rgba(128, 128, 128, 0.01) 4px),
+    radial-gradient(circle at 20% 50%, var(--color-cyan-10) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, var(--color-cyan-10) 0%, transparent 50%),
     var(--color-bg);
   background-attachment: fixed;
 }

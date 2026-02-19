@@ -338,7 +338,7 @@ export function TravelMap() {
         padding: '120px 40px 80px',
         maxWidth: '1400px',
         margin: '0 auto',
-        color: '#fff',
+        color: 'var(--color-text-primary)',
       }}
     >
       <div
@@ -359,8 +359,8 @@ export function TravelMap() {
             fontFamily: 'var(--font-space-mono), monospace',
             textTransform: 'uppercase',
             letterSpacing: '2px',
-            color: '#00d9ff',
-            textShadow: '0 0 20px rgba(0, 217, 255, 0.5)',
+            color: 'var(--color-headline)',
+            textShadow: 'var(--color-headline-shadow)',
           }}
         >
           旅行地图
@@ -372,9 +372,9 @@ export function TravelMap() {
               onClick={() => switchMapType('terrain')}
               style={{
                 padding: '8px 16px',
-                border: `1px solid ${mapType === 'terrain' ? 'rgba(0, 217, 255, 0.8)' : 'rgba(0, 217, 255, 0.3)'}`,
-                backgroundColor: mapType === 'terrain' ? 'rgba(0, 217, 255, 0.15)' : 'rgba(0, 217, 255, 0.05)',
-                color: '#00d9ff',
+                border: `1px solid ${mapType === 'terrain' ? 'var(--color-cyan)' : 'var(--color-cyan-30)'}`,
+                backgroundColor: mapType === 'terrain' ? 'var(--color-cyan-15)' : 'var(--color-cyan-10)',
+                color: 'var(--color-cyan)',
                 borderRadius: '4px',
                 cursor: 'pointer',
                 fontFamily: 'var(--font-space-mono), monospace',
@@ -400,9 +400,9 @@ export function TravelMap() {
               onClick={() => switchMapType('normal')}
               style={{
                 padding: '8px 16px',
-                border: `1px solid ${mapType === 'normal' ? 'rgba(0, 217, 255, 0.8)' : 'rgba(0, 217, 255, 0.3)'}`,
-                backgroundColor: mapType === 'normal' ? 'rgba(0, 217, 255, 0.15)' : 'rgba(0, 217, 255, 0.05)',
-                color: '#00d9ff',
+                border: `1px solid ${mapType === 'normal' ? 'var(--color-cyan)' : 'var(--color-cyan-30)'}`,
+                backgroundColor: mapType === 'normal' ? 'var(--color-cyan-15)' : 'var(--color-cyan-10)',
+                color: 'var(--color-cyan)',
                 borderRadius: '4px',
                 cursor: 'pointer',
                 fontFamily: 'var(--font-space-mono), monospace',
@@ -428,9 +428,9 @@ export function TravelMap() {
               onClick={() => switchMapType('satellite')}
               style={{
                 padding: '8px 16px',
-                border: `1px solid ${mapType === 'satellite' ? 'rgba(0, 217, 255, 0.8)' : 'rgba(0, 217, 255, 0.3)'}`,
-                backgroundColor: mapType === 'satellite' ? 'rgba(0, 217, 255, 0.15)' : 'rgba(0, 217, 255, 0.05)',
-                color: '#00d9ff',
+                border: `1px solid ${mapType === 'satellite' ? 'var(--color-cyan)' : 'var(--color-cyan-30)'}`,
+                backgroundColor: mapType === 'satellite' ? 'var(--color-cyan-15)' : 'var(--color-cyan-10)',
+                color: 'var(--color-cyan)',
                 borderRadius: '4px',
                 cursor: 'pointer',
                 fontFamily: 'var(--font-space-mono), monospace',
@@ -457,9 +457,9 @@ export function TravelMap() {
             onClick={toggleListView}
             style={{
               padding: '8px 16px',
-              border: '1px solid rgba(0, 217, 255, 0.3)',
-              backgroundColor: 'rgba(0, 217, 255, 0.05)',
-              color: '#00d9ff',
+              border: '1px solid var(--color-cyan-30)',
+              backgroundColor: 'var(--color-cyan-10)',
+              color: 'var(--color-cyan)',
               borderRadius: '4px',
               cursor: 'pointer',
               fontFamily: 'var(--font-space-mono), monospace',
@@ -492,8 +492,8 @@ export function TravelMap() {
         <div
           style={{
             padding: '20px',
-            border: '1px solid rgba(0, 217, 255, 0.3)',
-            backgroundColor: 'rgba(0, 217, 255, 0.05)',
+            border: '1px solid var(--color-card-border)',
+            backgroundColor: 'var(--color-card-bg)',
             borderRadius: '8px',
             textAlign: 'center',
           }}
@@ -502,7 +502,7 @@ export function TravelMap() {
             style={{
               fontSize: '32px',
               fontWeight: 'bold',
-              color: '#00d9ff',
+              color: 'var(--color-cyan)',
               fontFamily: 'var(--font-space-mono), monospace',
               marginBottom: '8px',
             }}
@@ -512,7 +512,7 @@ export function TravelMap() {
           <div
             style={{
               fontSize: '12px',
-              color: 'rgba(255, 255, 255, 0.6)',
+              color: 'var(--color-text-muted)',
               fontFamily: 'var(--font-space-mono), monospace',
               textTransform: 'uppercase',
               letterSpacing: '1px',
@@ -524,8 +524,8 @@ export function TravelMap() {
         <div
           style={{
             padding: '20px',
-            border: '1px solid rgba(0, 217, 255, 0.3)',
-            backgroundColor: 'rgba(0, 217, 255, 0.05)',
+            border: '1px solid var(--color-card-border)',
+            backgroundColor: 'var(--color-card-bg)',
             borderRadius: '8px',
             textAlign: 'center',
           }}
@@ -534,7 +534,7 @@ export function TravelMap() {
             style={{
               fontSize: '32px',
               fontWeight: 'bold',
-              color: '#00d9ff',
+              color: 'var(--color-cyan)',
               fontFamily: 'var(--font-space-mono), monospace',
               marginBottom: '8px',
             }}
@@ -570,11 +570,11 @@ export function TravelMap() {
             height: 'clamp(400px, 60vh, 800px)',
             minHeight: '400px',
             borderRadius: '8px',
-            border: '1px solid rgba(0, 217, 255, 0.3)',
+            border: '1px solid var(--color-card-border)',
             overflow: 'hidden',
-            backgroundColor: '#0a0a0a',
+            backgroundColor: 'var(--color-bg)',
             position: 'relative',
-            boxShadow: '0 0 30px rgba(0, 217, 255, 0.1)',
+            boxShadow: '0 0 30px var(--color-cyan-10)',
           }}
         >
           {!mapLoaded && (
@@ -586,7 +586,7 @@ export function TravelMap() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'rgba(255, 255, 255, 0.5)',
+                color: 'var(--color-text-muted)',
                 fontFamily: 'var(--font-space-mono), monospace',
                 gap: '12px',
                 padding: '20px',
@@ -612,7 +612,7 @@ export function TravelMap() {
                       padding: '8px 16px',
                       border: '1px solid rgba(0, 217, 255, 0.3)',
                       backgroundColor: 'rgba(0, 217, 255, 0.05)',
-                      color: '#00d9ff',
+                      color: 'var(--color-cyan)',
                       borderRadius: '4px',
                       cursor: 'pointer',
                       fontFamily: 'var(--font-space-mono), monospace',
@@ -658,8 +658,8 @@ export function TravelMap() {
                 key={location.id}
                 style={{
                   padding: '24px',
-                  border: '1px solid rgba(0, 217, 255, 0.3)',
-                  backgroundColor: 'rgba(0, 217, 255, 0.05)',
+                  border: '1px solid var(--color-card-border)',
+                  backgroundColor: 'var(--color-card-bg)',
                   borderRadius: '8px',
                   transition: 'all 0.3s ease',
                   cursor: 'pointer',
@@ -696,7 +696,7 @@ export function TravelMap() {
                       style={{
                         fontSize: '24px',
                         fontWeight: 'bold',
-                        color: '#00d9ff',
+                        color: 'var(--color-cyan)',
                         fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
                         marginBottom: '8px',
                       }}
@@ -706,7 +706,7 @@ export function TravelMap() {
                     <p
                       style={{
                         fontSize: '14px',
-                        color: 'rgba(255, 255, 255, 0.7)',
+                        color: 'var(--color-text-secondary)',
                         fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
                         marginBottom: '4px',
                       }}
@@ -716,7 +716,7 @@ export function TravelMap() {
                     <span
                       style={{
                         fontSize: '12px',
-                        color: 'rgba(255, 255, 255, 0.5)',
+                        color: 'var(--color-text-muted)',
                         fontFamily: 'var(--font-space-mono), monospace',
                       }}
                     >
@@ -729,7 +729,7 @@ export function TravelMap() {
                       color: 'rgba(255, 255, 255, 0.6)',
                       fontFamily: 'var(--font-space-mono), monospace',
                       padding: '4px 12px',
-                      border: '1px solid rgba(0, 217, 255, 0.3)',
+                      border: '1px solid var(--color-card-border)',
                       borderRadius: '4px',
                     }}
                   >
@@ -745,7 +745,7 @@ export function TravelMap() {
                       style={{
                         fontSize: '14px',
                         lineHeight: '1.8',
-                        color: 'rgba(255, 255, 255, 0.85)',
+                        color: 'var(--color-text-primary)',
                         fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
                         marginBottom: '16px',
                         whiteSpace: 'pre-wrap',
@@ -769,7 +769,7 @@ export function TravelMap() {
                             key={idx}
                             style={{
                               fontSize: '11px',
-                              color: 'rgba(255, 255, 255, 0.6)',
+                              color: 'var(--color-text-muted)',
                               fontFamily: 'var(--font-space-mono), monospace',
                               padding: '2px 8px',
                               backgroundColor: 'rgba(0, 217, 255, 0.1)',
@@ -789,7 +789,7 @@ export function TravelMap() {
                   style={{
                     marginTop: '12px',
                     fontSize: '12px',
-                    color: 'rgba(255, 255, 255, 0.5)',
+                    color: 'var(--color-text-muted)',
                     fontFamily: 'var(--font-space-mono), monospace',
                     textAlign: 'right',
                   }}

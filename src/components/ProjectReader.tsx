@@ -108,10 +108,10 @@ export function ProjectReader({ project, isOpen, onClose }: ProjectReaderProps) 
             style={{
               display: 'inline-block',
               padding: '8px 16px',
-              border: '2px solid rgba(0, 217, 255, 0.5)',
-              backgroundColor: 'rgba(0, 217, 255, 0.1)',
+              border: '2px solid var(--color-cyan-50)',
+              backgroundColor: 'var(--color-cyan-10)',
               fontSize: '14px',
-              color: '#00d9ff',
+              color: 'var(--color-cyan)',
               fontFamily: 'var(--font-jetbrains-mono), monospace',
               textTransform: 'uppercase',
               letterSpacing: '2px',
@@ -123,10 +123,10 @@ export function ProjectReader({ project, isOpen, onClose }: ProjectReaderProps) 
             <span
               style={{
                 fontSize: '12px',
-                color: project.status === 'completed' ? '#22c55e' : project.status === 'in-progress' ? '#00d9ff' : 'rgba(255, 255, 255, 0.6)',
+                color: project.status === 'completed' ? '#22c55e' : project.status === 'in-progress' ? 'var(--color-cyan)' : 'var(--color-text-muted)',
                 fontFamily: 'var(--font-space-mono), monospace',
                 padding: '4px 12px',
-                border: `1px solid ${project.status === 'completed' ? 'rgba(34, 197, 94, 0.3)' : project.status === 'in-progress' ? 'rgba(0, 217, 255, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
+                border: `1px solid ${project.status === 'completed' ? 'rgba(34, 197, 94, 0.3)' : project.status === 'in-progress' ? 'var(--color-cyan-30)' : 'var(--color-btn-inactive-border)'}`,
                 borderRadius: '4px',
                 textTransform: 'uppercase',
               }}
@@ -138,7 +138,7 @@ export function ProjectReader({ project, isOpen, onClose }: ProjectReaderProps) 
             <span
               style={{
                 fontSize: '12px',
-                color: 'rgba(255, 255, 255, 0.6)',
+                color: 'var(--color-text-muted)',
                 fontFamily: 'var(--font-space-mono), monospace',
               }}
             >
@@ -167,9 +167,9 @@ export function ProjectReader({ project, isOpen, onClose }: ProjectReaderProps) 
                   fontSize: '14px',
                   fontFamily: 'var(--font-space-mono), monospace',
                   fontWeight: 'bold',
-                  color: '#0a0a0a',
-                  backgroundColor: '#00d9ff',
-                  border: '2px solid #00d9ff',
+                  color: 'var(--color-bg)',
+                  backgroundColor: 'var(--color-cyan)',
+                  border: '2px solid var(--color-cyan)',
                   borderRadius: '4px',
                   textDecoration: 'none',
                   textTransform: 'uppercase',
@@ -204,9 +204,9 @@ export function ProjectReader({ project, isOpen, onClose }: ProjectReaderProps) 
                   fontSize: '14px',
                   fontFamily: 'var(--font-space-mono), monospace',
                   fontWeight: 'bold',
-                  color: '#00d9ff',
+                  color: 'var(--color-cyan)',
                   backgroundColor: 'transparent',
-                  border: '2px solid #00d9ff',
+                  border: '2px solid var(--color-cyan)',
                   borderRadius: '4px',
                   textDecoration: 'none',
                   textTransform: 'uppercase',
@@ -242,7 +242,7 @@ export function ProjectReader({ project, isOpen, onClose }: ProjectReaderProps) 
               marginBottom: '32px',
               borderRadius: '8px',
               overflow: 'hidden',
-              border: '1px solid rgba(0, 217, 255, 0.3)',
+              border: '1px solid var(--color-card-border)',
             }}
           >
             <img
@@ -264,7 +264,7 @@ export function ProjectReader({ project, isOpen, onClose }: ProjectReaderProps) 
               fontSize: '18px',
               lineHeight: '1.8',
               fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
-              color: 'rgba(255, 255, 255, 0.9)',
+              color: 'var(--color-text-primary)',
               marginBottom: '16px',
             }}
           >
@@ -276,7 +276,7 @@ export function ProjectReader({ project, isOpen, onClose }: ProjectReaderProps) 
                 fontSize: '16px',
                 lineHeight: '1.8',
                 fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
-                color: 'rgba(255, 255, 255, 0.75)',
+                color: 'var(--color-text-secondary)',
               }}
             >
               {project.detailedDescription}
@@ -291,7 +291,7 @@ export function ProjectReader({ project, isOpen, onClose }: ProjectReaderProps) 
               style={{
                 fontSize: '20px',
                 fontWeight: 'bold',
-                color: '#00d9ff',
+                color: 'var(--color-cyan)',
                 fontFamily: 'var(--font-space-mono), monospace',
                 marginBottom: '16px',
                 textTransform: 'uppercase',
@@ -312,7 +312,7 @@ export function ProjectReader({ project, isOpen, onClose }: ProjectReaderProps) 
                   style={{
                     fontSize: '16px',
                     lineHeight: '1.8',
-                    color: 'rgba(255, 255, 255, 0.75)',
+                    color: 'var(--color-text-secondary)',
                     fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
                     marginBottom: '12px',
                     paddingLeft: '24px',
@@ -323,7 +323,7 @@ export function ProjectReader({ project, isOpen, onClose }: ProjectReaderProps) 
                     style={{
                       position: 'absolute',
                       left: '0',
-                      color: '#00d9ff',
+                      color: 'var(--color-cyan)',
                       fontSize: '20px',
                     }}
                   >
@@ -343,7 +343,7 @@ export function ProjectReader({ project, isOpen, onClose }: ProjectReaderProps) 
               style={{
                 fontSize: '20px',
                 fontWeight: 'bold',
-                color: '#00d9ff',
+                color: 'var(--color-cyan)',
                 fontFamily: 'var(--font-space-mono), monospace',
                 marginBottom: '16px',
                 textTransform: 'uppercase',
@@ -365,9 +365,9 @@ export function ProjectReader({ project, isOpen, onClose }: ProjectReaderProps) 
                   style={{
                     fontSize: '13px',
                     fontFamily: 'var(--font-jetbrains-mono), monospace',
-                    color: '#00d9ff',
-                    border: '1px solid rgba(0, 217, 255, 0.3)',
-                    backgroundColor: 'rgba(0, 217, 255, 0.05)',
+                    color: 'var(--color-cyan)',
+                    border: '1px solid var(--color-card-border)',
+                    backgroundColor: 'var(--color-cyan-10)',
                     padding: '6px 14px',
                     borderRadius: '4px',
                     textTransform: 'uppercase',

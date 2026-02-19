@@ -18,7 +18,7 @@ export function Experience({ compact = false }: ExperienceProps) {
         padding: compact ? '0 40px 120px' : '120px 40px 120px',
         maxWidth: '1400px',
         margin: '0 auto',
-        color: '#fff',
+        color: 'var(--color-text-primary)',
       }}
     >
       {/* 杂志式标题 */}
@@ -32,8 +32,8 @@ export function Experience({ compact = false }: ExperienceProps) {
           fontFamily: 'var(--font-space-mono), monospace',
           textTransform: 'uppercase',
           letterSpacing: '4px',
-          color: '#00d9ff',
-          textShadow: '0 0 30px rgba(0, 217, 255, 0.6)',
+          color: 'var(--color-headline)',
+          textShadow: 'var(--color-headline-shadow)',
           scrollMarginTop: compact ? '100px' : '140px',
         }}
         initial={{ opacity: 0, y: 50 }}
@@ -58,7 +58,7 @@ export function Experience({ compact = false }: ExperienceProps) {
             top: '0',
             bottom: '0',
             width: '3px',
-            background: 'linear-gradient(to bottom, #00d9ff, rgba(0, 217, 255, 0.3))',
+            background: `linear-gradient(to bottom, var(--color-cyan), var(--color-cyan-30))`,
             borderRadius: '2px',
           }}
           initial={{ scaleY: 0 }}
@@ -92,17 +92,17 @@ export function Experience({ compact = false }: ExperienceProps) {
                   width: '20px',
                   height: '20px',
                   borderRadius: '50%',
-                  backgroundColor: '#00d9ff',
-                  border: '4px solid #0a0a0a',
-                  boxShadow: '0 0 20px rgba(0, 217, 255, 0.6)',
+                  backgroundColor: 'var(--color-cyan)',
+                  border: '4px solid var(--color-timeline-dot-border)',
+                  boxShadow: '0 0 20px var(--color-cyan-glow-strong)',
                   zIndex: 10,
                 }}
                 animate={{
                   scale: [1, 1.3, 1],
                   boxShadow: [
-                    '0 0 20px rgba(0, 217, 255, 0.6)',
-                    '0 0 30px rgba(0, 217, 255, 0.9)',
-                    '0 0 20px rgba(0, 217, 255, 0.6)',
+                    '0 0 20px var(--color-cyan-glow-strong)',
+                    '0 0 30px var(--color-cyan-glow-strong)',
+                    '0 0 20px var(--color-cyan-glow-strong)',
                   ],
                 }}
                 transition={{

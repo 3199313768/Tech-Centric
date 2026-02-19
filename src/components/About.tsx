@@ -20,7 +20,7 @@ export function About({ compact = false }: AboutProps) {
         padding: compact ? '40px 40px 120px' : '120px 40px 120px',
         maxWidth: '1400px',
         margin: '0 auto',
-        color: '#fff',
+        color: 'var(--color-text-primary)',
         position: 'relative',
       }}
     >
@@ -35,8 +35,8 @@ export function About({ compact = false }: AboutProps) {
           fontFamily: 'var(--font-space-mono), monospace',
           textTransform: 'uppercase',
           letterSpacing: '4px',
-          color: '#00d9ff',
-          textShadow: '0 0 30px rgba(0, 217, 255, 0.6)',
+          color: 'var(--color-headline)',
+          textShadow: 'var(--color-headline-shadow)',
           scrollMarginTop: compact ? '100px' : '140px',
         }}
         initial={{ opacity: 0, y: 50 }}
@@ -60,7 +60,7 @@ export function About({ compact = false }: AboutProps) {
           style={{
             fontSize: '22px',
             lineHeight: '1.6',
-            color: 'rgba(255, 255, 255, 0.95)',
+            color: 'var(--color-text-primary)',
             fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
           }}
         >
@@ -88,7 +88,6 @@ export function About({ compact = false }: AboutProps) {
           }}
         >
           {aboutInfo.detailedBio.map((paragraph, index) => {
-            // 定义每个段落的元数据
             const paragraphMeta = [
               {
                 title: '技术专长',
@@ -154,11 +153,11 @@ export function About({ compact = false }: AboutProps) {
                     display: 'flex',
                     flexDirection: 'column',
                     border: isHovered
-                      ? '1px solid rgba(0, 217, 255, 0.4)'
-                      : '1px solid rgba(0, 217, 255, 0.2)',
+                      ? '1px solid var(--color-cyan-40)'
+                      : '1px solid var(--color-card-border)',
                     boxShadow: isHovered
-                      ? '0 8px 32px rgba(0, 217, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05)'
-                      : '0 4px 16px rgba(0, 217, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                      ? '0 8px 32px var(--color-card-shadow-hover), inset 0 1px 0 rgba(255, 255, 255, 0.05)'
+                      : '0 4px 16px var(--color-card-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
                     position: 'relative',
                     overflow: 'hidden',
                     transition: 'border-color 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
@@ -181,8 +180,8 @@ export function About({ compact = false }: AboutProps) {
                           top: 0,
                           bottom: 0,
                           width: '3px',
-                          backgroundColor: '#00d9ff',
-                          boxShadow: '0 0 10px rgba(0, 217, 255, 0.6)',
+                          backgroundColor: 'var(--color-cyan)',
+                          boxShadow: '0 0 10px var(--color-cyan-glow-strong)',
                           transformOrigin: 'left center',
                         }}
                       />
@@ -226,7 +225,7 @@ export function About({ compact = false }: AboutProps) {
                           fontSize: '16px',
                           fontWeight: 'bold',
                           fontFamily: 'var(--font-space-mono), monospace',
-                          color: '#00d9ff',
+                          color: 'var(--color-cyan)',
                           textTransform: 'uppercase',
                           letterSpacing: '1px',
                           margin: 0,
@@ -253,7 +252,7 @@ export function About({ compact = false }: AboutProps) {
                             flex: 1,
                             overflow: 'hidden',
                             paddingLeft: '20px',
-                            borderLeft: '1px solid rgba(0, 217, 255, 0.2)',
+                            borderLeft: '1px solid var(--color-cyan-20)',
                             position: 'relative',
                             display: 'flex',
                             alignItems: 'center',
@@ -270,7 +269,7 @@ export function About({ compact = false }: AboutProps) {
                             style={{
                               fontSize: '17px',
                               lineHeight: '1.9',
-                              color: 'rgba(255, 255, 255, 0.9)',
+                              color: 'var(--color-text-secondary)',
                               fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
                               margin: 0,
                             }}
@@ -303,7 +302,7 @@ export function About({ compact = false }: AboutProps) {
             fontWeight: 'bold',
             marginBottom: '40px',
             fontFamily: 'var(--font-space-mono), monospace',
-            color: '#00d9ff',
+            color: 'var(--color-cyan)',
             textTransform: 'uppercase',
             letterSpacing: '2px',
           }}
@@ -359,7 +358,7 @@ export function About({ compact = false }: AboutProps) {
             fontWeight: 'bold',
             marginBottom: '40px',
             fontFamily: 'var(--font-space-mono), monospace',
-            color: '#00d9ff',
+            color: 'var(--color-cyan)',
             textTransform: 'uppercase',
             letterSpacing: '2px',
           }}
@@ -391,7 +390,7 @@ export function About({ compact = false }: AboutProps) {
                       style={{
                         fontSize: '24px',
                         fontWeight: 'bold',
-                        color: '#00d9ff',
+                        color: 'var(--color-cyan)',
                         fontFamily: 'var(--font-space-mono), monospace',
                         marginBottom: '8px',
                         textTransform: 'uppercase',
@@ -402,7 +401,7 @@ export function About({ compact = false }: AboutProps) {
                     <p
                       style={{
                         fontSize: '18px',
-                        color: 'rgba(255, 255, 255, 0.95)',
+                        color: 'var(--color-text-secondary)',
                         fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
                       }}
                     >
@@ -418,7 +417,7 @@ export function About({ compact = false }: AboutProps) {
                     style={{
                       fontSize: '15px',
                       lineHeight: '1.7',
-                      color: 'rgba(255, 255, 255, 0.8)',
+                      color: 'var(--color-text-secondary)',
                       fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
                       marginTop: '16px',
                     }}

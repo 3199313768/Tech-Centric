@@ -172,7 +172,7 @@ export function Contact() {
         padding: '120px 40px 80px',
         maxWidth: '1400px',
         margin: '0 auto',
-        color: '#fff',
+        color: 'var(--color-text-primary)',
       }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -188,8 +188,8 @@ export function Contact() {
           fontFamily: 'var(--font-space-mono), monospace',
           textTransform: 'uppercase',
           letterSpacing: '4px',
-          color: '#00d9ff',
-          textShadow: '0 0 30px rgba(0, 217, 255, 0.6)',
+          color: 'var(--color-headline)',
+          textShadow: 'var(--color-headline-shadow)',
         }}
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -210,7 +210,7 @@ export function Contact() {
           style={{
             fontSize: '18px',
             lineHeight: '1.6',
-            color: 'rgba(255, 255, 255, 0.95)',
+            color: 'var(--color-text-primary)',
             fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
             margin: 0,
           }}
@@ -241,7 +241,7 @@ export function Contact() {
               fontWeight: 'bold',
               marginBottom: '24px',
               fontFamily: 'var(--font-space-mono), monospace',
-              color: '#00d9ff',
+              color: 'var(--color-cyan)',
               textTransform: 'uppercase',
               letterSpacing: '2px',
             }}
@@ -258,15 +258,15 @@ export function Contact() {
               style={{
                 marginBottom: '24px',
                 padding: '16px 20px',
-                backgroundColor: 'rgba(0, 217, 255, 0.05)',
-                border: '1px solid rgba(0, 217, 255, 0.2)',
+                backgroundColor: 'var(--color-cyan-10)',
+                border: '1px solid var(--color-cyan-20)',
                 borderRadius: '4px',
               }}
             >
               <p
                 style={{
                   fontSize: '14px',
-                  color: 'rgba(255, 255, 255, 0.8)',
+                  color: 'var(--color-text-secondary)',
                   fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
                   margin: 0,
                   lineHeight: '1.6',
@@ -276,7 +276,7 @@ export function Contact() {
                 <a
                   href={personalInfo.socialLinks.email}
                   style={{
-                    color: '#00d9ff',
+                    color: 'var(--color-cyan)',
                     textDecoration: 'none',
                     marginLeft: '8px',
                     fontWeight: '500',
@@ -306,7 +306,7 @@ export function Contact() {
                   style={{
                     display: 'block',
                     fontSize: '14px',
-                    color: 'rgba(255, 255, 255, 0.7)',
+                    color: 'var(--color-text-secondary)',
                     fontFamily: 'var(--font-space-mono), monospace',
                     marginBottom: '8px',
                     textTransform: 'uppercase',
@@ -328,8 +328,8 @@ export function Contact() {
                     padding: '14px',
                     fontSize: '15px',
                     fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
-                    color: '#fff',
-                    backgroundColor: 'rgba(0, 217, 255, 0.05)',
+                    color: 'var(--color-text-primary)',
+                    backgroundColor: 'var(--color-cyan-10)',
                     border: errors.name
                       ? '1px solid rgba(239, 68, 68, 0.5)'
                       : '1px solid rgba(0, 217, 255, 0.3)',
@@ -368,7 +368,7 @@ export function Contact() {
                   style={{
                     display: 'block',
                     fontSize: '14px',
-                    color: 'rgba(255, 255, 255, 0.7)',
+                    color: 'var(--color-text-secondary)',
                     fontFamily: 'var(--font-space-mono), monospace',
                     marginBottom: '8px',
                     textTransform: 'uppercase',
@@ -390,8 +390,8 @@ export function Contact() {
                     padding: '14px',
                     fontSize: '15px',
                     fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
-                    color: '#fff',
-                    backgroundColor: 'rgba(0, 217, 255, 0.05)',
+                    color: 'var(--color-text-primary)',
+                    backgroundColor: 'var(--color-cyan-10)',
                     border: errors.email
                       ? '1px solid rgba(239, 68, 68, 0.5)'
                       : '1px solid rgba(0, 217, 255, 0.3)',
@@ -430,7 +430,7 @@ export function Contact() {
                   style={{
                     display: 'block',
                     fontSize: '14px',
-                    color: 'rgba(255, 255, 255, 0.7)',
+                    color: 'var(--color-text-secondary)',
                     fontFamily: 'var(--font-space-mono), monospace',
                     marginBottom: '8px',
                     textTransform: 'uppercase',
@@ -452,8 +452,8 @@ export function Contact() {
                     padding: '14px',
                     fontSize: '15px',
                     fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
-                    color: '#fff',
-                    backgroundColor: 'rgba(0, 217, 255, 0.05)',
+                    color: 'var(--color-text-primary)',
+                    backgroundColor: 'var(--color-cyan-10)',
                     border: errors.subject
                       ? '1px solid rgba(239, 68, 68, 0.5)'
                       : '1px solid rgba(0, 217, 255, 0.3)',
@@ -493,7 +493,7 @@ export function Contact() {
                     style={{
                       display: 'block',
                       fontSize: '14px',
-                      color: 'rgba(255, 255, 255, 0.7)',
+                      color: 'var(--color-text-secondary)',
                       fontFamily: 'var(--font-space-mono), monospace',
                       textTransform: 'uppercase',
                       letterSpacing: '1px',
@@ -506,7 +506,7 @@ export function Contact() {
                       fontSize: '12px',
                       color: messageLength > maxMessageLength
                         ? '#ef4444'
-                        : 'rgba(255, 255, 255, 0.5)',
+                        : 'var(--color-text-muted)',
                       fontFamily: 'var(--font-space-mono), monospace',
                     }}
                   >
@@ -527,8 +527,8 @@ export function Contact() {
                     padding: '14px',
                     fontSize: '15px',
                     fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
-                    color: '#fff',
-                    backgroundColor: 'rgba(0, 217, 255, 0.05)',
+                    color: 'var(--color-text-primary)',
+                    backgroundColor: 'var(--color-cyan-10)',
                     border: errors.message
                       ? '1px solid rgba(239, 68, 68, 0.5)'
                       : '1px solid rgba(0, 217, 255, 0.3)',
@@ -613,14 +613,14 @@ export function Contact() {
                   fontSize: '15px',
                   fontFamily: 'var(--font-space-mono), monospace',
                   fontWeight: 'bold',
-                  color: '#0a0a0a',
-                  backgroundColor: isSubmitting ? 'rgba(0, 217, 255, 0.5)' : '#00d9ff',
-                  border: '2px solid #00d9ff',
+                  color: 'var(--color-bg)',
+                  backgroundColor: isSubmitting ? 'var(--color-cyan-50)' : 'var(--color-cyan)',
+                  border: '2px solid var(--color-cyan)',
                   borderRadius: '0',
                   cursor: isSubmitting ? 'not-allowed' : 'pointer',
                   textTransform: 'uppercase',
                   letterSpacing: '2px',
-                  boxShadow: '0 0 25px rgba(0, 217, 255, 0.6)',
+                  boxShadow: '0 0 25px var(--color-cyan-glow-strong)',
                   transition: 'all 0.3s ease',
                 }}
                 whileHover={!isSubmitting ? {
@@ -663,7 +663,7 @@ export function Contact() {
               fontWeight: 'bold',
               marginBottom: '32px',
               fontFamily: 'var(--font-space-mono), monospace',
-              color: '#00d9ff',
+              color: 'var(--color-cyan)',
               textTransform: 'uppercase',
               letterSpacing: '2px',
             }}
@@ -683,7 +683,7 @@ export function Contact() {
               <h4
                 style={{
                   fontSize: '14px',
-                  color: 'rgba(255, 255, 255, 0.6)',
+                  color: 'var(--color-text-muted)',
                   fontFamily: 'var(--font-space-mono), monospace',
                   marginBottom: '12px',
                   textTransform: 'uppercase',
@@ -695,7 +695,7 @@ export function Contact() {
               <p
                 style={{
                   fontSize: '14px',
-                  color: 'rgba(255, 255, 255, 0.75)',
+                  color: 'var(--color-text-secondary)',
                   fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
                   lineHeight: '1.6',
                   margin: 0,
@@ -711,7 +711,7 @@ export function Contact() {
                 <h4
                   style={{
                     fontSize: '16px',
-                    color: 'rgba(255, 255, 255, 0.9)',
+                    color: 'var(--color-text-primary)',
                     fontFamily: 'var(--font-space-mono), monospace',
                     marginBottom: '16px',
                     textTransform: 'uppercase',
@@ -749,7 +749,7 @@ export function Contact() {
                   style={{
                     marginTop: '16px',
                     fontSize: '13px',
-                    color: 'rgba(255, 255, 255, 0.6)',
+                    color: 'var(--color-text-muted)',
                     fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
                   }}
                 >
@@ -763,7 +763,7 @@ export function Contact() {
               <h4
                 style={{
                   fontSize: '14px',
-                  color: 'rgba(255, 255, 255, 0.6)',
+                  color: 'var(--color-text-muted)',
                   fontFamily: 'var(--font-space-mono), monospace',
                   marginBottom: '16px',
                   textTransform: 'uppercase',
@@ -789,7 +789,7 @@ export function Contact() {
                       border: '1px solid rgba(0, 217, 255, 0.3)',
                       backgroundColor: 'rgba(0, 217, 255, 0.05)',
                       borderRadius: '4px',
-                      color: '#00d9ff',
+                      color: 'var(--color-cyan)',
                       textDecoration: 'none',
                       fontSize: '13px',
                       fontFamily: 'var(--font-space-mono), monospace',
@@ -817,7 +817,7 @@ export function Contact() {
                       border: '1px solid rgba(0, 217, 255, 0.3)',
                       backgroundColor: 'rgba(0, 217, 255, 0.05)',
                       borderRadius: '4px',
-                      color: '#00d9ff',
+                      color: 'var(--color-cyan)',
                       textDecoration: 'none',
                       fontSize: '13px',
                       fontFamily: 'var(--font-space-mono), monospace',
@@ -845,7 +845,7 @@ export function Contact() {
                       border: '1px solid rgba(0, 217, 255, 0.3)',
                       backgroundColor: 'rgba(0, 217, 255, 0.05)',
                       borderRadius: '4px',
-                      color: '#00d9ff',
+                      color: 'var(--color-cyan)',
                       textDecoration: 'none',
                       fontSize: '13px',
                       fontFamily: 'var(--font-space-mono), monospace',
@@ -873,7 +873,7 @@ export function Contact() {
                       border: '1px solid rgba(0, 217, 255, 0.3)',
                       backgroundColor: 'rgba(0, 217, 255, 0.05)',
                       borderRadius: '4px',
-                      color: '#00d9ff',
+                      color: 'var(--color-cyan)',
                       textDecoration: 'none',
                       fontSize: '13px',
                       fontFamily: 'var(--font-space-mono), monospace',

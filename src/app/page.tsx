@@ -7,12 +7,9 @@ import { About } from '@/components/About'
 import { Experience } from '@/components/Experience'
 import { Skills } from '@/components/Skills'
 import { Stats } from '@/components/Stats'
-import { Blog } from '@/components/Blog'
 import { Achievements } from '@/components/Achievements'
 import { Contact } from '@/components/Contact'
-import { LifeLog } from '@/components/LifeLog'
 import { YearlyReview } from '@/components/YearlyReview'
-import { Recommendations } from '@/components/Recommendations'
 import { TravelMap } from '@/components/TravelMap'
 import { Projects } from '@/components/Projects'
 import { motion } from 'framer-motion'
@@ -45,7 +42,7 @@ export default function Home() {
     switch (activeTab) {
       case 'home':
         return (
-          <div style={{ position: 'relative', backgroundColor: '#0a0a0a' }}>
+          <div style={{ position: 'relative', backgroundColor: 'var(--color-bg)' }}>
             {/* Hero 区域 - 封面页 */}
             <section style={{ position: 'relative' }}>
               <PhysicsWorld showHero={true} />
@@ -100,14 +97,8 @@ export default function Home() {
             </section>
           </div>
         )
-      case 'blog':
-        return <Blog />
-      case 'lifelog':
-        return <LifeLog />
       case 'yearlyreview':
         return <YearlyReview />
-      case 'recommendations':
-        return <Recommendations />
       case 'travel':
         return <TravelMap />
       case 'contact':
@@ -118,7 +109,7 @@ export default function Home() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0a', position: 'relative' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg)', position: 'relative' }}>
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       
       {/* 页码显示 - 仅在首页显示 */}
