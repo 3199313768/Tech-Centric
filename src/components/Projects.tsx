@@ -5,6 +5,7 @@ import { projects, Project, ProjectType } from '@/data/projects'
 import { ProjectReader } from './ProjectReader'
 import { ClipCard } from './ClipCard'
 import { motion } from 'framer-motion'
+import { useBreakpoint } from '@/utils/useBreakpoint'
 
 interface ProjectsProps {
   compact?: boolean
@@ -15,6 +16,8 @@ export function Projects({ compact = false }: ProjectsProps) {
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'completed' | 'in-progress' | 'archived'>('all')
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [isReaderOpen, setIsReaderOpen] = useState(false)
+  const { isMobile, isTablet } = useBreakpoint()
+  const px = isMobile ? '20px' : isTablet ? '24px' : '40px'
 
   const projectTypes: ProjectType[] = ['React', 'Vue', 'Node']
   const statusOptions: Array<'all' | 'completed' | 'in-progress' | 'archived'> = ['all', 'completed', 'in-progress', 'archived']
@@ -38,7 +41,7 @@ export function Projects({ compact = false }: ProjectsProps) {
   return (
     <div
       style={{
-        padding: compact ? '120px 40px 80px' : '120px 40px 80px',
+        padding: compact ? `80px ${px} 80px` : `120px ${px} 80px`,
         maxWidth: '1400px',
         margin: '0 auto',
         color: 'var(--color-text-primary)',
@@ -190,8 +193,8 @@ export function Projects({ compact = false }: ProjectsProps) {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-            gap: '32px',
+            gridTemplateColumns: `repeat(auto-fill, minmax(${isMobile ? '260px' : '320px'}, 1fr))`,
+            gap: isMobile ? '20px' : '32px',
           }}
         >
           {filteredProjects.map((project, index) => (

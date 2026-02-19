@@ -1,6 +1,7 @@
 'use client'
 
 import { ThemeToggle } from './ThemeToggle'
+import { useBreakpoint } from '@/utils/useBreakpoint'
 
 interface NavigationProps {
   activeTab: string
@@ -15,6 +16,8 @@ const tabs = [
 ]
 
 export function Navigation({ activeTab, onTabChange }: NavigationProps) {
+  const { isMobile } = useBreakpoint()
+
   return (
     <nav
       style={{
@@ -26,7 +29,7 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
         backgroundColor: 'var(--color-nav-bg)',
         backdropFilter: 'blur(10px)',
         borderBottom: '1px solid var(--color-nav-border)',
-        padding: '12px 24px',
+        padding: isMobile ? '8px 12px' : '12px 24px',
       }}
     >
       <div
@@ -34,7 +37,7 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          gap: '8px',
+          gap: isMobile ? '4px' : '8px',
           flexWrap: 'wrap',
           maxWidth: '1400px',
           margin: '0 auto',
@@ -45,8 +48,8 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             style={{
-              padding: '8px 16px',
-              fontSize: '13px',
+              padding: isMobile ? '6px 10px' : '8px 16px',
+              fontSize: isMobile ? '11px' : '13px',
               fontFamily: 'var(--font-space-mono), monospace',
               fontWeight: activeTab === tab.id ? 'bold' : 'normal',
               color: activeTab === tab.id ? 'var(--color-cyan)' : 'var(--color-nav-text)',
@@ -55,7 +58,7 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
               borderRadius: '4px',
               cursor: 'pointer',
               textTransform: 'uppercase',
-              letterSpacing: '1px',
+              letterSpacing: isMobile ? '0.5px' : '1px',
               transition: 'all 0.2s ease',
               boxShadow: activeTab === tab.id ? '0 0 10px var(--color-cyan-glow)' : 'none',
             }}
@@ -78,7 +81,7 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
           </button>
         ))}
         {/* 主题切换按钮 */}
-        <div style={{ marginLeft: '16px' }}>
+        <div style={{ marginLeft: isMobile ? '8px' : '16px' }}>
           <ThemeToggle />
         </div>
       </div>

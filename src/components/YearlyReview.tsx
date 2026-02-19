@@ -2,14 +2,17 @@
 
 import { useState } from 'react'
 import { yearlyReviews } from '@/data/personal'
+import { useBreakpoint } from '@/utils/useBreakpoint'
 
 export function YearlyReview() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const { isMobile, isTablet } = useBreakpoint()
+  const px = isMobile ? '20px' : isTablet ? '24px' : '40px'
 
   return (
     <div
       style={{
-        padding: '120px 40px 80px',
+        padding: `${isMobile ? '80px' : '120px'} ${px} 80px`,
         maxWidth: '1200px',
         margin: '0 auto',
         color: 'var(--color-text-primary)',
@@ -30,10 +33,10 @@ export function YearlyReview() {
         年度回顾
       </h2>
 
-      <div
+        <div
         style={{
           position: 'relative',
-          paddingLeft: '32px',
+          paddingLeft: isMobile ? '20px' : '32px',
         }}
       >
         {/* 时间轴线 */}
@@ -56,8 +59,8 @@ export function YearlyReview() {
               key={review.id}
               style={{
                 position: 'relative',
-                marginBottom: '48px',
-                paddingLeft: '48px',
+                marginBottom: isMobile ? '32px' : '48px',
+                paddingLeft: isMobile ? '28px' : '48px',
               }}
             >
               {/* 时间轴节点 */}
@@ -78,7 +81,7 @@ export function YearlyReview() {
               {/* 年度卡片 */}
               <div
                 style={{
-                  padding: '24px',
+                  padding: isMobile ? '16px' : '24px',
                   border: '1px solid var(--color-card-border)',
                   backgroundColor: 'var(--color-card-bg)',
                   borderRadius: '8px',
@@ -109,7 +112,7 @@ export function YearlyReview() {
                   <div>
                     <h3
                       style={{
-                        fontSize: '28px',
+                        fontSize: isMobile ? '22px' : '28px',
                         fontWeight: 'bold',
                         color: 'var(--color-cyan)',
                         fontFamily: 'var(--font-space-mono), monospace',

@@ -3,8 +3,11 @@
 import { personalInfo } from '@/data/personal'
 import { Typewriter } from './Typewriter'
 import { motion } from 'framer-motion'
+import { useBreakpoint } from '@/utils/useBreakpoint'
 
 export function Hero() {
+  const { isMobile, isTablet } = useBreakpoint()
+
   const handleCTAClick = (action: string) => {
     if (action.startsWith('mailto:')) {
       window.location.href = action
@@ -31,7 +34,7 @@ export function Hero() {
         fontFamily: 'var(--font-space-mono), monospace',
         zIndex: 100,
         maxWidth: '800px',
-        padding: '120px 40px 80px',
+        padding: isMobile ? '80px 20px 40px' : isTablet ? '100px 30px 60px' : '120px 40px 80px',
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
@@ -44,7 +47,7 @@ export function Hero() {
       {/* 日期标签 - 杂志风格 */}
       <motion.div
         className="magazine-date-label"
-        style={{ marginBottom: '24px', alignSelf: 'flex-start' }}
+        style={{ marginBottom: isMobile ? '16px' : '24px', alignSelf: 'flex-start' }}
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.2, duration: 0.6 }}
@@ -82,7 +85,7 @@ export function Hero() {
           lineHeight: '1.6',
           color: 'var(--color-text-hero-sub)',
           fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
-          marginBottom: '32px',
+          marginBottom: isMobile ? '24px' : '32px',
           letterSpacing: '2px',
         }}
         initial={{ opacity: 0, y: 30 }}
@@ -95,7 +98,7 @@ export function Hero() {
       {/* 个人简介 - 杂志式引用块 */}
       <motion.div
         style={{
-          marginBottom: '40px',
+          marginBottom: isMobile ? '24px' : '40px',
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -125,8 +128,8 @@ export function Hero() {
         style={{
           display: 'flex',
           flexWrap: 'wrap',
-          gap: '12px',
-          marginBottom: '40px',
+          gap: isMobile ? '8px' : '12px',
+          marginBottom: isMobile ? '24px' : '40px',
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -137,8 +140,8 @@ export function Hero() {
             key={index}
             style={{
               display: 'inline-block',
-              padding: '6px 16px',
-              fontSize: '12px',
+              padding: isMobile ? '4px 10px' : '6px 16px',
+              fontSize: isMobile ? '11px' : '12px',
               fontFamily: 'var(--font-jetbrains-mono), monospace',
               color: 'var(--color-cyan)',
               border: '1px solid var(--color-cyan-40)',
@@ -175,9 +178,9 @@ export function Hero() {
       <motion.div
         style={{
           display: 'flex',
-          gap: '16px',
+          gap: isMobile ? '10px' : '16px',
           flexWrap: 'wrap',
-          marginBottom: '40px',
+          marginBottom: isMobile ? '24px' : '40px',
         }}
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -186,8 +189,8 @@ export function Hero() {
         <motion.button
           onClick={() => handleCTAClick(personalInfo.cta.primary.action)}
           style={{
-            padding: '14px 32px',
-            fontSize: '15px',
+            padding: isMobile ? '10px 20px' : '14px 32px',
+            fontSize: isMobile ? '13px' : '15px',
             fontFamily: 'var(--font-space-mono), monospace',
             fontWeight: 'bold',
             color: 'var(--color-bg)',
@@ -211,8 +214,8 @@ export function Hero() {
           <motion.button
             onClick={() => handleCTAClick(personalInfo.cta.secondary!.action)}
             style={{
-              padding: '14px 32px',
-              fontSize: '15px',
+              padding: isMobile ? '10px 20px' : '14px 32px',
+              fontSize: isMobile ? '13px' : '15px',
               fontFamily: 'var(--font-space-mono), monospace',
               fontWeight: 'bold',
               color: 'var(--color-cyan)',

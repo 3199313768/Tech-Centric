@@ -3,6 +3,7 @@
 import { achievements } from '@/data/personal'
 import { ClipCard } from './ClipCard'
 import { motion } from 'framer-motion'
+import { useBreakpoint } from '@/utils/useBreakpoint'
 
 const typeLabels: Record<string, string> = {
   award: '奖项',
@@ -15,6 +16,9 @@ interface AchievementsProps {
 }
 
 export function Achievements({ compact = false }: AchievementsProps) {
+  const { isMobile, isTablet } = useBreakpoint()
+  const px = isMobile ? '20px' : isTablet ? '24px' : '40px'
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString + '-01')
     return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' })
@@ -23,7 +27,7 @@ export function Achievements({ compact = false }: AchievementsProps) {
   return (
     <div
       style={{
-        padding: compact ? '0 40px 120px' : '120px 40px 120px',
+        padding: compact ? `0 ${px} 80px` : `120px ${px} 120px`,
         maxWidth: '1400px',
         margin: '0 auto',
         color: 'var(--color-text-primary)',
@@ -56,8 +60,8 @@ export function Achievements({ compact = false }: AchievementsProps) {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-          gap: '32px',
+          gridTemplateColumns: `repeat(auto-fill, minmax(${isMobile ? '260px' : '320px'}, 1fr))`,
+          gap: isMobile ? '20px' : '32px',
           position: 'relative',
         }}
       >

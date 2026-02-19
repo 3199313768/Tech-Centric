@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { Project } from '@/data/projects'
+import { useBreakpoint } from '@/utils/useBreakpoint'
 
 interface ProjectReaderProps {
   project: Project | null
@@ -10,6 +11,7 @@ interface ProjectReaderProps {
 }
 
 export function ProjectReader({ project, isOpen, onClose }: ProjectReaderProps) {
+  const { isMobile } = useBreakpoint()
   // 阻止背景滚动
   useEffect(() => {
     if (isOpen) {
@@ -58,16 +60,18 @@ export function ProjectReader({ project, isOpen, onClose }: ProjectReaderProps) 
         className="relative w-full h-full overflow-y-auto"
         style={{
           maxWidth: '900px',
-          padding: '80px 40px',
+          padding: isMobile ? '60px 16px' : '80px 40px',
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* 关闭按钮 */}
         <button
           onClick={onClose}
-          className="fixed top-8 right-8 z-10 text-white hover:text-gray-300 transition-colors"
+          className="fixed z-10 text-white hover:text-gray-300 transition-colors"
           style={{
-            fontSize: '32px',
+            top: isMobile ? '16px' : '32px',
+            right: isMobile ? '16px' : '32px',
+            fontSize: isMobile ? '28px' : '32px',
             lineHeight: '1',
             cursor: 'pointer',
             background: 'none',
@@ -84,7 +88,7 @@ export function ProjectReader({ project, isOpen, onClose }: ProjectReaderProps) 
         <h1
           className="text-white mb-8"
           style={{
-            fontSize: '48px',
+            fontSize: isMobile ? 'clamp(28px, 6vw, 36px)' : '48px',
             fontWeight: 'bold',
             lineHeight: '1.2',
             fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
@@ -261,7 +265,7 @@ export function ProjectReader({ project, isOpen, onClose }: ProjectReaderProps) 
         <div style={{ marginBottom: '32px' }}>
           <p
             style={{
-              fontSize: '18px',
+              fontSize: isMobile ? '16px' : '18px',
               lineHeight: '1.8',
               fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
               color: 'var(--color-text-primary)',

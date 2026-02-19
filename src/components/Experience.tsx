@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { workExperience } from '@/data/personal'
 import { ClipCard } from './ClipCard'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useBreakpoint } from '@/utils/useBreakpoint'
 
 interface ExperienceProps {
   compact?: boolean
@@ -11,11 +12,13 @@ interface ExperienceProps {
 
 export function Experience({ compact = false }: ExperienceProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const { isMobile, isTablet } = useBreakpoint()
+  const px = isMobile ? '20px' : isTablet ? '24px' : '40px'
 
   return (
     <div
       style={{
-        padding: compact ? '0 40px 120px' : '120px 40px 120px',
+        padding: compact ? `0 ${px} 80px` : `120px ${px} 120px`,
         maxWidth: '1400px',
         margin: '0 auto',
         color: 'var(--color-text-primary)',
@@ -47,7 +50,7 @@ export function Experience({ compact = false }: ExperienceProps) {
       <div
         style={{
           position: 'relative',
-          paddingLeft: '48px',
+          paddingLeft: isMobile ? '24px' : '48px',
         }}
       >
         {/* 杂志式时间轴线 */}
@@ -75,8 +78,8 @@ export function Experience({ compact = false }: ExperienceProps) {
               key={exp.id}
               style={{
                 position: 'relative',
-                marginBottom: '48px',
-                paddingLeft: '64px',
+                marginBottom: isMobile ? '32px' : '48px',
+                paddingLeft: isMobile ? '32px' : '64px',
               }}
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -87,10 +90,10 @@ export function Experience({ compact = false }: ExperienceProps) {
               <motion.div
                 style={{
                   position: 'absolute',
-                  left: '-10px',
+                  left: isMobile ? '-8px' : '-10px',
                   top: '12px',
-                  width: '20px',
-                  height: '20px',
+                  width: isMobile ? '16px' : '20px',
+                  height: isMobile ? '16px' : '20px',
                   borderRadius: '50%',
                   backgroundColor: 'var(--color-cyan)',
                   border: '4px solid var(--color-timeline-dot-border)',

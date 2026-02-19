@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { stats } from '@/data/personal'
 import { PaperCard } from './PaperCard'
 import { motion } from 'framer-motion'
+import { useBreakpoint } from '@/utils/useBreakpoint'
 
 function AnimatedNumber({ value, unit }: { value: number; unit?: string }) {
   const [displayValue, setDisplayValue] = useState(0)
@@ -49,10 +50,13 @@ interface StatsProps {
 }
 
 export function Stats({ compact = false }: StatsProps) {
+  const { isMobile, isTablet } = useBreakpoint()
+  const px = isMobile ? '20px' : isTablet ? '24px' : '40px'
+
   return (
     <div
       style={{
-        padding: compact ? '0 40px 120px' : '120px 40px 120px',
+        padding: compact ? `0 ${px} 80px` : `120px ${px} 120px`,
         maxWidth: '1400px',
         margin: '0 auto',
         color: 'var(--color-text-primary)',
@@ -85,8 +89,8 @@ export function Stats({ compact = false }: StatsProps) {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '40px',
+          gridTemplateColumns: `repeat(auto-fit, minmax(${isMobile ? '240px' : '280px'}, 1fr))`,
+          gap: isMobile ? '20px' : '40px',
         }}
       >
         {stats.map((stat, index) => (

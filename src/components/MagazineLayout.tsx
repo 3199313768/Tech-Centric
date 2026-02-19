@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react'
 import { motion } from 'framer-motion'
+import { useBreakpoint } from '@/utils/useBreakpoint'
 
 interface MagazineLayoutProps {
   children: ReactNode
@@ -11,11 +12,14 @@ interface MagazineLayoutProps {
 }
 
 export function MagazineLayout({ children, columns = 2, className = '', gap = 32 }: MagazineLayoutProps) {
+  const { isMobile, isTablet } = useBreakpoint()
   const gridTemplateColumns = {
     1: '1fr',
     2: '1fr 1fr',
     3: '1fr 1fr 1fr'
   }[columns]
+
+  const responsiveGap = isMobile ? Math.min(gap, 16) : isTablet ? Math.min(gap, 24) : gap
 
   return (
     <motion.div
@@ -23,7 +27,7 @@ export function MagazineLayout({ children, columns = 2, className = '', gap = 32
       style={{
         display: 'grid',
         gridTemplateColumns,
-        gap: `${gap}px`,
+        gap: `${responsiveGap}px`,
         width: '100%',
       }}
       initial={{ opacity: 0 }}

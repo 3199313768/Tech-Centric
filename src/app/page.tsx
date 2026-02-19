@@ -8,15 +8,18 @@ import { Experience } from '@/components/Experience'
 import { Skills } from '@/components/Skills'
 import { Stats } from '@/components/Stats'
 import { Achievements } from '@/components/Achievements'
-import { Contact } from '@/components/Contact'
+import { ContactChat } from '@/components/ContactChat'
 import { YearlyReview } from '@/components/YearlyReview'
 import { TravelMap } from '@/components/TravelMap'
 import { Projects } from '@/components/Projects'
 import { motion } from 'framer-motion'
+import { useBreakpoint } from '@/utils/useBreakpoint'
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('home')
   const [currentPage, setCurrentPage] = useState(1)
+  const { isMobile, isTablet } = useBreakpoint()
+  const dividerMargin = isMobile ? '40px 0' : isTablet ? '60px 0' : '80px 0'
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,7 +52,7 @@ export default function Home() {
             </section>
             
             {/* 杂志式分割线 */}
-            <div className="magazine-divider" style={{ margin: '80px 0' }} />
+            <div className="magazine-divider" style={{ margin: dividerMargin }} />
             
             {/* 关于我 */}
             <section style={{ position: 'relative', zIndex: 10 }}>
@@ -57,7 +60,7 @@ export default function Home() {
             </section>
             
             {/* 杂志式分割线 */}
-            <div className="magazine-divider" style={{ margin: '80px 0' }} />
+            <div className="magazine-divider" style={{ margin: dividerMargin }} />
             
             {/* 技能 */}
             <section style={{ position: 'relative', zIndex: 10 }}>
@@ -65,7 +68,7 @@ export default function Home() {
             </section>
             
             {/* 杂志式分割线 */}
-            <div className="magazine-divider" style={{ margin: '80px 0' }} />
+            <div className="magazine-divider" style={{ margin: dividerMargin }} />
             
             {/* 工作经历 */}
             <section style={{ position: 'relative', zIndex: 10 }}>
@@ -73,7 +76,7 @@ export default function Home() {
             </section>
             
             {/* 杂志式分割线 */}
-            <div className="magazine-divider" style={{ margin: '80px 0' }} />
+            <div className="magazine-divider" style={{ margin: dividerMargin }} />
             
             {/* 作品集 */}
             <section style={{ position: 'relative', zIndex: 10 }}>
@@ -81,7 +84,7 @@ export default function Home() {
             </section>
             
             {/* 杂志式分割线 */}
-            <div className="magazine-divider" style={{ margin: '80px 0' }} />
+            <div className="magazine-divider" style={{ margin: dividerMargin }} />
             
             {/* 统计 */}
             <section style={{ position: 'relative', zIndex: 10 }}>
@@ -89,10 +92,10 @@ export default function Home() {
             </section>
             
             {/* 杂志式分割线 */}
-            <div className="magazine-divider" style={{ margin: '80px 0' }} />
+            <div className="magazine-divider" style={{ margin: dividerMargin }} />
             
             {/* 成就 */}
-            <section style={{ position: 'relative', zIndex: 10, paddingBottom: '120px' }}>
+            <section style={{ position: 'relative', zIndex: 10, paddingBottom: isMobile ? '60px' : '120px' }}>
               <Achievements compact={true} />
             </section>
           </div>
@@ -102,7 +105,7 @@ export default function Home() {
       case 'travel':
         return <TravelMap />
       case 'contact':
-        return <Contact />
+        return <ContactChat />
       default:
         return <PhysicsWorld />
     }

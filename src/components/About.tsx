@@ -7,6 +7,7 @@ import { ClipCard } from './ClipCard'
 import { MagazineLayout } from './MagazineLayout'
 import { motion, AnimatePresence } from 'framer-motion'
 import { highlightKeywords } from '@/utils/textHighlight'
+import { useBreakpoint } from '@/utils/useBreakpoint'
 
 interface AboutProps {
   compact?: boolean
@@ -14,10 +15,12 @@ interface AboutProps {
 
 export function About({ compact = false }: AboutProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const { isMobile, isTablet } = useBreakpoint()
+  const px = isMobile ? '20px' : isTablet ? '24px' : '40px'
   return (
     <div
       style={{
-        padding: compact ? '40px 40px 120px' : '120px 40px 120px',
+        padding: compact ? `40px ${px} 80px` : `120px ${px} 120px`,
         maxWidth: '1400px',
         margin: '0 auto',
         color: 'var(--color-text-primary)',

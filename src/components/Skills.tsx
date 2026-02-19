@@ -5,6 +5,7 @@ import { skillsDetail } from '@/data/personal'
 import { ClipCard } from './ClipCard'
 import { MagazineLayout } from './MagazineLayout'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useBreakpoint } from '@/utils/useBreakpoint'
 
 const categoryLabels: Record<string, string> = {
   frontend: '前端',
@@ -19,6 +20,8 @@ interface SkillsProps {
 
 export function Skills({ compact = false }: SkillsProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const { isMobile, isTablet } = useBreakpoint()
+  const px = isMobile ? '20px' : isTablet ? '24px' : '40px'
 
   const categories = Array.from(new Set(skillsDetail.map(s => s.category)))
   const filteredSkills = selectedCategory
@@ -28,7 +31,7 @@ export function Skills({ compact = false }: SkillsProps) {
   return (
     <div
       style={{
-        padding: compact ? '0 40px 120px' : '120px 40px 120px',
+        padding: compact ? `0 ${px} 80px` : `120px ${px} 120px`,
         maxWidth: '1400px',
         margin: '0 auto',
         color: 'var(--color-text-primary)',
@@ -75,8 +78,8 @@ export function Skills({ compact = false }: SkillsProps) {
         <motion.button
           onClick={() => setSelectedCategory(null)}
           style={{
-            padding: '12px 24px',
-            fontSize: '14px',
+            padding: isMobile ? '8px 14px' : '12px 24px',
+            fontSize: isMobile ? '12px' : '14px',
             fontFamily: 'var(--font-space-mono), monospace',
             fontWeight: selectedCategory === null ? 'bold' : 'normal',
             color: selectedCategory === null ? 'var(--color-cyan)' : 'var(--color-btn-inactive-text)',

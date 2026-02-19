@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { travelLocations, TravelLocation } from '@/data/personal'
 import { loadAMapScript, initMap, createCustomMarkerIcon, fitBounds, formatDate, setupMapLayers, MapLayerType } from '@/utils/amap'
 import { TravelDataImporter } from './TravelDataImporter'
+import { useBreakpoint } from '@/utils/useBreakpoint'
 
 export function TravelMap() {
   const mapContainerRef = useRef<HTMLDivElement>(null)
@@ -18,6 +19,8 @@ export function TravelMap() {
   const [mapError, setMapError] = useState<string | null>(null)
   const [mapType, setMapType] = useState<MapLayerType>('terrain')
   const [isMounted, setIsMounted] = useState(false)
+  const { isMobile, isTablet } = useBreakpoint()
+  const px = isMobile ? '20px' : isTablet ? '24px' : '40px'
 
   // 合并原始数据和导入的数据
   const allLocations = [...travelLocations, ...importedLocations]
@@ -335,7 +338,7 @@ export function TravelMap() {
   return (
     <div
       style={{
-        padding: '120px 40px 80px',
+        padding: `${isMobile ? '80px' : '120px'} ${px} 80px`,
         maxWidth: '1400px',
         margin: '0 auto',
         color: 'var(--color-text-primary)',
@@ -346,7 +349,7 @@ export function TravelMap() {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '48px',
+          marginBottom: isMobile ? '24px' : '48px',
           flexWrap: 'wrap',
           gap: '16px',
         }}
@@ -486,7 +489,7 @@ export function TravelMap() {
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
           gap: '16px',
-          marginBottom: '48px',
+          marginBottom: isMobile ? '24px' : '48px',
         }}
       >
         <div
@@ -567,8 +570,8 @@ export function TravelMap() {
           ref={mapContainerRef}
           style={{
             width: '100%',
-            height: 'clamp(400px, 60vh, 800px)',
-            minHeight: '400px',
+            height: isMobile ? 'clamp(300px, 50vh, 500px)' : 'clamp(400px, 60vh, 800px)',
+            minHeight: isMobile ? '300px' : '400px',
             borderRadius: '8px',
             border: '1px solid var(--color-card-border)',
             overflow: 'hidden',

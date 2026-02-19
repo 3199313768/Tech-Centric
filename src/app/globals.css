@@ -683,4 +683,48 @@ body {
     padding: 16px 20px;
     font-size: 16px;
   }
+
+  .magazine-headline {
+    letter-spacing: 2px !important;
+  }
+
+  .magazine-divider::before,
+  .magazine-divider::after {
+    display: none;
+  }
+
+  .magazine-date-label {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+}
+
+/* 平板端适配 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .magazine-layout {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .magazine-quote {
+    padding: 20px 24px;
+    font-size: 18px;
+  }
+}
+
+/* ========== 聊天对话式联系页 ========== */
+
+/* 打字指示器三点弹跳 */
+@keyframes typing-bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+}
+
+.typing-dot {
+  animation: typing-bounce 1s ease-in-out infinite;
 }
