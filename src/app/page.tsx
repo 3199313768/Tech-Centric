@@ -12,6 +12,7 @@ import { ContactChat } from '@/components/ContactChat'
 import { YearlyReview } from '@/components/YearlyReview'
 import { TravelMap } from '@/components/TravelMap'
 import { Projects } from '@/components/Projects'
+import { AiSkills } from '@/components/AiSkills'
 import { motion } from 'framer-motion'
 import { useBreakpoint } from '@/utils/useBreakpoint'
 
@@ -100,6 +101,8 @@ export default function Home() {
             </section>
           </div>
         )
+      case 'ai-skills':
+        return <AiSkills />
       case 'yearlyreview':
         return <YearlyReview />
       case 'travel':

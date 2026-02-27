@@ -10,6 +10,7 @@ interface NavigationProps {
 
 const tabs = [
   { id: 'home', label: '首页' },
+  { id: 'ai-skills', label: 'AI Skills' },
   { id: 'yearlyreview', label: '年度回顾' },
   { id: 'travel', label: '旅行' },
   { id: 'contact', label: '联系' }
