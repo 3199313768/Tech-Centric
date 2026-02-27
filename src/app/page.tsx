@@ -14,6 +14,7 @@ import { TravelMap } from '@/components/TravelMap'
 import { Projects } from '@/components/Projects'
 import { AiSkills } from '@/components/AiSkills'
 import { VibeCoding } from '@/components/VibeCoding'
+import { ResourceLinks } from '@/components/ResourceLinks'
 import { motion } from 'framer-motion'
 import { useBreakpoint } from '@/utils/useBreakpoint'
 
@@ -22,6 +23,11 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1)
   const { isMobile, isTablet } = useBreakpoint()
   const dividerMargin = isMobile ? '40px 0' : isTablet ? '60px 0' : '80px 0'
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -108,6 +114,8 @@ export default function Home() {
         return <VibeCoding />
       case 'yearlyreview':
         return <YearlyReview />
+      case 'resources':
+        return <ResourceLinks />
       case 'travel':
         return <TravelMap />
       case 'contact':
@@ -119,7 +127,7 @@ export default function Home() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-bg)', position: 'relative' }}>
-      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <Navigation activeTab={activeTab} onTabChange={handleTabChange} />
       
       {/* 页码显示 - 仅在首页显示 */}
       {activeTab === 'home' && (
