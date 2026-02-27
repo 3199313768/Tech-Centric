@@ -14,18 +14,39 @@ interface ProjectsProps {
 export function Projects({ compact = false }: ProjectsProps) {
   const [selectedType, setSelectedType] = useState<ProjectType | 'all'>('all')
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'completed' | 'in-progress' | 'archived'>('all')
+  const [searchQuery, setSearchQuery] = useState('')
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [isReaderOpen, setIsReaderOpen] = useState(false)
   const { isMobile, isTablet } = useBreakpoint()
   const px = isMobile ? '20px' : isTablet ? '24px' : '40px'
 
-  const projectTypes: ProjectType[] = ['React', 'Vue', 'Node']
+  const projectTypes = ['all', ...Array.from(new Set(projects.map(p => p.type)))]
   const statusOptions: Array<'all' | 'completed' | 'in-progress' | 'archived'> = ['all', 'completed', 'in-progress', 'archived']
+
+  const SearchHighlight = ({ text, query }: { text: string; query: string }) => {
+    if (!query.trim()) return <span>{text}</span>
+    const parts = text.split(new RegExp(`(${query.replace(/[-[\]{}()*+?.,\\\\^$|#\\s]/g, '\\\\$&')})`, 'gi'))
+    return (
+      <span>
+        {parts.map((part, i) => 
+          part.toLowerCase() === query.toLowerCase() ? (
+            <mark key={i} style={{ backgroundColor: 'var(--color-cyan-30)', color: 'var(--color-cyan)', padding: '0 2px', borderRadius: '2px' }}>{part}</mark>
+          ) : (
+            part
+          )
+        )}
+      </span>
+    )
+  }
 
   const filteredProjects = projects.filter((project) => {
     const typeMatch = selectedType === 'all' || project.type === selectedType
     const statusMatch = selectedStatus === 'all' || project.status === selectedStatus
-    return typeMatch && statusMatch
+    const searchMatch = !searchQuery.trim() || 
+      project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.technologies.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
+    return typeMatch && statusMatch && searchMatch
   })
 
   const handleProjectClick = (project: Project) => {
@@ -79,6 +100,30 @@ export function Projects({ compact = false }: ProjectsProps) {
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
+        {/* 综合搜索 */}
+        <div style={{ marginBottom: '24px' }}>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="搜索项目名称、描述或技术栈..."
+            style={{
+              width: '100%',
+              maxWidth: '400px',
+              padding: '12px 16px',
+              fontSize: '14px',
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid var(--color-btn-inactive-border)',
+              borderRadius: '8px',
+              color: 'var(--color-text-primary)',
+              outline: 'none',
+              transition: 'border-color 0.3s ease',
+            }}
+            onFocus={(e) => e.currentTarget.style.borderColor = 'var(--color-cyan-50)'}
+            onBlur={(e) => e.currentTarget.style.borderColor = 'var(--color-btn-inactive-border)'}
+          />
+        </div>
+
         {/* 类型筛选 */}
         <div
           style={{
@@ -100,29 +145,10 @@ export function Projects({ compact = false }: ProjectsProps) {
           >
             类型：
           </span>
-          <button
-            onClick={() => setSelectedType('all')}
-            style={{
-              padding: '8px 16px',
-              fontSize: '13px',
-              fontFamily: 'var(--font-space-mono), monospace',
-              fontWeight: selectedType === 'all' ? 'bold' : 'normal',
-              color: selectedType === 'all' ? 'var(--color-cyan)' : 'var(--color-btn-inactive-text)',
-              backgroundColor: selectedType === 'all' ? 'var(--color-cyan-10)' : 'transparent',
-              border: `1px solid ${selectedType === 'all' ? 'var(--color-cyan-50)' : 'var(--color-btn-inactive-border)'}`,
-              borderRadius: '4px',
-              cursor: 'pointer',
-              textTransform: 'uppercase',
-              letterSpacing: '1px',
-              transition: 'all 0.2s ease',
-            }}
-          >
-            全部
-          </button>
           {projectTypes.map((type) => (
             <button
               key={type}
-              onClick={() => setSelectedType(type)}
+              onClick={() => setSelectedType(type as ProjectType | 'all')}
               style={{
                 padding: '8px 16px',
                 fontSize: '13px',
@@ -138,7 +164,7 @@ export function Projects({ compact = false }: ProjectsProps) {
                 transition: 'all 0.2s ease',
               }}
             >
-              {type}
+              {type === 'all' ? '全部' : type}
             </button>
           ))}
         </div>
@@ -226,7 +252,7 @@ export function Projects({ compact = false }: ProjectsProps) {
                     lineHeight: '1.3',
                   }}
                 >
-                  {project.title}
+                  <SearchHighlight text={project.title} query={searchQuery} />
                 </h3>
 
                 <div
@@ -278,7 +304,7 @@ export function Projects({ compact = false }: ProjectsProps) {
                     flex: 1,
                   }}
                 >
-                  {project.description}
+                  <SearchHighlight text={project.description} query={searchQuery} />
                 </p>
 
                 {project.technologies && project.technologies.length > 0 && (

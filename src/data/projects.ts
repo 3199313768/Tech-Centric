@@ -1,4 +1,4 @@
-export type ProjectType = 'React' | 'Vue' | 'Node'
+export type ProjectType = 'React' | 'Vue' | 'Node' | 'AI' | 'Mobile' | 'Other'
 
 export interface Project {
   id: string
@@ -19,9 +19,9 @@ export interface Project {
 export const projects: Project[] = [
   {
     id: '1',
-    title: 'E-Commerce Platform',
+    title: '电商平台系统',
     type: 'React',
-    description: 'A modern e-commerce platform built with React and TypeScript',
+    description: '基于 React 和 TypeScript 构建的现代化电商平台',
     detailedDescription: '一个功能完整的电商平台，包含商品展示、购物车、订单管理、支付集成等功能。采用现代化的技术栈，确保高性能和良好的用户体验。',
     technologies: ['React', 'TypeScript', 'Next.js', 'Tailwind CSS', 'Stripe'],
     highlights: ['响应式设计', '支付集成', '实时库存管理', '用户评价系统'],
@@ -33,9 +33,9 @@ export const projects: Project[] = [
   },
   {
     id: '2',
-    title: 'Task Manager',
+    title: '智能任务管理器',
     type: 'Vue',
-    description: 'A collaborative task management application',
+    description: '协作式任务管理应用，支持团队协作',
     detailedDescription: '协作式任务管理应用，支持团队协作、任务分配、进度跟踪等功能。',
     technologies: ['Vue.js', 'Vuex', 'Firebase', 'Vuetify'],
     highlights: ['实时协作', '任务看板', '通知系统', '数据可视化'],
@@ -47,9 +47,9 @@ export const projects: Project[] = [
   },
   {
     id: '3',
-    title: 'API Gateway',
+    title: 'API 网关服务',
     type: 'Node',
-    description: 'Microservices API gateway with rate limiting',
+    description: '支持频率限制的微服务 API 网关',
     detailedDescription: '微服务API网关，提供统一入口、限流、认证、监控等功能。',
     technologies: ['Node.js', 'Express', 'Redis', 'Docker', 'Kubernetes'],
     highlights: ['限流保护', '负载均衡', 'API监控', '自动扩缩容'],
@@ -60,9 +60,9 @@ export const projects: Project[] = [
   },
   {
     id: '4',
-    title: 'Dashboard UI',
+    title: '分析仪表盘',
     type: 'React',
-    description: 'Real-time analytics dashboard',
+    description: '实时数据分析仪表板，提供可视化报表',
     detailedDescription: '实时数据分析仪表板，提供数据可视化、报表生成等功能。',
     technologies: ['React', 'D3.js', 'WebSocket', 'Chart.js'],
     highlights: ['实时数据', '多种图表', '数据导出', '自定义报表'],
@@ -74,9 +74,9 @@ export const projects: Project[] = [
   },
   {
     id: '5',
-    title: 'Admin Panel',
+    title: '中台管理系统',
     type: 'Vue',
-    description: 'Comprehensive admin panel with role-based access',
+    description: '功能完善的管理后台，支持角色权限管理',
     detailedDescription: '功能完善的管理后台，支持角色权限管理、数据管理等功能。',
     technologies: ['Vue.js', 'Element UI', 'Node.js', 'PostgreSQL'],
     highlights: ['权限管理', '数据CRUD', '批量操作', '操作日志'],
@@ -87,9 +87,9 @@ export const projects: Project[] = [
   },
   {
     id: '6',
-    title: 'WebSocket Server',
+    title: '实时通信服务器',
     type: 'Node',
-    description: 'Real-time communication server',
+    description: '基于 WebSocket 的高性能实时通信服务',
     detailedDescription: '基于WebSocket的实时通信服务器，支持多房间、消息推送等功能。',
     technologies: ['Node.js', 'Socket.io', 'Redis', 'MongoDB'],
     highlights: ['实时通信', '房间管理', '消息持久化', '高并发支持'],
@@ -100,9 +100,9 @@ export const projects: Project[] = [
   },
   {
     id: '7',
-    title: 'Component Library',
+    title: '通用组件库',
     type: 'React',
-    description: 'Reusable React component library',
+    description: '可复用的 React 业务组件库',
     detailedDescription: '可复用的React组件库，包含常用UI组件，支持主题定制。',
     technologies: ['React', 'TypeScript', 'Storybook', 'Jest'],
     highlights: ['30+组件', 'TypeScript支持', '主题定制', '完整文档'],
@@ -114,9 +114,9 @@ export const projects: Project[] = [
   },
   {
     id: '8',
-    title: 'SPA Framework',
+    title: '性能优化框架',
     type: 'Vue',
-    description: 'Custom single-page application framework',
+    description: '自定义单页应用性能优化框架',
     detailedDescription: '自定义单页应用框架，提供路由、状态管理等核心功能。',
     technologies: ['Vue.js', 'TypeScript', 'Webpack', 'Vite'],
     highlights: ['轻量级', 'TypeScript支持', '插件系统', '开发工具'],
@@ -126,9 +126,9 @@ export const projects: Project[] = [
   },
   {
     id: '9',
-    title: 'Database ORM',
+    title: '数据库 ORM 库',
     type: 'Node',
-    description: 'Type-safe database ORM for Node.js',
+    description: '类型安全的 Node.js 数据库 ORM',
     detailedDescription: '类型安全的Node.js数据库ORM，支持多种数据库，提供流畅的API。',
     technologies: ['TypeScript', 'Node.js', 'PostgreSQL', 'MySQL'],
     highlights: ['类型安全', '多数据库支持', '迁移工具', '查询构建器'],
@@ -139,9 +139,9 @@ export const projects: Project[] = [
   },
   {
     id: '10',
-    title: 'Animation Engine',
+    title: '动画渲染引擎',
     type: 'React',
-    description: 'High-performance animation library',
+    description: '高性能 Web 动画库',
     detailedDescription: '高性能动画库，提供流畅的动画效果和丰富的动画API。',
     technologies: ['React', 'TypeScript', 'Web Animations API', 'GSAP'],
     highlights: ['高性能', '60fps', '丰富API', '易于使用'],

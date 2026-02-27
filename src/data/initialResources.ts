@@ -3,8 +3,11 @@ export interface ResourceItem {
   name: string
   url: string
   description?: string
-  category: 'learning' | 'ai' | 'other'
+  category: string // Changed from strict union to string to allow custom categories
+  tags?: string[]
   createdAt: number
+  isPinned?: boolean
+  clickCount?: number
 }
 
 const baseTime = 1700000000000
@@ -17,6 +20,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://developer.mozilla.org/',
     description: 'Web 技术权威文档，HTML/CSS/JS 参考',
     category: 'learning',
+    tags: ['前端', '文档', '基础'],
   },
   {
     id: 'react-docs',
@@ -24,6 +28,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://react.dev/',
     description: 'React 官方文档，Hooks、Server Components 等',
     category: 'learning',
+    tags: ['React', '文档', '框架'],
   },
   {
     id: 'vue-docs',
@@ -31,6 +36,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://cn.vuejs.org/',
     description: 'Vue 3 中文文档',
     category: 'learning',
+    tags: ['Vue', '文档', '框架'],
   },
   {
     id: 'typescript',
@@ -38,6 +44,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://www.typescriptlang.org/docs/',
     description: 'TypeScript 官方文档与手册',
     category: 'learning',
+    tags: ['TypeScript', '文档'],
   },
   {
     id: 'nextjs',
@@ -45,6 +52,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://nextjs.org/docs',
     description: 'Next.js App Router、SSR、API 等',
     category: 'learning',
+    tags: ['Next.js', 'React', '全栈'],
   },
   {
     id: 'tailwind',
@@ -52,6 +60,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://tailwindcss.com/docs',
     description: 'Tailwind CSS 工具类文档',
     category: 'learning',
+    tags: ['CSS', '原子化'],
   },
   {
     id: 'webdev',
@@ -59,6 +68,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://web.dev/',
     description: 'Google 的 Web 开发学习资源',
     category: 'learning',
+    tags: ['前端', '最佳实践'],
   },
   {
     id: 'css-tricks',
@@ -66,6 +76,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://css-tricks.com/',
     description: 'CSS 技巧、布局、动画等',
     category: 'learning',
+    tags: ['CSS', '技巧'],
   },
   {
     id: 'caniuse',
@@ -73,6 +84,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://caniuse.com/',
     description: '前端 API 与 CSS 兼容性查询',
     category: 'learning',
+    tags: ['工具', '兼容性'],
   },
   {
     id: 'javascript-info',
@@ -80,6 +92,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://zh.javascript.info/',
     description: '现代 JavaScript 教程（中文）',
     category: 'learning',
+    tags: ['JavaScript', '教程'],
   },
   {
     id: 'freecodecamp',
@@ -87,6 +100,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://www.freecodecamp.org/',
     description: '免费编程学习平台',
     category: 'learning',
+    tags: ['平台', '教程'],
   },
   {
     id: 'frontend-roadmap',
@@ -94,6 +108,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://roadmap.sh/frontend',
     description: '前端学习路线图',
     category: 'learning',
+    tags: ['路线图'],
   },
   // 进阶 - 源码与规范
   {
@@ -102,6 +117,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://github.com/facebook/react',
     description: 'React 官方仓库，Fiber、调度、并发渲染',
     category: 'learning',
+    tags: ['React', '源码'],
   },
   {
     id: 'tc39',
@@ -109,6 +125,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://github.com/tc39/proposals',
     description: 'ECMAScript 提案与标准演进',
     category: 'learning',
+    tags: ['规范', 'ECMAScript'],
   },
   {
     id: 'ecma262',
@@ -116,6 +133,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://tc39.es/ecma262/',
     description: 'ECMAScript 语言规范',
     category: 'learning',
+    tags: ['规范', 'ECMAScript'],
   },
   {
     id: 'v8-blog',
@@ -123,6 +141,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://v8.dev/blog',
     description: 'V8 引擎实现、JIT、GC、优化',
     category: 'learning',
+    tags: ['底层', 'V8'],
   },
   {
     id: 'whatwg',
@@ -130,6 +149,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://html.spec.whatwg.org/',
     description: 'HTML 标准规范',
     category: 'learning',
+    tags: ['规范', 'HTML'],
   },
   {
     id: 'overreacted',
@@ -137,6 +157,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://overreacted.io/',
     description: 'Dan Abramov 深度解析 React',
     category: 'learning',
+    tags: ['博客', 'React'],
   },
   {
     id: 'kentcdodds',
@@ -144,6 +165,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://kentcdodds.com/blog',
     description: '测试、React、Remix 实践',
     category: 'learning',
+    tags: ['博客', '测试'],
   },
   {
     id: 'refactoring-guru',
@@ -151,6 +173,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://refactoring.guru/',
     description: '设计模式、重构、SOLID',
     category: 'learning',
+    tags: ['设计模式', '重构'],
   },
   {
     id: 'system-design',
@@ -158,6 +181,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://github.com/donnemartin/system-design-primer',
     description: '系统设计、分布式、高可用',
     category: 'learning',
+    tags: ['系统设计', '架构'],
   },
   {
     id: 'nodejs-docs',
@@ -165,6 +189,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://nodejs.org/docs/latest/api/',
     description: 'Node.js API、Stream、Event Loop',
     category: 'learning',
+    tags: ['Node.js', '后端'],
   },
   {
     id: 'web-performance',
@@ -172,6 +197,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://web.dev/performance/',
     description: '性能优化、Core Web Vitals、LCP/FID/CLS',
     category: 'learning',
+    tags: ['性能优化'],
   },
   {
     id: 'chrome-docs',
@@ -179,6 +205,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://developer.chrome.com/',
     description: 'Chrome 渲染、新特性、DevTools',
     category: 'learning',
+    tags: ['浏览器', 'DevTools'],
   },
   // AI
   {
@@ -187,6 +214,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://chat.openai.com/',
     description: 'OpenAI 大语言模型对话',
     category: 'ai',
+    tags: ['大模型', '对话'],
   },
   {
     id: 'claude',
@@ -194,6 +222,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://claude.ai/',
     description: 'Anthropic Claude 对话',
     category: 'ai',
+    tags: ['大模型', '对话'],
   },
   {
     id: 'cursor',
@@ -201,6 +230,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://cursor.com/',
     description: 'AI 驱动的代码编辑器',
     category: 'ai',
+    tags: ['编辑器', '工具'],
   },
   {
     id: 'perplexity',
@@ -208,6 +238,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://www.perplexity.ai/',
     description: 'AI 搜索引擎',
     category: 'ai',
+    tags: ['搜索引擎', '工具'],
   },
   {
     id: 'v0-vercel',
@@ -215,6 +246,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://v0.dev/',
     description: 'AI 生成 React/Next.js UI 组件',
     category: 'ai',
+    tags: ['生成UI', 'Vercel'],
   },
   {
     id: 'github-copilot',
@@ -222,6 +254,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://github.com/features/copilot',
     description: 'GitHub AI 编程助手',
     category: 'ai',
+    tags: ['编程助手', '工具'],
   },
   // AI 进阶
   {
@@ -230,6 +263,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://platform.openai.com/docs',
     description: 'GPT API、Embeddings、Function Calling',
     category: 'ai',
+    tags: ['API', '平台'],
   },
   {
     id: 'anthropic-docs',
@@ -237,6 +271,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://docs.anthropic.com/',
     description: 'Claude API、长上下文、工具调用',
     category: 'ai',
+    tags: ['API', '平台'],
   },
   {
     id: 'langchain',
@@ -244,6 +279,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://python.langchain.com/docs/',
     description: 'LLM 应用框架、RAG、Agent',
     category: 'ai',
+    tags: ['框架', 'RAG'],
   },
   {
     id: 'huggingface',
@@ -251,6 +287,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://huggingface.co/',
     description: '模型、数据集、Transformers',
     category: 'ai',
+    tags: ['社区', '模型库'],
   },
   {
     id: 'prompt-engineering',
@@ -258,6 +295,7 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://platform.openai.com/docs/guides/prompt-engineering',
     description: 'Prompt 工程最佳实践',
     category: 'ai',
+    tags: ['Prompt工程'],
   },
   {
     id: 'swe-agent',
@@ -265,6 +303,57 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     url: 'https://github.com/princeton-nlp/SWE-agent',
     description: 'AI 代码修复 Agent',
     category: 'ai',
+    tags: ['Agent', '开源'],
+  },
+  // 工具
+  {
+    id: 'tinypng',
+    name: 'TinyPNG',
+    url: 'https://tinypng.com/',
+    description: '智能图片压缩工具，处理 Web 图片必备',
+    category: 'tools',
+    tags: ['工具', '图片压缩'],
+  },
+  {
+    id: 'vercel',
+    name: 'Vercel',
+    url: 'https://vercel.com/',
+    description: '现代 Web 应用部署平台，Next.js 官方支持',
+    category: 'tools',
+    tags: ['部署', '托管'],
+  },
+  {
+    id: 'codesandbox',
+    name: 'CodeSandbox',
+    url: 'https://codesandbox.io/',
+    description: '在线代码编辑器，快速原型开发',
+    category: 'tools',
+    tags: ['工具', 'IDE'],
+  },
+  // 设计
+  {
+    id: 'figma',
+    name: 'Figma',
+    url: 'https://www.figma.com/',
+    description: '跨平台协作设计工具',
+    category: 'design',
+    tags: ['设计', '协作', 'UI/UX'],
+  },
+  {
+    id: 'dribbble',
+    name: 'Dribbble',
+    url: 'https://dribbble.com/',
+    description: '全球设计师作品展示社区',
+    category: 'design',
+    tags: ['灵感', '社区'],
+  },
+  {
+    id: 'framer-motion',
+    name: 'Framer Motion',
+    url: 'https://www.framer.com/motion/',
+    description: 'React 的高性能动效库',
+    category: 'design',
+    tags: ['动效', 'React'],
   },
 ]
 
