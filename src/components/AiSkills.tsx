@@ -13,53 +13,54 @@ interface AgentSkill {
   link?: string
 }
 
-const mockSkills: AgentSkill[] = [
+const SKILL_REPO = 'https://github.com/3199313768/SKILL'
+
+const skills: AgentSkill[] = [
   {
-    id: '1',
-    name: '代码审查专家 (Code Reviewer)',
-    icon: '🔍',
-    description: '专注于发现潜在的代码缺陷、性能瓶颈以及安全漏洞，并提供详细的重构建议。',
-    tags: ['Code', 'Review', 'Best Practices'],
-    platform: 'Dify',
+    id: 'auto-commit',
+    name: '自动提交代码 (auto-commit)',
+    icon: '⚡',
+    description: '智能分析代码变更，自动生成符合 Conventional Commits 规范的提交信息，并完成提交和推送。',
+    tags: ['Git', 'Conventional Commits', 'Shell'],
+    platform: 'Shell',
+    link: `${SKILL_REPO}/tree/main/auto-commit`,
   },
   {
-    id: '2',
-    name: '架构设计助手 (Architect)',
-    icon: '🏗️',
-    description: '辅助进行系统级架构设计，提供高阶技术选型、数据库建模及微服务设计思路。',
-    tags: ['Architecture', 'System Design'],
-    platform: 'Coze',
+    id: 'commit-convention',
+    name: '提交规范校验 (commit-convention)',
+    icon: '✅',
+    description: '通过 Git commit-msg hook 自动校验提交信息格式，确保代码提交历史的一致性和可追溯性。',
+    tags: ['Git', 'Hook', 'Conventional Commits'],
+    platform: 'Git Hook',
+    link: `${SKILL_REPO}/tree/main/commit-convention`,
   },
   {
-    id: '3',
-    name: '数据分析分析师 (Data Analyst)',
+    id: 'weekly-report',
+    name: '周报生成 (weekly-report)',
     icon: '📊',
-    description: '用于快速清洗、整理数据，并能通过内置的 code interpreter 生成商业洞察和可视化图表。',
-    tags: ['Data', 'Python', 'Analysis'],
-    platform: 'OpenAI GPTs',
+    description: '基于 Git 提交记录自动生成程序员周报，支持约定式提交分类，符合企业级周报标准。',
+    tags: ['Python', 'Git', '周报'],
+    platform: 'Python',
+    link: `${SKILL_REPO}/tree/main/weekly-report`,
   },
   {
-    id: '4',
-    name: '技术文档撰写者 (Doc Writer)',
-    icon: '📝',
-    description: '根据代码或口述逻辑，自动生成结构清晰、带示例代码的 API 文档和开发指南。',
-    tags: ['Documentation', 'Markdown'],
+    id: 'ui-style-optimization',
+    name: 'UI 样式优化 (ui-style-optimization)',
+    icon: '🎨',
+    description: '基于 Type Scale 字号阶梯规则优化 Web 字体、字号、排版。支持 Prompt 对话与脚本自动分析两种模式。',
+    tags: ['Type Scale', 'Typography', 'Python'],
+    platform: 'Python',
+    link: `${SKILL_REPO}/tree/main/ui-style-optimization`,
   },
   {
-    id: '5',
-    name: '面试官 Agent (Interviewer)',
-    icon: '👔',
-    description: '模拟真实的前端/后端技术面试，提供追问环节以及最后的总结反馈。',
-    tags: ['Interview', 'Frontend', 'Backend'],
-    platform: 'LangChain',
+    id: 'code-audit',
+    name: '代码审计 (code-audit)',
+    icon: '🔍',
+    description: '从 Git 仓库提取提交记录，使用 AI 分析工程师工作表现，生成审计报告并通过 SMTP 发送邮件。',
+    tags: ['Python', 'AI', '审计'],
+    platform: 'Python',
+    link: `${SKILL_REPO}/tree/main/code-audit`,
   },
-  {
-    id: '6',
-    name: 'SEO 与文案助手 (Copywriter)',
-    icon: '✍️',
-    description: '生成针对搜素引擎优化的网站文案、博客标题及长尾词策略分析。',
-    tags: ['SEO', 'Content', 'Marketing'],
-  }
 ]
 
 export function AiSkills() {
@@ -94,7 +95,7 @@ export function AiSkills() {
       maxWidth: '1200px',
       margin: '0 auto',
       minHeight: '100vh',
-      color: '#fff',
+      color: 'var(--color-text-primary)',
       fontFamily: 'var(--font-inter), sans-serif',
     }}>
       <motion.div
@@ -103,15 +104,14 @@ export function AiSkills() {
         transition={{ duration: 0.8 }}
         style={{ marginBottom: '60px', textAlign: 'center' }}
       >
-
         <p style={{
-          color: 'rgba(255, 255, 255, 0.6)',
+          color: 'var(--color-text-secondary)',
           fontSize: '1.2rem',
           maxWidth: '600px',
           margin: '0 auto',
           lineHeight: 1.6
         }}>
-          构建智能与自动化工作流 | 探索我开发的各类 AI 代理与专属技能
+          一套提高开发效率的 Agent Skills 集合，包含代码提交、提交规范、周报生成、UI 优化、代码审计等实用技能
         </p>
       </motion.div>
 
@@ -125,19 +125,19 @@ export function AiSkills() {
           gap: '24px',
         }}
       >
-        {mockSkills.map((skill) => (
+        {skills.map((skill) => (
           <motion.div
             key={skill.id}
             variants={cardVariants}
             onHoverStart={() => setHoveredId(skill.id)}
             onHoverEnd={() => setHoveredId(null)}
             onClick={() => {
-              const url = skill.link || 'https://github.com/3199313768/SKILL'
+              const url = skill.link || SKILL_REPO
               window.open(url, '_blank', 'noopener,noreferrer')
             }}
             style={{
-              background: 'rgba(20, 20, 20, 0.6)',
-              border: `1px solid ${hoveredId === skill.id ? 'rgba(0, 217, 255, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
+              background: 'var(--color-ai-card-bg)',
+              border: `1px solid ${hoveredId === skill.id ? 'var(--color-cyan-50)' : 'var(--color-ai-card-border)'}`,
               borderRadius: '16px',
               padding: '32px 24px',
               position: 'relative',
@@ -145,31 +145,28 @@ export function AiSkills() {
               cursor: 'pointer',
               transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
               transform: hoveredId === skill.id ? 'translateY(-8px)' : 'translateY(0)',
-              boxShadow: hoveredId === skill.id ? '0 15px 30px rgba(0, 217, 255, 0.1)' : '0 5px 15px rgba(0,0,0,0.3)',
+              boxShadow: hoveredId === skill.id ? `0 15px 30px var(--color-ai-shadow-hover)` : `0 5px 15px var(--color-ai-shadow)`,
               backdropFilter: 'blur(10px)',
             }}
           >
-            {/* 赛博朋克风格的装饰元素 - Hover 才完全显示 */}
             <div style={{
               position: 'absolute',
               top: 0,
               left: 0,
               width: '100%',
               height: '2px',
-              background: 'linear-gradient(90deg, transparent, #00d9ff, transparent)',
+              background: 'linear-gradient(90deg, transparent, var(--color-cyan), transparent)',
               opacity: hoveredId === skill.id ? 1 : 0,
               transition: 'opacity 0.3s ease',
             }} />
-            
-            {/* 角落装饰 */}
             <div style={{
               position: 'absolute',
               top: '-5px',
               right: '-5px',
               width: '20px',
               height: '20px',
-              borderTop: `2px solid ${hoveredId === skill.id ? '#00d9ff' : 'transparent'}`,
-              borderRight: `2px solid ${hoveredId === skill.id ? '#00d9ff' : 'transparent'}`,
+              borderTop: `2px solid ${hoveredId === skill.id ? 'var(--color-cyan)' : 'transparent'}`,
+              borderRight: `2px solid ${hoveredId === skill.id ? 'var(--color-cyan)' : 'transparent'}`,
               transition: 'all 0.3s ease',
             }} />
 
@@ -181,28 +178,27 @@ export function AiSkills() {
             }}>
               <div style={{
                 fontSize: '2.5rem',
-                background: 'rgba(255, 255, 255, 0.05)',
+                background: 'var(--color-ai-card-icon-bg)',
                 width: '60px',
                 height: '60px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderRadius: '12px',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
+                border: '1px solid var(--color-ai-card-icon-border)',
               }}>
                 {skill.icon}
               </div>
-              
               {skill.platform && (
                 <span style={{
                   fontSize: '0.75rem',
                   padding: '4px 8px',
-                  background: 'rgba(0, 217, 255, 0.1)',
-                  color: '#00d9ff',
+                  background: 'var(--color-cyan-10)',
+                  color: 'var(--color-cyan)',
                   borderRadius: '20px',
                   fontFamily: 'var(--font-space-mono), monospace',
                   letterSpacing: '0.5px',
-                  border: '1px solid rgba(0, 217, 255, 0.2)'
+                  border: '1px solid var(--color-cyan-20)'
                 }}>
                   {skill.platform}
                 </span>
@@ -213,14 +209,13 @@ export function AiSkills() {
               fontSize: '1.25rem',
               fontWeight: 600,
               marginBottom: '12px',
-              color: hoveredId === skill.id ? '#fff' : 'rgba(255, 255, 255, 0.9)',
+              color: 'var(--color-text-primary)',
               transition: 'color 0.3s ease',
             }}>
               {skill.name}
             </h3>
-            
             <p style={{
-              color: 'rgba(255, 255, 255, 0.5)',
+              color: 'var(--color-text-muted)',
               fontSize: '0.9rem',
               lineHeight: 1.6,
               marginBottom: '24px',
@@ -237,16 +232,16 @@ export function AiSkills() {
               {skill.tags.map((tag, index) => (
                 <span key={index} style={{
                   fontSize: '0.75rem',
-                  color: 'rgba(255, 255, 255, 0.4)',
-                  background: 'rgba(255, 255, 255, 0.03)',
+                  color: 'var(--color-text-muted)',
+                  background: 'var(--color-ai-tag-bg)',
                   padding: '4px 10px',
                   borderRadius: '4px',
-                  border: '1px solid rgba(255, 255, 255, 0.05)',
+                  border: '1px solid var(--color-ai-tag-border)',
                   transition: 'all 0.2s ease',
                   ...(hoveredId === skill.id ? {
-                    color: 'rgba(0, 217, 255, 0.8)',
-                    borderColor: 'rgba(0, 217, 255, 0.2)',
-                    background: 'rgba(0, 217, 255, 0.05)'
+                    color: 'var(--color-cyan)',
+                    borderColor: 'var(--color-cyan-20)',
+                    background: 'var(--color-cyan-10)'
                   } : {})
                 }}>
                   #{tag}
@@ -254,14 +249,13 @@ export function AiSkills() {
               ))}
             </div>
 
-            {/* Hover 时发光的底部背景 */}
             <div style={{
               position: 'absolute',
               bottom: '-50%',
               left: '-20%',
               width: '140%',
               height: '100%',
-              background: 'radial-gradient(ellipse at bottom, rgba(0, 217, 255, 0.15) 0%, transparent 70%)',
+              background: 'radial-gradient(ellipse at bottom, var(--color-cyan-15) 0%, transparent 70%)',
               opacity: hoveredId === skill.id ? 1 : 0,
               transition: 'opacity 0.5s ease',
               pointerEvents: 'none',

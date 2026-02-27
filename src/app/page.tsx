@@ -13,6 +13,7 @@ import { YearlyReview } from '@/components/YearlyReview'
 import { TravelMap } from '@/components/TravelMap'
 import { Projects } from '@/components/Projects'
 import { AiSkills } from '@/components/AiSkills'
+import { VibeCoding } from '@/components/VibeCoding'
 import { motion } from 'framer-motion'
 import { useBreakpoint } from '@/utils/useBreakpoint'
 
@@ -103,6 +104,8 @@ export default function Home() {
         )
       case 'ai-skills':
         return <AiSkills />
+      case 'vibe-coding':
+        return <VibeCoding />
       case 'yearlyreview':
         return <YearlyReview />
       case 'travel':
