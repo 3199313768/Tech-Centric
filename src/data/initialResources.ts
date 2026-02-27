@@ -10,7 +10,7 @@ export interface ResourceItem {
   clickCount?: number
 }
 
-const baseTime = 1700000000000
+const baseTime = 1735689600000 // 2025-01-01
 
 const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
   // 学习 - 文档与规范
@@ -354,6 +354,154 @@ const initialResourcesData: Omit<ResourceItem, 'createdAt'>[] = [
     description: 'React 的高性能动效库',
     category: 'design',
     tags: ['动效', 'React'],
+  },
+  {
+    id: 'deepseek',
+    name: 'DeepSeek',
+    url: 'https://www.deepseek.com/',
+    description: '国产大模型之光，极高性价比的推理模型与 API',
+    category: 'ai',
+    tags: ['大模型', '国产', '推理'],
+  },
+  {
+    id: 'flux-ai',
+    name: 'Flux.1',
+    url: 'https://blackforestlabs.ai/',
+    description: '由原 SD 团队成员开发的目前最强开源图像生成模型',
+    category: 'ai',
+    tags: ['图像生成', '开源', 'AIGC'],
+  },
+  {
+    id: 'groq',
+    name: 'Groq',
+    url: 'https://groq.com/',
+    description: '极速 LLM 推理平台，基于 LPU 硬件加速',
+    category: 'ai',
+    tags: ['推理加速', '硬件', 'API'],
+  },
+  // 工具 & 前端趋势
+  {
+    id: 'tailwind-v4',
+    name: 'Tailwind CSS v4',
+    url: 'https://tailwindcss.com/blog/tailwindcss-v4-alpha',
+    description: '全新高性能引擎，基于 Lightning CSS 构建，无配置化倾向',
+    category: 'learning',
+    tags: ['CSS', '趋势', '高性能'],
+  },
+  {
+    id: 'biome',
+    name: 'Biome',
+    url: 'https://biomejs.dev/',
+    description: 'Rust 编写的极速一体化工具，替代 ESLint/Prettier',
+    category: 'tools',
+    tags: ['Rust', 'Linter', '工具'],
+  },
+  {
+    id: 'shadcn-charts',
+    name: 'Shadcn UI Charts',
+    url: 'https://ui.shadcn.com/charts',
+    description: '基于 Recharts 的美观、可拷贝的图表组件库',
+    category: 'design',
+    tags: ['UI组件', '图表', 'React'],
+  },
+  // 工程师核心 - 算法与修炼
+  {
+    id: 'leetcode-cn',
+    name: 'LeetCode 力扣',
+    url: 'https://leetcode.cn/',
+    description: '算法进阶、面试准备必选平台',
+    category: 'learning',
+    tags: ['算法', '面试', '刷题'],
+  },
+  {
+    id: 'hello-algo',
+    name: 'Hello 算法',
+    url: 'https://www.hello-algo.com/',
+    description: '动画图解、开源的算法学习教程，非常易懂',
+    category: 'learning',
+    tags: ['算法', '入门', '图解'],
+  },
+  {
+    id: 'system-design-interview',
+    name: 'System Design Interview',
+    url: 'https://github.com/donnemartin/system-design-primer',
+    description: '系统设计入门，涵盖分布式、扩展性、数据库等核心知识',
+    category: 'learning',
+    tags: ['架构', '系统设计', '进阶'],
+  },
+  // 工程师核心 - 效率与视野
+  {
+    id: 'developer-roadmap',
+    name: 'Developer Roadmap',
+    url: 'https://roadmap.sh/',
+    description: '全球最火的程序员学习路线图，涵盖全栈、后端及 AI',
+    category: 'learning',
+    tags: ['路线图', '职业规划'],
+  },
+  {
+    id: 'v2ex',
+    name: 'V2EX',
+    url: 'https://www.v2ex.com/',
+    description: '创意工作者社区，了解行业动态、摸鱼与交流',
+    category: 'other',
+    tags: ['社区', '动态'],
+  },
+  {
+    id: 'he3-app',
+    name: 'He3 App',
+    url: 'https://he3app.com/',
+    description: '堪称“开发者武器库”，集成各种 JSON 处理、编码转换工具',
+    category: 'tools',
+    tags: ['工具集', '效率'],
+  },
+  {
+    id: 'sql-mother',
+    name: 'SQL 刷题宝',
+    url: 'https://sqlmother.yupi.icu/',
+    description: 'SQL 闯关式学习，非常适合巩固数据库基础',
+    category: 'learning',
+    tags: ['SQL', '数据库', '练习'],
+  },
+  // AI 专项 - 框架与进阶
+  {
+    id: 'langchain-js',
+    name: 'LangChain.js',
+    url: 'https://js.langchain.com/',
+    description: '构建 LLM 应用的最流行框架，JS/TS 版本',
+    category: 'ai',
+    tags: ['AI框架', 'Agent', 'JS/TS'],
+  },
+  {
+    id: 'llamaindex',
+    name: 'LlamaIndex',
+    url: 'https://www.llamaindex.ai/',
+    description: '为 LLM 提供高效数据连接与检索 (RAG) 的核心技术库',
+    category: 'ai',
+    tags: ['RAG', '数据索引'],
+  },
+  {
+    id: 'waytoagi',
+    name: 'WaytoAGI',
+    url: 'https://www.waytoagi.com/',
+    description: '国内最大的 AGI 知识库，涵盖海量 AI 工具与案例',
+    category: 'ai',
+    tags: ['知识库', '社区'],
+  },
+  {
+    id: 'prompt-guide',
+    name: 'Prompt Engineering Guide',
+    url: 'https://www.promptingguide.ai/zh',
+    description: '多语言提示词工程指南，系统化学习如何与 AI 对话',
+    category: 'learning',
+    tags: ['Prompt', '教程'],
+  },
+  {
+    id: 'coze-cn',
+    name: 'Coze 扣子',
+    url: 'https://www.coze.cn/',
+    description: '字节跳动推出的新一代 AI 应用开发平台，零代码创建 Bot',
+    category: 'ai',
+    tags: ['低代码', 'Agent', '平台'],
   },
 ]
 
