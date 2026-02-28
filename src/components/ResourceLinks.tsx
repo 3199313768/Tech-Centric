@@ -33,22 +33,34 @@ function loadFromStorage(): ResourceItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     const initial = getInitialResources();
-    if (!raw || raw === "[]") {
+    if (!raw) {
       saveToStorage(initial);
       return initial;
     }
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed) || parsed.length === 0) {
+    if (!Array.isArray(parsed)) {
       saveToStorage(initial);
       return initial;
     }
+    
     // 补全缺失的关键字段，防止旧数据导致排序或渲染崩溃
-    return parsed.map((item) => ({
+    let items = parsed.map((item) => ({
       ...item,
       createdAt: item.createdAt || Date.now(),
       clickCount: item.clickCount || 0,
       category: item.category || "other",
     }));
+
+    // 合并代码中新增的默认资源（如果 localStorage 中还没有）
+    const existingUrls = new Set(items.map(item => item.url));
+    const newInitials = initial.filter(item => !existingUrls.has(item.url));
+    
+    if (newInitials.length > 0) {
+      items = [...items, ...newInitials];
+      saveToStorage(items);
+    }
+
+    return items;
   } catch {
     const initial = getInitialResources();
     saveToStorage(initial);
@@ -372,11 +384,8 @@ export function ResourceLinks() {
     setCandidateItems(loadCandidates());
   }, []);
 
-  {
-    /* AI 发现结果弹窗 */
-  }
-  {
-    showDiscoveryModal && (
+  // AI 发现结果弹窗
+  const discoveryModalContent = showDiscoveryModal ? (
       <div
         style={{
           position: "fixed",
@@ -538,21 +547,44 @@ export function ResourceLinks() {
                     ))}
                   </div>
                 </div>
-                <button
-                  onClick={() => addToLibrary(item)}
-                  style={{
-                    padding: "8px 16px",
-                    borderRadius: "6px",
-                    background: "var(--color-cyan-10)",
-                    border: "1px solid var(--color-cyan-50)",
-                    color: "var(--color-cyan)",
-                    fontSize: "13px",
-                    cursor: "pointer",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  加入库
-                </button>
+                <div style={{ display: "flex", gap: "8px", flexDirection: "column" }}>
+                  <button
+                    onClick={() => addToLibrary(item)}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: "6px",
+                      background: "var(--color-cyan-10)",
+                      border: "1px solid var(--color-cyan-50)",
+                      color: "var(--color-cyan)",
+                      fontSize: "13px",
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    加入库
+                  </button>
+                  <button
+                    onClick={() => {
+                      const nextDiscovered = discoveredItems.filter((i) => i.id !== item.id);
+                      setDiscoveredItems(nextDiscovered);
+                      const nextCandidates = candidateItems.filter((i) => i.url !== item.url);
+                      setCandidateItems(nextCandidates);
+                      saveCandidates(nextCandidates);
+                    }}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: "6px",
+                      background: "rgba(239, 68, 68, 0.1)",
+                      border: "1px solid rgba(239, 68, 68, 0.3)",
+                      color: "var(--color-red, #ef4444)",
+                      fontSize: "13px",
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    🗑️ 移除
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -569,8 +601,7 @@ export function ResourceLinks() {
           )}
         </motion.div>
       </div>
-    );
-  }
+    ) : null;
 
   const handleCopy = (e: React.MouseEvent, url: string, id: string) => {
     e.stopPropagation();
@@ -665,7 +696,7 @@ export function ResourceLinks() {
         category: data.category || prev.category,
         tags: Array.from(new Set([...prev.tags, ...(data.tags || [])])),
       }));
-    } catch (err) {
+    } catch {
       alert("AI 填充失败，请手动填写");
     } finally {
       setIsFetchingMeta(false);
@@ -846,26 +877,31 @@ export function ResourceLinks() {
         const imported = JSON.parse(text) as Partial<ResourceItem>[];
         if (!Array.isArray(imported)) throw new Error("Invalid format");
 
-        const next = [...items];
         let addedCount = 0;
         let updatedCount = 0;
         let invalidCount = 0;
-
-        imported.forEach((item) => {
+        
+        const tempNext = [...items];
+        
+        const processedItems = imported.map((item) => {
           if (!item.name || !item.url) {
             invalidCount++;
-            return;
+            return null;
           }
-          if (!item.id) {
-            item.id = generateId();
-          }
-          const index = next.findIndex((i) => i.id === item.id);
+          return {
+             ...(item as ResourceItem),
+             id: item.id || generateId(),
+          };
+        }).filter(Boolean) as ResourceItem[];
+        
+        processedItems.forEach((item) => {
+          const index = tempNext.findIndex((i) => i.id === item.id);
           if (index > -1) {
-            next[index] = { ...next[index], ...(item as ResourceItem) };
+            tempNext[index] = { ...tempNext[index], ...item };
             updatedCount++;
           } else {
-            next.push({
-              ...(item as ResourceItem),
+            tempNext.push({
+              ...item,
               createdAt: item.createdAt || Date.now(),
               clickCount: item.clickCount || 0,
             });
@@ -873,7 +909,7 @@ export function ResourceLinks() {
           }
         });
 
-        persist(next);
+        persist(tempNext);
         alert(
           `导入完成！\n✅ 新增: ${addedCount} 条\n🔄 更新: ${updatedCount} 条\n❌ 无效跳过: ${invalidCount} 条`,
         );
@@ -1387,7 +1423,7 @@ export function ResourceLinks() {
                 right: "12px",
                 display: "flex",
                 gap: "8px",
-                opacity: hoveredId === item.id ? 1 : 0,
+                opacity: hoveredId === item.id ? 1 : 0.4,
                 transition: "opacity 0.2s ease",
                 zIndex: 20,
               }}
@@ -1692,6 +1728,8 @@ export function ResourceLinks() {
         onConfirm={confirmConfig.onConfirm}
         onCancel={() => setConfirmConfig((prev) => ({ ...prev, isOpen: false }))}
       />
+      
+      {discoveryModalContent}
 
       {/* 全局 Toast 通知 */}
       {toastMessage && (
@@ -1760,16 +1798,19 @@ export function ResourceLinks() {
             <form onSubmit={handleSubmit}>
               <div style={{ marginBottom: "16px" }}>
                 <label
+                  htmlFor="field-name"
                   style={{
                     display: "block",
                     fontSize: "0.85rem",
                     color: "var(--color-text-secondary)",
                     marginBottom: "6px",
+                    cursor: "pointer",
                   }}
                 >
                   名称 *
                 </label>
                 <input
+                  id="field-name"
                   type="text"
                   value={formData.name}
                   onChange={(e) =>
@@ -1791,20 +1832,22 @@ export function ResourceLinks() {
               </div>
               <div style={{ marginBottom: "16px" }}>
                 <label
+                  htmlFor="field-url"
                   style={{
                     display: "block",
                     fontSize: "0.85rem",
                     color: "var(--color-text-secondary)",
                     marginBottom: "6px",
+                    cursor: "pointer",
                   }}
                 >
                   URL *
                 </label>
                 <div style={{ display: "flex", gap: "8px" }}>
                   <input
+                    id="field-url"
                     type="url"
                     value={formData.url}
-                    onBlur={() => !formData.name && fetchMeta(formData.url)}
                     onChange={(e) =>
                       setFormData((f) => ({ ...f, url: e.target.value }))
                     }
@@ -1860,16 +1903,19 @@ export function ResourceLinks() {
               </div>
               <div style={{ marginBottom: "16px" }}>
                 <label
+                  htmlFor="field-desc"
                   style={{
                     display: "block",
                     fontSize: "0.85rem",
                     color: "var(--color-text-secondary)",
                     marginBottom: "6px",
+                    cursor: "pointer",
                   }}
                 >
                   描述（可选）
                 </label>
                 <textarea
+                  id="field-desc"
                   value={formData.description}
                   onChange={(e) =>
                     setFormData((f) => ({ ...f, description: e.target.value }))
@@ -1891,30 +1937,26 @@ export function ResourceLinks() {
               </div>
               <div style={{ marginBottom: "24px" }}>
                 <label
+                  htmlFor="field-category"
                   style={{
                     display: "block",
                     fontSize: "0.85rem",
                     color: "var(--color-text-secondary)",
                     marginBottom: "6px",
+                    cursor: "pointer",
                   }}
                 >
                   分类
                 </label>
                 <select
-                  value={
-                    categories.includes(formData.category)
-                      ? formData.category
-                      : "new"
-                  }
+                  id="field-category"
+                  value={formData.category}
                   onChange={(e) => {
                     const val = e.target.value;
                     if (val === "new") {
                       const newCat = prompt("请输入新分类名称");
-                      if (newCat) {
-                        setCategories((prev) =>
-                          Array.from(new Set([...prev, newCat])),
-                        );
-                        setFormData((f) => ({ ...f, category: newCat }));
+                      if (newCat && newCat.trim() !== "") {
+                        setFormData((f) => ({ ...f, category: newCat.trim() }));
                       }
                     } else {
                       setFormData((f) => ({
@@ -1939,6 +1981,9 @@ export function ResourceLinks() {
                       {CATEGORY_LABELS[cat] || cat}
                     </option>
                   ))}
+                  {!categories.includes(formData.category) && formData.category !== "other" && formData.category && (
+                    <option value={formData.category}>{formData.category}</option>
+                  )}
                   <option value="new">+ 新增分类...</option>
                 </select>
               </div>

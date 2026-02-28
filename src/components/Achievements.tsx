@@ -4,6 +4,7 @@ import { achievements } from '@/data/personal'
 import { ClipCard } from './ClipCard'
 import { motion } from 'framer-motion'
 import { useBreakpoint } from '@/utils/useBreakpoint'
+import Image from 'next/image'
 
 const typeLabels: Record<string, string> = {
   award: '奖项',
@@ -84,7 +85,7 @@ export function Achievements({ compact = false }: AchievementsProps) {
               whileHover={{
                 zIndex: 10,
                 scale: 1.05,
-                rotate: rotation + (Math.random() > 0.5 ? 3 : -3),
+                rotate: rotation + (index % 2 === 0 ? 3 : -3),
                 transition: { duration: 0.3 },
               }}
             >
@@ -113,12 +114,12 @@ export function Achievements({ compact = false }: AchievementsProps) {
                     whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <img
+                    <Image
                       src={achievement.image}
                       alt={achievement.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 400px"
                       style={{
-                        width: '100%',
-                        height: '100%',
                         objectFit: 'cover',
                       }}
                     />

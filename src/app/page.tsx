@@ -15,6 +15,7 @@ import { Projects } from '@/components/Projects'
 import { AiSkills } from '@/components/AiSkills'
 import { VibeCoding } from '@/components/VibeCoding'
 import { ResourceLinks } from '@/components/ResourceLinks'
+import { AllProjects } from '@/components/AllProjects'
 import { motion } from 'framer-motion'
 import { useBreakpoint } from '@/utils/useBreakpoint'
 
@@ -30,22 +31,30 @@ export default function Home() {
   }
 
   useEffect(() => {
+    let ticking = false
+
     const handleScroll = () => {
-      const sections = document.querySelectorAll('section, [id]')
-      const scrollPosition = window.scrollY + window.innerHeight / 2
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const sections = document.querySelectorAll('section, [id]')
+          const scrollPosition = window.scrollY + window.innerHeight / 2
 
-      sections.forEach((section, index) => {
-        const rect = section.getBoundingClientRect()
-        const sectionTop = rect.top + window.scrollY
-        const sectionBottom = sectionTop + rect.height
+          sections.forEach((section, index) => {
+            const rect = section.getBoundingClientRect()
+            const sectionTop = rect.top + window.scrollY
+            const sectionBottom = sectionTop + rect.height
 
-        if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
-          setCurrentPage(index + 1)
-        }
-      })
+            if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+              setCurrentPage(index + 1)
+            }
+          })
+          ticking = false
+        })
+        ticking = true
+      }
     }
 
-    window.addEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -114,6 +123,8 @@ export default function Home() {
         return <VibeCoding />
       case 'yearlyreview':
         return <YearlyReview />
+      case 'all-projects':
+        return <AllProjects />
       case 'resources':
         return <ResourceLinks />
       case 'travel':

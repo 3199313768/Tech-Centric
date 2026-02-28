@@ -10,6 +10,7 @@ interface NavigationProps {
 
 const tabs = [
   { id: 'home', label: '首页' },
+  { id: 'all-projects', label: '全部项目' },
   { id: 'ai-skills', label: 'AI Skills' },
   { id: 'vibe-coding', label: 'Vibe Coding' },
   { id: 'yearlyreview', label: '年度回顾' },
