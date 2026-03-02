@@ -2,11 +2,16 @@
 
 declare global {
   interface Window {
-    AMap: any
-    initAMap: () => void
+    _AMapSecurityConfig: {
+      securityJsCode: string;
+    };
+    initAMap?: () => void;
+    AMap?: AMapType;
+    loca?: LocaType;
   }
 }
 
+// 模拟的高清地图组件类型，用于服务端渲染时占位
 export type MapLayerType = 'normal' | 'satellite' | 'roadnet' | 'hybrid' | 'terrain'
 
 export interface AMapConfig {
@@ -113,6 +118,38 @@ export function loadAMapScript(apiKey: string): Promise<void> {
   })
 }
 
+// 定义地图组件的类型集
+export interface AMapType {
+  Map: new (container: string | HTMLDivElement, options: Record<string, unknown>) => unknown;
+  Marker: new (options: Record<string, unknown>) => unknown;
+  Polyline: new (options: Record<string, unknown>) => unknown;
+  Pixel: new (x: number, y: number) => unknown;
+  Icon: new (options: Record<string, unknown>) => unknown;
+  Size: new (width: number, height: number) => unknown;
+  LngLat: new (lng: number, lat: number) => unknown;
+  Bounds: new (sw: unknown, ne: unknown) => unknown;
+  InfoWindow: new (options: Record<string, unknown>) => unknown;
+  plugin: (plugins: string[], callback: () => void) => void;
+  [key: string]: unknown;
+}
+
+export interface LocaType {
+  Container: new (options: Record<string, unknown>) => unknown;
+  PointLayer: new (options: Record<string, unknown>) => unknown;
+  LineLayer: new (options: Record<string, unknown>) => unknown;
+  PulseLineLayer: new (options: Record<string, unknown>) => unknown;
+  ScatterLayer: new (options: Record<string, unknown>) => unknown;
+  [key: string]: unknown;
+}
+
+export interface AMapInstance {
+  add: (layer: unknown) => void;
+  remove: (layer: unknown) => void;
+  getLayers: () => unknown[];
+  setBounds: (bounds: unknown, immediately: boolean, padding: number[]) => void;
+  [key: string]: unknown;
+}
+
 /**
  * 初始化地图实例
  */
@@ -145,35 +182,39 @@ export function initMap(container: string | HTMLElement, config: AMapConfig = {}
 /**
  * 设置地图图层
  */
-export function setupMapLayers(map: any, layerType: MapLayerType) {
+export function setupMapLayers(map: AMapInstance, layerType: MapLayerType) {
   // 确保只在客户端执行
   if (typeof window === 'undefined' || !map || !window.AMap) return
 
   // 清除现有图层（但保留覆盖物）
   const layers = map.getLayers()
-  layers.forEach((layer: any) => {
-    if (layer instanceof window.AMap.TileLayer) {
+  layers.forEach((layer) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (layer instanceof (window.AMap as any).TileLayer) {
       map.remove(layer)
     }
   })
 
   // 根据类型添加图层
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const AMapTileLayer = (window.AMap as any).TileLayer;
+
   switch (layerType) {
     case 'satellite':
-      map.add(new window.AMap.TileLayer.Satellite())
+      map.add(new AMapTileLayer.Satellite())
       break
     case 'roadnet':
-      map.add(new window.AMap.TileLayer.RoadNet())
+      map.add(new AMapTileLayer.RoadNet())
       break
     case 'hybrid':
       // 先添加卫星图层作为底图
-      map.add(new window.AMap.TileLayer.Satellite())
+      map.add(new AMapTileLayer.Satellite())
       // 再添加路网图层叠加在上方
-      map.add(new window.AMap.TileLayer.RoadNet())
+      map.add(new AMapTileLayer.RoadNet())
       break
     case 'terrain':
       // 添加地形图层
-      map.add(new window.AMap.TileLayer.Terrain())
+      map.add(new AMapTileLayer.Terrain())
       break
     case 'normal':
     default:
@@ -222,11 +263,29 @@ function createMarkerImage(color: string): string {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
 }
 
+// 辅助函数：将我们的旅行数据格式转换为高德地图/Loca需要的格式
+export const formatDataForLoca = (
+  data: Array<{
+    id: string;
+    longitude: number;
+    latitude: number;
+    title?: string;
+    description?: string;
+    imageUrl?: string;
+    [key: string]: unknown;
+  }>
+) => {
+  return data.map((item) => ({
+    ...item,
+    lnglat: [item.longitude, item.latitude],
+  }));
+};
+
 /**
  * 计算适合所有标记点的地图视野
  */
 export function fitBounds(
-  map: any,
+  map: AMapInstance,
   coordinates: Array<{ lat: number; lng: number }>,
   padding: number[] = [50, 50, 50, 50]
 ) {
@@ -235,9 +294,11 @@ export function fitBounds(
     return
   }
 
-  const bounds = new window.AMap.Bounds()
-  coordinates.forEach((coord) => {
-    bounds.extend([coord.lng, coord.lat])
+  const bounds = new window.AMap.Bounds(undefined, undefined)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  coordinates.forEach((coord: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (bounds as any).extend([coord.lng, coord.lat])
   })
 
   map.setBounds(bounds, false, padding)

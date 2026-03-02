@@ -34,6 +34,10 @@ export function QuickRecordModal() {
 
   // Auto focus and logic resets when opened
   useEffect(() => {
+    // Listen for custom event from other components (like mobile FAB)
+    const handleOpenModal = () => setIsOpen(true)
+    window.addEventListener('open-quick-record', handleOpenModal)
+
     if (isOpen) {
       setTimeout(() => textareaRef.current?.focus(), 100)
     } else {
@@ -47,6 +51,10 @@ export function QuickRecordModal() {
         setPreviewUrl(null)
         setIsSubmitting(false)
       }, 300)
+    }
+    
+    return () => {
+      window.removeEventListener('open-quick-record', handleOpenModal)
     }
   }, [isOpen])
 
@@ -81,6 +89,13 @@ export function QuickRecordModal() {
 
       // 2. Upload file if necessary
       if ((type === 'image' || type === 'file') && file) {
+        // Validation: Limit file size to 5MB (5 * 1024 * 1024 bytes)
+        const MAX_FILE_SIZE = 5 * 1024 * 1024
+        if (file.size > MAX_FILE_SIZE) {
+          alert('文件体积过大，请上传小于 5MB 的资源')
+          return
+        }
+        
         const fileExt = file.name.split('.').pop()
         const fileName = `${user.id}/${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}/${crypto.randomUUID()}.${fileExt}`
         

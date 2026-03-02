@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { FileText, Code2, Image as ImageIcon, Link as LinkIcon, ExternalLink, Calendar, Copy, Check } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { FileText, Code2, Image as ImageIcon, Link as LinkIcon, ExternalLink, Calendar, Copy, Check, MoreVertical, Trash2, Edit2, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import ReactMarkdown from 'react-markdown'
 import rehypeHighlight from 'rehype-highlight'
@@ -9,14 +10,28 @@ import rehypeHighlight from 'rehype-highlight'
 // minimal css for highlight js integration
 import 'highlight.js/styles/github-dark.css'
 
+interface IRecord {
+  id: string;
+  user_id: string;
+  type: string;
+  content: string;
+  tags?: string[];
+  created_at: string;
+  [key: string]: any;
+}
+
 interface RecordCardProps {
-  record: any // using any for MVP, ideally should be inferred from Supabase database typing
+  record: IRecord 
 }
 
 export function RecordCard({ record }: RecordCardProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [showOptions, setShowOptions] = useState(false)
+  
   const supabase = createClient()
+  const router = useRouter()
 
   // For image/file types we stored the path in 'content'. Let's fetch the signed URL.
   useEffect(() => {
@@ -24,7 +39,7 @@ export function RecordCard({ record }: RecordCardProps) {
       if (record.type === 'image' || record.type === 'file') {
         const { data, error } = await supabase.storage
           .from('kb_assets')
-          .createSignedUrl(record.content, 60 * 60) // valid for 1 hour
+          .createSignedUrl(record.content, 60 * 60 * 24 * 7) // valid for 7 days
         
         if (!error && data) {
           setImageUrl(data.signedUrl)
@@ -53,8 +68,33 @@ export function RecordCard({ record }: RecordCardProps) {
     file: LinkIcon
   }[record.type as string] || FileText
 
+  const handleDelete = async () => {
+    if (confirm('确定要删除这条记录吗？这不可撤销。')) {
+      setIsDeleting(true)
+      try {
+        const { error } = await supabase.from('kb_records').delete().eq('id', record.id)
+        if (error) throw error
+        router.refresh()
+      } catch (e) {
+        console.error("Failed to delete record: ", e)
+        alert('删除失败，请重试')
+      } finally {
+        setIsDeleting(false)
+      }
+    }
+  }
+
+  const handleEdit = () => {
+    // We dispatch a custom event because QuickRecordModal is global
+    // To implement a minimal MVP edit behavior we just populate the global modal although it usually creates.
+    // For a real app, you would pass an `editId` in the event payload to let the modal switch to UPDATE mode.
+    // E.g. window.dispatchEvent(new CustomEvent('open-quick-record', { detail: { mode: 'edit', record } }))
+    alert('编辑功能待弹窗组件改造后支持 (WIP)')
+    setShowOptions(false)
+  }
+
   return (
-    <div className="group break-inside-avoid relative flex flex-col gap-3 p-5 bg-zinc-900 border border-zinc-800 rounded-2xl hover:border-zinc-700 transition-colors shadow-sm overflow-hidden">
+    <div className={`group break-inside-avoid relative flex flex-col gap-3 p-5 bg-zinc-900 border border-zinc-800 rounded-2xl hover:border-zinc-700 transition-colors shadow-sm overflow-visible ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}>
       
       {/* Header Info */}
       <div className="flex items-center justify-between opacity-60 text-xs text-zinc-400 font-mono tracking-wider uppercase">
@@ -62,9 +102,46 @@ export function RecordCard({ record }: RecordCardProps) {
           <TypeIcon className="w-3.5 h-3.5" />
           <span>{record.type}</span>
         </div>
-        <div className="flex items-center gap-1">
-          <Calendar className="w-3 h-3" />
-          <span>{new Date(record.created_at).toLocaleDateString()}</span>
+        
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <Calendar className="w-3 h-3" />
+            <span>{new Date(record.created_at).toLocaleDateString()}</span>
+          </div>
+          
+          <div className="relative">
+            <button 
+              onClick={() => setShowOptions(!showOptions)}
+              className="p-1 hover:bg-zinc-800 rounded-md transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+            >
+              <MoreVertical className="w-3.5 h-3.5" />
+            </button>
+            
+            {showOptions && (
+              <>
+                <div 
+                  className="fixed inset-0 z-10" 
+                  onClick={() => setShowOptions(false)}
+                />
+                <div className="absolute right-0 top-full mt-1 w-32 bg-zinc-800 border border-zinc-700 rounded-lg shadow-xl overflow-hidden z-20 py-1">
+                  <button
+                    onClick={handleEdit}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-700/50 hover:text-white transition-colors"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    编辑
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
+                  >
+                    {isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                    删除
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 

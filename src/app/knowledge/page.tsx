@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { SearchBar } from '@/components/knowledge/SearchBar'
-import { RecordCard } from '@/components/knowledge/RecordCard'
 import { LoginForm } from '@/components/knowledge/LoginForm'
+import { RecordList } from '@/components/knowledge/RecordList'
+import { MobileFab } from '@/components/knowledge/MobileFab'
+import Link from 'next/link'
 
 export const metadata = {
   title: 'Knowledge Base',
@@ -71,10 +73,10 @@ export default async function KnowledgePage({ searchParams }: PageProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header Section */}
         <div className="mb-12 space-y-4">
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-100">
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-100 flex items-center justify-between">
             碎片知识库
           </h1>
-          <p className="text-zinc-400 font-mono text-sm">
+          <p className="text-zinc-400 font-mono text-sm hidden sm:block">
             Press <kbd className="px-1.5 py-0.5 border border-zinc-700 rounded-md bg-zinc-800 text-xs">Cmd</kbd> + <kbd className="px-1.5 py-0.5 border border-zinc-700 rounded-md bg-zinc-800 text-xs">K</kbd> anywhere to start drafting.
           </p>
         </div>
@@ -91,17 +93,13 @@ export default async function KnowledgePage({ searchParams }: PageProps) {
                 <div className="text-red-400 p-4 border border-red-900/30 bg-red-950/20 rounded-xl">
                   Error loading records: {error.message}
                 </div>
-              ) : records?.length === 0 ? (
-                <div className="py-24 text-center text-zinc-500 flex flex-col items-center justify-center border border-dashed border-zinc-800 rounded-2xl">
-                  <span className="text-4xl mb-4">📭</span>
-                  <p>没有找到相关记录</p>
-                </div>
               ) : (
-                <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
-                  {records?.map((record: any) => (
-                    <RecordCard key={record.id} record={record} />
-                  ))}
-                </div>
+                <RecordList 
+                  initialRecords={records || []} 
+                  initialQuery={query}
+                  initialTags={tagsFilter}
+                  initialType={typeFilter}
+                />
              )}
           </main>
 
@@ -112,12 +110,23 @@ export default async function KnowledgePage({ searchParams }: PageProps) {
                <div className="flex flex-wrap gap-2">
                  {uniqueTags.length > 0 ? (uniqueTags as string[]).map(tag => {
                     const isActive = tagsFilter.includes(tag)
-                    // We generate a URL adding/removing the tag from current selection
-                    // Here we simply use a client-directed approach in the Tag logic or a standard link
-                    // MVP: just passing to standard search bar logic (TagCloud component)
+                    
+                    // Generate new URL with the tag toggled
+                    const newTags = isActive 
+                      ? tagsFilter.filter(t => t !== tag) 
+                      : [...tagsFilter, tag]
+                    
+                    const searchParams = new URLSearchParams()
+                    if (query) searchParams.set('q', query)
+                    if (typeFilter) searchParams.set('type', typeFilter)
+                    if (newTags.length > 0) searchParams.set('tags', newTags.join(','))
+                    
+                    const href = `/knowledge${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
+
                     return (
-                        <span 
+                        <Link 
                            key={tag}
+                           href={href}
                            className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium cursor-pointer transition-colors border ${
                              isActive 
                                ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' 
@@ -125,7 +134,7 @@ export default async function KnowledgePage({ searchParams }: PageProps) {
                            }`}
                         >
                           #{tag}
-                        </span>
+                        </Link>
                     )
                  }) : (
                    <span className="text-zinc-600 text-sm">暂无标签记录</span>
@@ -135,6 +144,7 @@ export default async function KnowledgePage({ searchParams }: PageProps) {
           </aside>
         </div>
       </div>
+      <MobileFab />
     </div>
   )
 }
