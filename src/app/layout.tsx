@@ -3,7 +3,7 @@ import { Geist, JetBrains_Mono, Space_Mono, Press_Start_2P } from "next/font/goo
 import "./globals.css";
 import { personalInfo } from "@/data/personal";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { QuickRecordModal } from "@/components/knowledge/QuickRecordModal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -50,6 +50,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <QuickRecordModal />
         </ThemeProvider>
       </body>
     </html>

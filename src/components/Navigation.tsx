@@ -2,6 +2,8 @@
 
 import { ThemeToggle } from './ThemeToggle'
 import { useBreakpoint } from '@/utils/useBreakpoint'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 interface NavigationProps {
   activeTab: string
@@ -21,6 +23,8 @@ const tabs = [
 
 export function Navigation({ activeTab, onTabChange }: NavigationProps) {
   const { isMobile } = useBreakpoint()
+  const pathname = usePathname()
+  const isKnowledgePage = pathname === '/knowledge'
 
   return (
     <nav
@@ -84,6 +88,28 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
             {tab.label}
           </button>
         ))}
+        {/* Knowledge Base Link */}
+        <Link 
+           href="/knowledge"
+           style={{
+             padding: isMobile ? '6px 10px' : '8px 16px',
+             fontSize: isMobile ? '11px' : '13px',
+             fontFamily: 'var(--font-space-mono), monospace',
+             fontWeight: isKnowledgePage ? 'bold' : 'normal',
+             color: isKnowledgePage ? 'var(--color-cyan)' : 'var(--color-nav-text)',
+             backgroundColor: isKnowledgePage ? 'var(--color-cyan-10)' : 'transparent',
+             border: `1px solid ${isKnowledgePage ? 'var(--color-cyan-50)' : 'var(--color-cyan-30)'}`,
+             borderRadius: '4px',
+             cursor: 'pointer',
+             textTransform: 'uppercase',
+             letterSpacing: isMobile ? '0.5px' : '1px',
+             transition: 'all 0.2s ease',
+             textDecoration: 'none',
+             boxShadow: isKnowledgePage ? '0 0 10px var(--color-cyan-glow)' : 'none',
+           }}
+        >
+          知识库
+        </Link>
         {/* 主题切换按钮 */}
         <div style={{ marginLeft: isMobile ? '8px' : '16px' }}>
           <ThemeToggle />
