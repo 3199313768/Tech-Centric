@@ -83,7 +83,7 @@ export default async function KnowledgePage({ searchParams }: PageProps) {
 
         {/* Toolbar Section */}
         <div className="mb-10">
-          <SearchBar initialQuery={query} initialTags={tagsFilter} initialType={typeFilter} />
+          <SearchBar initialQuery={query} initialType={typeFilter} />
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
