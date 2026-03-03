@@ -1,26 +1,59 @@
 'use client'
 
-import { useState } from 'react'
-import { projects, Project, ProjectType } from '@/data/projects'
+import { useState, useEffect } from 'react'
+import { Project, ProjectType } from '@/data/projects'
 import { ProjectReader } from './ProjectReader'
 import { ClipCard } from './ClipCard'
 import { motion } from 'framer-motion'
 import { useBreakpoint } from '@/utils/useBreakpoint'
+import { createClient } from '@/lib/supabase/client'
+import { AddProjectModal } from './AddProjectModal'
 
 interface ProjectsProps {
   compact?: boolean
 }
 
 export function Projects({ compact = false }: ProjectsProps) {
+  const [projectsList, setProjectsList] = useState<Project[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [selectedType, setSelectedType] = useState<ProjectType | 'all'>('all')
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'completed' | 'in-progress' | 'archived'>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [isReaderOpen, setIsReaderOpen] = useState(false)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const { isMobile, isTablet } = useBreakpoint()
   const px = isMobile ? '20px' : isTablet ? '24px' : '40px'
 
-  const projectTypes = ['all', ...Array.from(new Set(projects.map(p => p.type)))]
+  const fetchProjects = async () => {
+    setIsLoading(true)
+    const supabase = createClient()
+    const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false })
+    if (!error && data) {
+      setProjectsList(data.map(p => ({
+        id: p.id,
+        title: p.title,
+        type: p.type as ProjectType,
+        description: p.description,
+        detailedDescription: p.detailed_description,
+        image: p.image,
+        demoUrl: p.demo_url,
+        githubUrl: p.github_url,
+        technologies: p.technologies,
+        highlights: p.highlights,
+        status: p.status,
+        startDate: p.start_date,
+        endDate: p.end_date
+      })))
+    }
+    setIsLoading(false)
+  }
+
+  useEffect(() => {
+    fetchProjects()
+  }, [])
+
+  const projectTypes = ['all', ...Array.from(new Set(projectsList.map(p => p.type)))]
   const statusOptions: Array<'all' | 'completed' | 'in-progress' | 'archived'> = ['all', 'completed', 'in-progress', 'archived']
 
   const SearchHighlight = ({ text, query }: { text: string; query: string }) => {
@@ -39,7 +72,7 @@ export function Projects({ compact = false }: ProjectsProps) {
     )
   }
 
-  const filteredProjects = projects.filter((project) => {
+  const filteredProjects = projectsList.filter((project) => {
     const typeMatch = selectedType === 'all' || project.type === selectedType
     const statusMatch = selectedStatus === 'all' || project.status === selectedStatus
     const searchMatch = !searchQuery.trim() || 
@@ -57,6 +90,20 @@ export function Projects({ compact = false }: ProjectsProps) {
   const handleCloseReader = () => {
     setIsReaderOpen(false)
     setSelectedProject(null)
+  }
+
+  if (isLoading) {
+    return (
+      <div style={{ padding: compact ? `80px ${px} 80px` : `120px ${px} 80px`, maxWidth: '1400px', margin: '0 auto', color: 'var(--color-text-primary)' }}>
+        <h2 className="magazine-headline" style={{ fontSize: 'clamp(40px, 6vw, 64px)', fontWeight: 'bold', marginBottom: '48px', fontFamily: 'var(--font-space-mono), monospace', textTransform: 'uppercase', letterSpacing: '4px', color: 'var(--color-headline)' }}>
+          项目作品集
+        </h2>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
+          <div style={{ width: '40px', height: '40px', border: '3px solid var(--color-cyan-30)', borderTopColor: 'var(--color-cyan)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+          <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -90,127 +137,168 @@ export function Projects({ compact = false }: ProjectsProps) {
         项目作品集
       </motion.h2>
 
-      {/* 筛选器 */}
+      {/* 筛选器模块与操作按钮 */}
       <motion.div
         style={{
           marginBottom: '48px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          flexWrap: 'wrap',
+          gap: '24px',
         }}
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        {/* 综合搜索 */}
-        <div style={{ marginBottom: '24px' }}>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="搜索项目名称、描述或技术栈..."
+        <div style={{ flex: 1, minWidth: '300px' }}>
+          {/* 综合搜索 */}
+          <div style={{ marginBottom: '24px' }}>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="搜索项目名称、描述或技术栈..."
+              style={{
+                width: '100%',
+                maxWidth: '400px',
+                padding: '12px 16px',
+                fontSize: '14px',
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid var(--color-btn-inactive-border)',
+                borderRadius: '8px',
+                color: 'var(--color-text-primary)',
+                outline: 'none',
+                transition: 'border-color 0.3s ease',
+              }}
+              onFocus={(e) => e.currentTarget.style.borderColor = 'var(--color-cyan-50)'}
+              onBlur={(e) => e.currentTarget.style.borderColor = 'var(--color-btn-inactive-border)'}
+            />
+          </div>
+
+          {/* 类型筛选 */}
+          <div
             style={{
-              width: '100%',
-              maxWidth: '400px',
-              padding: '12px 16px',
-              fontSize: '14px',
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid var(--color-btn-inactive-border)',
+              display: 'flex',
+              gap: '12px',
+              marginBottom: '16px',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '14px',
+                color: 'var(--color-text-muted)',
+                fontFamily: 'var(--font-space-mono), monospace',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+              }}
+            >
+              类型：
+            </span>
+            {projectTypes.map((type) => (
+              <button
+                key={type}
+                onClick={() => setSelectedType(type as ProjectType | 'all')}
+                style={{
+                  padding: '8px 16px',
+                  fontSize: '13px',
+                  fontFamily: 'var(--font-space-mono), monospace',
+                  fontWeight: selectedType === type ? 'bold' : 'normal',
+                  color: selectedType === type ? 'var(--color-cyan)' : 'var(--color-btn-inactive-text)',
+                  backgroundColor: selectedType === type ? 'var(--color-cyan-10)' : 'transparent',
+                  border: `1px solid ${selectedType === type ? 'var(--color-cyan-50)' : 'var(--color-btn-inactive-border)'}`,
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {type === 'all' ? '全部' : type}
+              </button>
+            ))}
+          </div>
+
+          {/* 状态筛选 */}
+          <div
+            style={{
+              display: 'flex',
+              gap: '12px',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '14px',
+                color: 'var(--color-text-muted)',
+                fontFamily: 'var(--font-space-mono), monospace',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+              }}
+            >
+              状态：
+            </span>
+            {statusOptions.map((status) => (
+              <button
+                key={status}
+                onClick={() => setSelectedStatus(status)}
+                style={{
+                  padding: '8px 16px',
+                  fontSize: '13px',
+                  fontFamily: 'var(--font-space-mono), monospace',
+                  fontWeight: selectedStatus === status ? 'bold' : 'normal',
+                  color: selectedStatus === status ? 'var(--color-cyan)' : 'var(--color-btn-inactive-text)',
+                  backgroundColor: selectedStatus === status ? 'var(--color-cyan-10)' : 'transparent',
+                  border: `1px solid ${selectedStatus === status ? 'var(--color-cyan-50)' : 'var(--color-btn-inactive-border)'}`,
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {status === 'all' ? '全部' : status === 'completed' ? '已完成' : status === 'in-progress' ? '进行中' : '已归档'}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        {/* 新增操作 */}
+        <div>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            style={{
+              padding: '12px 24px',
+              backgroundColor: 'var(--color-cyan)',
+              color: 'var(--color-bg)',
+              border: 'none',
               borderRadius: '8px',
-              color: 'var(--color-text-primary)',
-              outline: 'none',
-              transition: 'border-color 0.3s ease',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              boxShadow: '0 4px 14px 0 var(--color-cyan-glow)',
+              transition: 'all 0.2s ease',
             }}
-            onFocus={(e) => e.currentTarget.style.borderColor = 'var(--color-cyan-50)'}
-            onBlur={(e) => e.currentTarget.style.borderColor = 'var(--color-btn-inactive-border)'}
-          />
-        </div>
-
-        {/* 类型筛选 */}
-        <div
-          style={{
-            display: 'flex',
-            gap: '12px',
-            marginBottom: '16px',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-          }}
-        >
-          <span
-            style={{
-              fontSize: '14px',
-              color: 'var(--color-text-muted)',
-              fontFamily: 'var(--font-space-mono), monospace',
-              textTransform: 'uppercase',
-              letterSpacing: '1px',
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)'
+              e.currentTarget.style.boxShadow = '0 6px 20px 0 var(--color-cyan-glow)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.boxShadow = '0 4px 14px 0 var(--color-cyan-glow)'
             }}
           >
-            类型：
-          </span>
-          {projectTypes.map((type) => (
-            <button
-              key={type}
-              onClick={() => setSelectedType(type as ProjectType | 'all')}
-              style={{
-                padding: '8px 16px',
-                fontSize: '13px',
-                fontFamily: 'var(--font-space-mono), monospace',
-                fontWeight: selectedType === type ? 'bold' : 'normal',
-                color: selectedType === type ? 'var(--color-cyan)' : 'var(--color-btn-inactive-text)',
-                backgroundColor: selectedType === type ? 'var(--color-cyan-10)' : 'transparent',
-                border: `1px solid ${selectedType === type ? 'var(--color-cyan-50)' : 'var(--color-btn-inactive-border)'}`,
-                borderRadius: '4px',
-                cursor: 'pointer',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              {type === 'all' ? '全部' : type}
-            </button>
-          ))}
-        </div>
-
-        {/* 状态筛选 */}
-        <div
-          style={{
-            display: 'flex',
-            gap: '12px',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-          }}
-        >
-          <span
-            style={{
-              fontSize: '14px',
-              color: 'var(--color-text-muted)',
-              fontFamily: 'var(--font-space-mono), monospace',
-              textTransform: 'uppercase',
-              letterSpacing: '1px',
-            }}
-          >
-            状态：
-          </span>
-          {statusOptions.map((status) => (
-            <button
-              key={status}
-              onClick={() => setSelectedStatus(status)}
-              style={{
-                padding: '8px 16px',
-                fontSize: '13px',
-                fontFamily: 'var(--font-space-mono), monospace',
-                fontWeight: selectedStatus === status ? 'bold' : 'normal',
-                color: selectedStatus === status ? 'var(--color-cyan)' : 'var(--color-btn-inactive-text)',
-                backgroundColor: selectedStatus === status ? 'var(--color-cyan-10)' : 'transparent',
-                border: `1px solid ${selectedStatus === status ? 'var(--color-cyan-50)' : 'var(--color-btn-inactive-border)'}`,
-                borderRadius: '4px',
-                cursor: 'pointer',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              {status === 'all' ? '全部' : status === 'completed' ? '已完成' : status === 'in-progress' ? '进行中' : '已归档'}
-            </button>
-          ))}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            新增项目
+          </button>
         </div>
       </motion.div>
 
@@ -389,6 +477,13 @@ export function Projects({ compact = false }: ProjectsProps) {
         project={selectedProject}
         isOpen={isReaderOpen}
         onClose={handleCloseReader}
+      />
+
+      {/* 新增项目弹窗 */}
+      <AddProjectModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={fetchProjects}
       />
     </div>
   )

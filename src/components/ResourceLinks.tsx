@@ -2,12 +2,9 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect, useCallback } from "react";
-import {
-  getInitialResources,
-  type ResourceItem,
-} from "@/data/initialResources";
+import { type ResourceItem } from "@/data/initialResources";
+import { createClient } from "@/lib/supabase/client";
 
-const STORAGE_KEY = "tech-centric-resources";
 const CANDIDATE_KEY = "tech-centric-candidates";
 
 export type { ResourceItem };
@@ -28,50 +25,6 @@ const CATEGORY_ICONS: Record<string, string> = {
   other: "🔗",
 };
 
-function loadFromStorage(): ResourceItem[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const initial = getInitialResources();
-    if (!raw) {
-      saveToStorage(initial);
-      return initial;
-    }
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      saveToStorage(initial);
-      return initial;
-    }
-    
-    // 补全缺失的关键字段，防止旧数据导致排序或渲染崩溃
-    let items = parsed.map((item) => ({
-      ...item,
-      createdAt: item.createdAt || Date.now(),
-      clickCount: item.clickCount || 0,
-      category: item.category || "other",
-    }));
-
-    // 合并代码中新增的默认资源（如果 localStorage 中还没有）
-    const existingUrls = new Set(items.map(item => item.url));
-    const newInitials = initial.filter(item => !existingUrls.has(item.url));
-    
-    if (newInitials.length > 0) {
-      items = [...items, ...newInitials];
-      saveToStorage(items);
-    }
-
-    return items;
-  } catch {
-    const initial = getInitialResources();
-    saveToStorage(initial);
-    return initial;
-  }
-}
-
-function saveToStorage(items: ResourceItem[]) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-}
 
 function loadCandidates(): ResourceItem[] {
   if (typeof window === "undefined") return [];
@@ -370,19 +323,37 @@ export function ResourceLinks() {
     onConfirm: () => {},
   });
 
-  useEffect(() => {
-    const data = loadFromStorage();
-    // Extract unique categories
-    const cats = Array.from(
-      new Set([
-        ...["learning", "ai", "tools", "design", "other"],
-        ...data.map((i) => i.category),
-      ]),
-    );
-    setCategories(cats);
-    setItems(data);
-    setCandidateItems(loadCandidates());
+  const fetchResources = useCallback(async () => {
+    const supabase = createClient();
+    const { data, error } = await supabase.from('resources').select('*');
+    if (data && !error) {
+      const itemsData = data.map(d => ({
+        id: d.id,
+        name: d.name,
+        url: d.url,
+        description: d.description || undefined,
+        category: d.category,
+        tags: d.tags || undefined,
+        createdAt: Number(d.created_at),
+        isPinned: d.is_pinned,
+        clickCount: d.click_count
+      }));
+      setItems(itemsData);
+      
+      const cats = Array.from(
+        new Set([
+          ...["learning", "ai", "tools", "design", "other"],
+          ...itemsData.map((i) => i.category),
+        ]),
+      );
+      setCategories(cats);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchResources();
+    setCandidateItems(loadCandidates());
+  }, [fetchResources]);
 
   // AI 发现结果弹窗
   const discoveryModalContent = showDiscoveryModal ? (
@@ -615,19 +586,6 @@ export function ResourceLinks() {
     setFilter("all");
   };
 
-  const persist = useCallback((next: ResourceItem[]) => {
-    setItems(next);
-    saveToStorage(next);
-    // Update categories list just in case
-    const cats = Array.from(
-      new Set([
-        ...["learning", "ai", "tools", "design", "other"],
-        ...next.map((i) => i.category),
-      ]),
-    );
-    setCategories(cats);
-  }, []);
-
   const handleExplore = async () => {
     setIsExploring(true);
     setDiscoveredItems([]);
@@ -662,13 +620,27 @@ export function ResourceLinks() {
     }
   };
 
-  const addToLibrary = (item: ResourceItem) => {
+  const addToLibrary = async (item: ResourceItem) => {
     if (items.find((i) => i.url === item.url)) {
       alert("资源已存在于库中");
       return;
     }
-    const next = [...items, { ...item, createdAt: Date.now() }];
-    persist(next);
+    const newItem = { ...item, createdAt: Date.now(), isPinned: false, clickCount: 0 };
+    setItems((prev) => [...prev, newItem]);
+    
+    const supabase = createClient();
+    await supabase.from('resources').insert([{
+      id: newItem.id,
+      name: newItem.name,
+      url: newItem.url,
+      description: newItem.description || null,
+      category: newItem.category,
+      tags: newItem.tags || null,
+      created_at: Number(newItem.createdAt),
+      is_pinned: newItem.isPinned,
+      click_count: newItem.clickCount
+    }]);
+
     setDiscoveredItems((prev) => prev.filter((i) => i.id !== item.id));
 
     // 如果是从候选池移过来的，也同步候选池
@@ -727,19 +699,27 @@ export function ResourceLinks() {
     }
   };
 
-  const togglePin = (e: React.MouseEvent, id: string) => {
+  const togglePin = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    persist(
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+    setItems(
       items.map((i) => (i.id === id ? { ...i, isPinned: !i.isPinned } : i)),
     );
+    const supabase = createClient();
+    await supabase.from('resources').update({ is_pinned: !item.isPinned }).eq('id', id);
   };
 
-  const incrementClick = (id: string) => {
-    persist(
-      items.map((i) =>
+  const incrementClick = async (id: string) => {
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+    setItems((prevItems) => 
+      prevItems.map((i) =>
         i.id === id ? { ...i, clickCount: (i.clickCount || 0) + 1 } : i,
-      ),
+      )
     );
+    const supabase = createClient();
+    await supabase.from('resources').update({ click_count: (item.clickCount || 0) + 1 }).eq('id', id);
   };
 
   const filteredItems = items
@@ -794,17 +774,18 @@ export function ResourceLinks() {
     setFormData(emptyForm);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const name = formData.name.trim();
     const url = formData.url.trim();
     if (!name || !url) return;
 
     const normalizedUrl = url.startsWith("http") ? url : `https://${url}`;
-
     const tags = formData.tags.filter((t) => t.trim()).map((t) => t.trim());
+    const supabase = createClient();
+
     if (editingId) {
-      persist(
+      setItems(
         items.map((i) =>
           i.id === editingId
             ? {
@@ -818,26 +799,50 @@ export function ResourceLinks() {
             : i,
         ),
       );
+      
+      await supabase.from('resources').update({
+        name,
+        url: normalizedUrl,
+        description: formData.description.trim() || null,
+        category: formData.category,
+        tags: tags.length > 0 ? tags : null,
+      }).eq('id', editingId);
+      
     } else {
-      persist([
-        ...items,
-        {
-          id: generateId(),
+      const newId = generateId();
+      const newObj = {
+          id: newId,
           name,
           url: normalizedUrl,
           description: formData.description.trim() || undefined,
           category: formData.category,
           tags: tags.length > 0 ? tags : undefined,
           createdAt: Date.now(),
-        },
-      ]);
+          isPinned: false,
+          clickCount: 0
+      };
+      setItems([ ...items, newObj ]);
+      
+      await supabase.from('resources').insert([{
+        id: newObj.id,
+        name: newObj.name,
+        url: newObj.url,
+        description: newObj.description || null,
+        category: newObj.category,
+        tags: newObj.tags || null,
+        created_at: newObj.createdAt,
+        is_pinned: newObj.isPinned,
+        click_count: newObj.clickCount
+      }]);
     }
     closeForm();
   };
 
-  const handleDelete = (id: string) => {
-    persist(items.filter((i) => i.id !== id));
+  const handleDelete = async (id: string) => {
+    setItems((prev) => prev.filter((i) => i.id !== id));
     setDeleteConfirmId(null);
+    const supabase = createClient();
+    await supabase.from('resources').delete().eq('id', id);
   };
 
   const handleBatchDelete = () => {
@@ -845,10 +850,14 @@ export function ResourceLinks() {
       isOpen: true,
       title: "批量删除确认",
       message: `确定要删除选中的 ${selectedIds.size} 项资源吗？此操作不可撤销。`,
-      onConfirm: () => {
-        persist(items.filter((i) => !selectedIds.has(i.id)));
+      onConfirm: async () => {
+        const idsToDelete = Array.from(selectedIds);
+        setItems((prev) => prev.filter((i) => !selectedIds.has(i.id)));
         setSelectedIds(new Set());
         setConfirmConfig((prev) => ({ ...prev, isOpen: false }));
+        
+        const supabase = createClient();
+        await supabase.from('resources').delete().in('id', idsToDelete);
       },
     });
   };
@@ -871,7 +880,7 @@ export function ResourceLinks() {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const text = event.target?.result as string;
         const imported = JSON.parse(text) as Partial<ResourceItem>[];
@@ -909,7 +918,21 @@ export function ResourceLinks() {
           }
         });
 
-        persist(tempNext);
+        setItems(tempNext);
+        const supabase = createClient();
+        const upsertData = tempNext.map(item => ({
+            id: item.id,
+            name: item.name,
+            url: item.url,
+            description: item.description || null,
+            category: item.category,
+            tags: item.tags || null,
+            created_at: item.createdAt,
+            is_pinned: item.isPinned || false,
+            click_count: item.clickCount || 0
+        }));
+        await supabase.from('resources').upsert(upsertData, { onConflict: 'id' });
+
         alert(
           `导入完成！\n✅ 新增: ${addedCount} 条\n🔄 更新: ${updatedCount} 条\n❌ 无效跳过: ${invalidCount} 条`,
         );

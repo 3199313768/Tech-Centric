@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
-import { allProjects, type AllProjectItem, type ProjectCategory } from '@/data/allProjects'
+import { type AllProjectItem, type ProjectCategory } from '@/data/allProjects'
 import { useBreakpoint } from '@/utils/useBreakpoint'
+import { createClient } from '@/lib/supabase/client'
+import { AddAllProjectModal } from './AddAllProjectModal'
 
 // ==========================================
 // 详情弹窗 Modal 组件
@@ -12,15 +14,38 @@ import { useBreakpoint } from '@/utils/useBreakpoint'
 function ProjectModal({
   project,
   isOpen,
-  onClose
+  onClose,
+  onDeleteSuccess
 }: {
   project: AllProjectItem | null
   isOpen: boolean
   onClose: () => void
+  onDeleteSuccess?: () => void
 }) {
   const { isMobile } = useBreakpoint()
+  const [isDeleting, setIsDeleting] = useState(false)
 
   if (!isOpen || !project) return null
+
+  const handleDelete = async () => {
+    if (!window.confirm(`确定要删除项目 "${project.name}" 吗？此操作不可逆。`)) {
+      return
+    }
+    setIsDeleting(true)
+    const supabase = createClient()
+    const { error } = await supabase.from('all_projects').delete().eq('id', project.id)
+    setIsDeleting(false)
+
+    if (error) {
+      console.error('Delete error:', error)
+      alert('删除失败：' + error.message)
+    } else {
+      onClose()
+      if (onDeleteSuccess) {
+        onDeleteSuccess()
+      }
+    }
+  }
 
   return (
     <div
@@ -121,36 +146,59 @@ function ProjectModal({
               </div>
             </div>
 
-            {project.isPublic ? (
-              <a
-                href={project.url}
-                target="_blank"
-                rel="noreferrer"
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
                 style={{
-                  padding: '10px 20px',
-                  backgroundColor: 'var(--color-cyan)',
-                  color: 'var(--color-bg)',
+                  padding: '10px 16px',
+                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                  color: '#ef4444',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
                   borderRadius: '8px',
-                  textDecoration: 'none',
-                  fontWeight: 'bold',
                   fontSize: '14px',
-                  boxShadow: '0 4px 14px 0 var(--color-cyan-glow)',
+                  cursor: isDeleting ? 'not-allowed' : 'pointer',
+                  opacity: isDeleting ? 0.6 : 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.2s',
                 }}
               >
-                访问项目 ↗
-              </a>
-            ) : (
-              <div style={{
-                padding: '10px 20px',
-                backgroundColor: 'rgba(255,255,255,0.05)',
-                color: 'var(--color-text-muted)',
-                borderRadius: '8px',
-                fontSize: '14px',
-                border: '1px solid rgba(255,255,255,0.1)'
-              }}>
-                需内网环境访问
-              </div>
-            )}
+                {isDeleting ? '删除中...' : '删除项目'}
+              </button>
+
+              {project.isPublic ? (
+                <a
+                  href={project.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    padding: '10px 20px',
+                    backgroundColor: 'var(--color-cyan)',
+                    color: 'var(--color-bg)',
+                    borderRadius: '8px',
+                    textDecoration: 'none',
+                    fontWeight: 'bold',
+                    fontSize: '14px',
+                    boxShadow: '0 4px 14px 0 var(--color-cyan-glow)',
+                  }}
+                >
+                  访问项目 ↗
+                </a>
+              ) : (
+                <div style={{
+                  padding: '10px 20px',
+                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  color: 'var(--color-text-muted)',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  border: '1px solid rgba(255,255,255,0.1)'
+                }}>
+                  需内网环境访问
+                </div>
+              )}
+            </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -365,14 +413,42 @@ export function AllProjects() {
   const { isMobile, isTablet } = useBreakpoint()
   const px = isMobile ? '20px' : isTablet ? '24px' : '40px'
   
+  const [allProjectsList, setAllProjectsList] = useState<AllProjectItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [activeCategory, setActiveCategory] = useState<ProjectCategory | '全部'>('全部')
   const [selectedProject, setSelectedProject] = useState<AllProjectItem | null>(null)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+
+  const fetchAllProjects = useCallback(async () => {
+    setIsLoading(true)
+    const supabase = createClient()
+    const { data, error } = await supabase.from('all_projects').select('*').order('created_at', { ascending: false })
+    if (!error && data) {
+      setAllProjectsList(data.map(p => ({
+        id: p.id,
+        name: p.name,
+        url: p.url,
+        isPublic: p.is_public,
+        category: p.category as ProjectCategory,
+        description: p.description,
+        roleAndContribution: p.role_and_contribution,
+        tags: p.tags,
+        screenshots: p.screenshots
+      })))
+    }
+    setIsLoading(false)
+  }, [])
+
+  useEffect(() => {
+    // eslint-disable-next-line
+    fetchAllProjects()
+  }, [fetchAllProjects])
 
   const categories: Array<ProjectCategory | '全部'> = ['全部', '数字孪生', '后台与管理系统', '门户与展现', '未分类']
 
   const filteredProjects = activeCategory === '全部' 
-    ? allProjects 
-    : allProjects.filter(p => p.category === activeCategory)
+    ? allProjectsList 
+    : allProjectsList.filter(p => p.category === activeCategory)
 
   // 处理溢出滚动锁定
   useEffect(() => {
@@ -383,6 +459,19 @@ export function AllProjects() {
     }
     return () => { document.body.style.overflow = '' }
   }, [selectedProject])
+
+  if (isLoading) {
+    return (
+      <div style={{ padding: `120px ${px} 80px`, maxWidth: '1400px', margin: '0 auto', color: 'var(--color-text-primary)', minHeight: '100vh' }}>
+        <h2 className="magazine-headline" style={{ fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 'bold', marginBottom: '16px', fontFamily: 'var(--font-space-mono), monospace', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--color-headline)' }}>
+          全部项目
+        </h2>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
+          <div style={{ width: '40px', height: '40px', border: '3px solid var(--color-cyan-30)', borderTopColor: 'var(--color-cyan)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div
@@ -420,38 +509,76 @@ export function AllProjects() {
         </p>
       </motion.div>
 
-      {/* 过滤器 Tab */}
+      {/* 过滤器 Tab 与操作区 */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
         style={{
           display: 'flex',
-          gap: '12px',
+          justifyContent: 'space-between',
+          alignItems: 'center',
           flexWrap: 'wrap',
+          gap: '24px',
           marginBottom: '48px',
         }}
       >
-        {categories.map((cat) => (
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', flex: 1, minWidth: '300px' }}>
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              style={{
+                padding: '8px 20px',
+                borderRadius: '20px',
+                border: `1px solid ${activeCategory === cat ? 'var(--color-cyan)' : 'var(--color-ai-tag-border)'}`,
+                background: activeCategory === cat ? 'var(--color-cyan-10)' : 'transparent',
+                color: activeCategory === cat ? 'var(--color-cyan)' : 'var(--color-text-secondary)',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: activeCategory === cat ? 'bold' : 'normal',
+                transition: 'all 0.2s',
+                boxShadow: activeCategory === cat ? '0 0 10px var(--color-cyan-30)' : 'none',
+              }}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* 新增操作 */}
+        <div>
           <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
+            onClick={() => setIsAddModalOpen(true)}
             style={{
-              padding: '8px 20px',
-              borderRadius: '20px',
-              border: `1px solid ${activeCategory === cat ? 'var(--color-cyan)' : 'var(--color-ai-tag-border)'}`,
-              background: activeCategory === cat ? 'var(--color-cyan-10)' : 'transparent',
-              color: activeCategory === cat ? 'var(--color-cyan)' : 'var(--color-text-secondary)',
+              padding: '12px 24px',
+              backgroundColor: 'var(--color-cyan)',
+              color: 'var(--color-bg)',
+              border: 'none',
+              borderRadius: '8px',
+              fontWeight: 'bold',
               cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: activeCategory === cat ? 'bold' : 'normal',
-              transition: 'all 0.2s',
-              boxShadow: activeCategory === cat ? '0 0 10px var(--color-cyan-30)' : 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              boxShadow: '0 4px 14px 0 var(--color-cyan-glow)',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)'
+              e.currentTarget.style.boxShadow = '0 6px 20px 0 var(--color-cyan-glow)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.boxShadow = '0 4px 14px 0 var(--color-cyan-glow)'
             }}
           >
-            {cat}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            新增项目
           </button>
-        ))}
+        </div>
       </motion.div>
 
       {/* 项目网格 */}
@@ -483,9 +610,16 @@ export function AllProjects() {
             project={selectedProject}
             isOpen={!!selectedProject}
             onClose={() => setSelectedProject(null)}
+            onDeleteSuccess={fetchAllProjects}
           />
         )}
       </AnimatePresence>
+
+      <AddAllProjectModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={fetchAllProjects}
+      />
     </div>
   )
 }

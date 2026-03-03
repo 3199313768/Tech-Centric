@@ -1,0 +1,82 @@
+-- 1. 创建 resources 表
+CREATE TABLE IF NOT EXISTS public.resources (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  url TEXT NOT NULL,
+  description TEXT,
+  category TEXT NOT NULL,
+  tags TEXT[],
+  created_at BIGINT NOT NULL,
+  is_pinned BOOLEAN DEFAULT false,
+  click_count INTEGER DEFAULT 0
+);
+
+-- 2. 设置 RLS 策略
+ALTER TABLE public.resources ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "允许匿名用户读取 resources" ON public.resources FOR SELECT USING (true);
+CREATE POLICY "允许匿名用户修改 resources" ON public.resources FOR ALL USING (true) WITH CHECK (true);
+
+-- 3. 初始数据导入
+INSERT INTO public.resources (id, name, url, description, category, tags, created_at, is_pinned, click_count) VALUES
+('mdn', 'MDN Web Docs', 'https://developer.mozilla.org/', 'Web 技术权威文档，HTML/CSS/JS 参考', 'learning', ARRAY['前端', '文档', '基础'], 1735689600000, false, 0),
+('react-docs', 'React 官方文档', 'https://react.dev/', 'React 官方文档，Hooks、Server Components 等', 'learning', ARRAY['React', '文档', '框架'], 1735689600001, false, 0),
+('vue-docs', 'Vue.js 官方文档', 'https://cn.vuejs.org/', 'Vue 3 中文文档', 'learning', ARRAY['Vue', '文档', '框架'], 1735689600002, false, 0),
+('typescript', 'TypeScript 手册', 'https://www.typescriptlang.org/docs/', 'TypeScript 官方文档与手册', 'learning', ARRAY['TypeScript', '文档'], 1735689600003, false, 0),
+('nextjs', 'Next.js 文档', 'https://nextjs.org/docs', 'Next.js App Router、SSR、API 等', 'learning', ARRAY['Next.js', 'React', '全栈'], 1735689600004, false, 0),
+('tailwind', 'Tailwind CSS', 'https://tailwindcss.com/docs', 'Tailwind CSS 工具类文档', 'learning', ARRAY['CSS', '原子化'], 1735689600005, false, 0),
+('webdev', 'web.dev', 'https://web.dev/', 'Google 的 Web 开发学习资源', 'learning', ARRAY['前端', '最佳实践'], 1735689600006, false, 0),
+('css-tricks', 'CSS-Tricks', 'https://css-tricks.com/', 'CSS 技巧、布局、动画等', 'learning', ARRAY['CSS', '技巧'], 1735689600007, false, 0),
+('caniuse', 'Can I use', 'https://caniuse.com/', '前端 API 与 CSS 兼容性查询', 'learning', ARRAY['工具', '兼容性'], 1735689600008, false, 0),
+('javascript-info', 'JavaScript.info', 'https://zh.javascript.info/', '现代 JavaScript 教程（中文）', 'learning', ARRAY['JavaScript', '教程'], 1735689600009, false, 0),
+('freecodecamp', 'freeCodeCamp', 'https://www.freecodecamp.org/', '免费编程学习平台', 'learning', ARRAY['平台', '教程'], 1735689600010, false, 0),
+('frontend-roadmap', 'Frontend Roadmap', 'https://roadmap.sh/frontend', '前端学习路线图', 'learning', ARRAY['路线图'], 1735689600011, false, 0),
+('react-source', 'React 源码', 'https://github.com/facebook/react', 'React 官方仓库，Fiber、调度、并发渲染', 'learning', ARRAY['React', '源码'], 1735689600012, false, 0),
+('tc39', 'TC39 Proposals', 'https://github.com/tc39/proposals', 'ECMAScript 提案与标准演进', 'learning', ARRAY['规范', 'ECMAScript'], 1735689600013, false, 0),
+('ecma262', 'ECMA-262 规范', 'https://tc39.es/ecma262/', 'ECMAScript 语言规范', 'learning', ARRAY['规范', 'ECMAScript'], 1735689600014, false, 0),
+('v8-blog', 'V8 Blog', 'https://v8.dev/blog', 'V8 引擎实现、JIT、GC、优化', 'learning', ARRAY['底层', 'V8'], 1735689600015, false, 0),
+('whatwg', 'WHATWG HTML', 'https://html.spec.whatwg.org/', 'HTML 标准规范', 'learning', ARRAY['规范', 'HTML'], 1735689600016, false, 0),
+('overreacted', 'Overreacted', 'https://overreacted.io/', 'Dan Abramov 深度解析 React', 'learning', ARRAY['博客', 'React'], 1735689600017, false, 0),
+('kentcdodds', 'Kent C. Dodds', 'https://kentcdodds.com/blog', '测试、React、Remix 实践', 'learning', ARRAY['博客', '测试'], 1735689600018, false, 0),
+('refactoring-guru', 'Refactoring Guru', 'https://refactoring.guru/', '设计模式、重构、SOLID', 'learning', ARRAY['设计模式', '重构'], 1735689600019, false, 0),
+('system-design', 'System Design Primer', 'https://github.com/donnemartin/system-design-primer', '系统设计、分布式、高可用', 'learning', ARRAY['系统设计', '架构'], 1735689600020, false, 0),
+('nodejs-docs', 'Node.js 文档', 'https://nodejs.org/docs/latest/api/', 'Node.js API、Stream、Event Loop', 'learning', ARRAY['Node.js', '后端'], 1735689600021, false, 0),
+('web-performance', 'Web Performance', 'https://web.dev/performance/', '性能优化、Core Web Vitals、LCP/FID/CLS', 'learning', ARRAY['性能优化'], 1735689600022, false, 0),
+('chrome-docs', 'Chrome for Developers', 'https://developer.chrome.com/', 'Chrome 渲染、新特性、DevTools', 'learning', ARRAY['浏览器', 'DevTools'], 1735689600023, false, 0),
+('chatgpt', 'ChatGPT', 'https://chat.openai.com/', 'OpenAI 大语言模型对话', 'ai', ARRAY['大模型', '对话'], 1735689600024, false, 0),
+('claude', 'Claude', 'https://claude.ai/', 'Anthropic Claude 对话', 'ai', ARRAY['大模型', '对话'], 1735689600025, false, 0),
+('cursor', 'Cursor', 'https://cursor.com/', 'AI 驱动的代码编辑器', 'ai', ARRAY['编辑器', '工具'], 1735689600026, false, 0),
+('perplexity', 'Perplexity', 'https://www.perplexity.ai/', 'AI 搜索引擎', 'ai', ARRAY['搜索引擎', '工具'], 1735689600027, false, 0),
+('v0-vercel', 'v0 by Vercel', 'https://v0.dev/', 'AI 生成 React/Next.js UI 组件', 'ai', ARRAY['生成UI', 'Vercel'], 1735689600028, false, 0),
+('github-copilot', 'GitHub Copilot', 'https://github.com/features/copilot', 'GitHub AI 编程助手', 'ai', ARRAY['编程助手', '工具'], 1735689600029, false, 0),
+('openai-api', 'OpenAI API', 'https://platform.openai.com/docs', 'GPT API、Embeddings、Function Calling', 'ai', ARRAY['API', '平台'], 1735689600030, false, 0),
+('anthropic-docs', 'Anthropic API', 'https://docs.anthropic.com/', 'Claude API、长上下文、工具调用', 'ai', ARRAY['API', '平台'], 1735689600031, false, 0),
+('langchain', 'LangChain', 'https://python.langchain.com/docs/', 'LLM 应用框架、RAG、Agent', 'ai', ARRAY['框架', 'RAG'], 1735689600032, false, 0),
+('huggingface', 'Hugging Face', 'https://huggingface.co/', '模型、数据集、Transformers', 'ai', ARRAY['社区', '模型库'], 1735689600033, false, 0),
+('prompt-engineering', 'OpenAI Prompt Guide', 'https://platform.openai.com/docs/guides/prompt-engineering', 'Prompt 工程最佳实践', 'ai', ARRAY['Prompt工程'], 1735689600034, false, 0),
+('swe-agent', 'SWE-agent', 'https://github.com/princeton-nlp/SWE-agent', 'AI 代码修复 Agent', 'ai', ARRAY['Agent', '开源'], 1735689600035, false, 0),
+('tinypng', 'TinyPNG', 'https://tinypng.com/', '智能图片压缩工具，处理 Web 图片必备', 'tools', ARRAY['工具', '图片压缩'], 1735689600036, false, 0),
+('vercel', 'Vercel', 'https://vercel.com/', '现代 Web 应用部署平台，Next.js 官方支持', 'tools', ARRAY['部署', '托管'], 1735689600037, false, 0),
+('codesandbox', 'CodeSandbox', 'https://codesandbox.io/', '在线代码编辑器，快速原型开发', 'tools', ARRAY['工具', 'IDE'], 1735689600038, false, 0),
+('figma', 'Figma', 'https://www.figma.com/', '跨平台协作设计工具', 'design', ARRAY['设计', '协作', 'UI/UX'], 1735689600039, false, 0),
+('dribbble', 'Dribbble', 'https://dribbble.com/', '全球设计师作品展示社区', 'design', ARRAY['灵感', '社区'], 1735689600040, false, 0),
+('framer-motion', 'Framer Motion', 'https://www.framer.com/motion/', 'React 的高性能动效库', 'design', ARRAY['动效', 'React'], 1735689600041, false, 0),
+('deepseek', 'DeepSeek', 'https://www.deepseek.com/', '国产大模型之光，极高性价比的推理模型与 API', 'ai', ARRAY['大模型', '国产', '推理'], 1735689600042, false, 0),
+('flux-ai', 'Flux.1', 'https://blackforestlabs.ai/', '由原 SD 团队成员开发的目前最强开源图像生成模型', 'ai', ARRAY['图像生成', '开源', 'AIGC'], 1735689600043, false, 0),
+('groq', 'Groq', 'https://groq.com/', '极速 LLM 推理平台，基于 LPU 硬件加速', 'ai', ARRAY['推理加速', '硬件', 'API'], 1735689600044, false, 0),
+('tailwind-v4', 'Tailwind CSS v4', 'https://tailwindcss.com/blog/tailwindcss-v4-alpha', '全新高性能引擎，基于 Lightning CSS 构建，无配置化倾向', 'learning', ARRAY['CSS', '趋势', '高性能'], 1735689600045, false, 0),
+('biome', 'Biome', 'https://biomejs.dev/', 'Rust 编写的极速一体化工具，替代 ESLint/Prettier', 'tools', ARRAY['Rust', 'Linter', '工具'], 1735689600046, false, 0),
+('shadcn-charts', 'Shadcn UI Charts', 'https://ui.shadcn.com/charts', '基于 Recharts 的美观、可拷贝的图表组件库', 'design', ARRAY['UI组件', '图表', 'React'], 1735689600047, false, 0),
+('leetcode-cn', 'LeetCode 力扣', 'https://leetcode.cn/', '算法进阶、面试准备必选平台', 'learning', ARRAY['算法', '面试', '刷题'], 1735689600048, false, 0),
+('hello-algo', 'Hello 算法', 'https://www.hello-algo.com/', '动画图解、开源的算法学习教程，非常易懂', 'learning', ARRAY['算法', '入门', '图解'], 1735689600049, false, 0),
+('system-design-interview', 'System Design Interview', 'https://github.com/donnemartin/system-design-primer', '系统设计入门，涵盖分布式、扩展性、数据库等核心知识', 'learning', ARRAY['架构', '系统设计', '进阶'], 1735689600050, false, 0),
+('developer-roadmap', 'Developer Roadmap', 'https://roadmap.sh/', '全球最火的程序员学习路线图，涵盖全栈、后端及 AI', 'learning', ARRAY['路线图', '职业规划'], 1735689600051, false, 0),
+('v2ex', 'V2EX', 'https://www.v2ex.com/', '创意工作者社区，了解行业动态、摸鱼与交流', 'other', ARRAY['社区', '动态'], 1735689600052, false, 0),
+('he3-app', 'He3 App', 'https://he3app.com/', '堪称“开发者武器库”，集成各种 JSON 处理、编码转换工具', 'tools', ARRAY['工具集', '效率'], 1735689600053, false, 0),
+('sql-mother', 'SQL 刷题宝', 'https://sqlmother.yupi.icu/', 'SQL 闯关式学习，非常适合巩固数据库基础', 'learning', ARRAY['SQL', '数据库', '练习'], 1735689600054, false, 0),
+('langchain-js', 'LangChain.js', 'https://js.langchain.com/', '构建 LLM 应用的最流行框架，JS/TS 版本', 'ai', ARRAY['AI框架', 'Agent', 'JS/TS'], 1735689600055, false, 0),
+('llamaindex', 'LlamaIndex', 'https://www.llamaindex.ai/', '为 LLM 提供高效数据连接与检索 (RAG) 的核心技术库', 'ai', ARRAY['RAG', '数据索引'], 1735689600056, false, 0),
+('waytoagi', 'WaytoAGI', 'https://www.waytoagi.com/', '国内最大的 AGI 知识库，涵盖海量 AI 工具与案例', 'ai', ARRAY['知识库', '社区'], 1735689600057, false, 0),
+('prompt-guide', 'Prompt Engineering Guide', 'https://www.promptingguide.ai/zh', '多语言提示词工程指南，系统化学习如何与 AI 对话', 'learning', ARRAY['Prompt', '教程'], 1735689600058, false, 0),
+('coze-cn', 'Coze 扣子', 'https://www.coze.cn/', '字节跳动推出的新一代 AI 应用开发平台，零代码创建 Bot', 'ai', ARRAY['低代码', 'Agent', '平台'], 1735689600059, false, 0)
+ON CONFLICT (id) DO NOTHING;
