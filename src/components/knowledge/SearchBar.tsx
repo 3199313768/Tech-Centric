@@ -6,10 +6,12 @@ import { Search, Image as ImageIcon, FileText, Code2, Link as LinkIcon } from 'l
 
 export function SearchBar({
   initialQuery = '',
-  initialType = ''
+  initialType = '',
+  initialTags
 }: {
   initialQuery?: string
   initialType?: string
+  initialTags?: string[]
 }) {
   const router = useRouter()
   const pathname = usePathname()

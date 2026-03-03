@@ -118,17 +118,38 @@ export function loadAMapScript(apiKey: string): Promise<void> {
   })
 }
 
+// 信息窗口实例类型
+export interface AMapInfoWindow {
+  open: (map: unknown, position?: unknown) => void;
+  close: () => void;
+}
+
+// 标记点实例类型
+export interface AMapMarker {
+  on: (event: string, callback: () => void) => void;
+  setMap: (map: unknown) => void;
+  getPosition: () => unknown;
+}
+
+// 折线实例类型
+export interface AMapPolyline {
+  setOptions: (options: Record<string, unknown>) => void;
+  setMap: (map: unknown) => void;
+}
+
 // 定义地图组件的类型集
 export interface AMapType {
-  Map: new (container: string | HTMLDivElement, options: Record<string, unknown>) => unknown;
-  Marker: new (options: Record<string, unknown>) => unknown;
-  Polyline: new (options: Record<string, unknown>) => unknown;
+  Map: new (container: string | HTMLElement, options: Record<string, unknown>) => AMapInstance;
+  Marker: new (options: Record<string, unknown>) => AMapMarker;
+  Polyline: new (options: Record<string, unknown>) => AMapPolyline;
   Pixel: new (x: number, y: number) => unknown;
   Icon: new (options: Record<string, unknown>) => unknown;
   Size: new (width: number, height: number) => unknown;
   LngLat: new (lng: number, lat: number) => unknown;
   Bounds: new (sw: unknown, ne: unknown) => unknown;
-  InfoWindow: new (options: Record<string, unknown>) => unknown;
+  InfoWindow: new (options: Record<string, unknown>) => AMapInfoWindow;
+  Scale: new () => unknown;
+  ToolBar: new (options?: Record<string, unknown>) => unknown;
   plugin: (plugins: string[], callback: () => void) => void;
   [key: string]: unknown;
 }
@@ -147,6 +168,10 @@ export interface AMapInstance {
   remove: (layer: unknown) => void;
   getLayers: () => unknown[];
   setBounds: (bounds: unknown, immediately: boolean, padding: number[]) => void;
+  addControl: (control: unknown) => void;
+  on: (event: string, callback: () => void) => void;
+  destroy: () => void;
+  setZoomAndCenter: (zoom: number, center: [number, number]) => void;
   [key: string]: unknown;
 }
 
@@ -290,7 +315,7 @@ export function fitBounds(
   padding: number[] = [50, 50, 50, 50]
 ) {
   // 确保只在客户端执行
-  if (typeof window === 'undefined' || !map || !coordinates || coordinates.length === 0) {
+  if (typeof window === 'undefined' || !map || !window.AMap || !coordinates || coordinates.length === 0) {
     return
   }
 

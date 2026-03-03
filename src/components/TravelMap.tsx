@@ -119,7 +119,8 @@ export function TravelMap() {
 
   // 设置地图功能：标记点、路线、信息窗口
   const setupMapFeatures = (map: any) => {
-    if (!map || !window.AMap) return
+    const AMap = window.AMap
+    if (!map || !AMap) return
 
     // 清除之前的标记和路线
     markersRef.current.forEach((marker) => marker.setMap(null))
@@ -137,7 +138,7 @@ export function TravelMap() {
 
     // 创建标记点
     sortedLocations.forEach((location) => {
-      const marker = new window.AMap.Marker({
+      const marker = new AMap.Marker({
         position: [location.coordinates.lng, location.coordinates.lat],
         icon: markerIcon,
         title: location.name,
@@ -161,7 +162,7 @@ export function TravelMap() {
         loc.coordinates.lat,
       ])
 
-      const polyline = new window.AMap.Polyline({
+      const polyline = new AMap.Polyline({
         path: path,
         isOutline: true,
         outlineColor: '#00d9ff',
@@ -208,7 +209,9 @@ export function TravelMap() {
         // 加载 SDK
         await loadAMapScript(apiKey)
 
-        if (!mounted || !mapContainerRef.current) return
+        if (!mounted || !mapContainerRef.current || !window.AMap) return
+
+        const AMap = window.AMap
 
         // 初始化地图 - 定位到中国中心，合适的缩放级别以显示地形
         // 如果有地点数据，先计算中心点和合适的缩放级别
@@ -233,8 +236,8 @@ export function TravelMap() {
 
         // 添加地图控件
         try {
-          map.addControl(new window.AMap.Scale())
-          map.addControl(new window.AMap.ToolBar({
+          map.addControl(new AMap.Scale())
+          map.addControl(new AMap.ToolBar({
             position: 'RT',
           }))
         } catch (controlError) {
