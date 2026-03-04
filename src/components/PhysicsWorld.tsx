@@ -9,7 +9,7 @@ interface PhysicsWorldProps {
   showHero?: boolean
 }
 
-export function PhysicsWorld({ className, showHero = true }: PhysicsWorldProps) {
+export function PhysicsWorld({ showHero = true }: PhysicsWorldProps) {
   const { isMobile, isTablet } = useBreakpoint()
 
   return (
@@ -53,6 +53,12 @@ export function PhysicsWorld({ className, showHero = true }: PhysicsWorldProps) 
                   borderRadius: '8px',
                   boxShadow: '0 20px 60px var(--color-card-shadow)',
                   transform: 'rotate(5deg)',
+                  overflow: 'hidden',
+                  padding: '24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  zIndex: 1,
                 }}
                 animate={{
                   y: [0, -20, 0],
@@ -63,7 +69,56 @@ export function PhysicsWorld({ className, showHero = true }: PhysicsWorldProps) 
                   repeat: Infinity,
                   ease: 'easeInOut',
                 }}
-              />
+              >
+                {/* 装饰线 */}
+                <div style={{ position: 'absolute', top: 0, left: '20px', width: '1px', height: '100%', background: 'var(--color-text-secondary)', opacity: 0.2 }} />
+                
+                {/* 顶部小字 */}
+                <div style={{ 
+                  fontFamily: 'var(--font-space-mono), monospace', 
+                  fontSize: isTablet ? '10px' : '12px', 
+                  color: 'var(--color-text-primary)',
+                  letterSpacing: '2px',
+                  paddingLeft: '10px',
+                  position: 'relative',
+                  zIndex: 2,
+                }}>
+                  OXYGEN / PORTFOLIO
+                </div>
+
+                {/* 背景大字 O */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: isTablet ? '-30px' : '-50px',
+                  right: isTablet ? '-30px' : '-60px',
+                  fontSize: isTablet ? '240px' : '380px',
+                  fontWeight: 'bold',
+                  fontFamily: 'var(--font-space-mono), monospace',
+                  color: 'var(--color-cyan-10)',
+                  lineHeight: 1,
+                  zIndex: 1,
+                  pointerEvents: 'none',
+                  userSelect: 'none',
+                }}>
+                  O
+                </div>
+                
+                {/* 底部分类 */}
+                <div style={{
+                  fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
+                  fontSize: isTablet ? '14px' : '22px',
+                  fontWeight: 'bold',
+                  color: 'var(--color-headline)',
+                  letterSpacing: '1px',
+                  paddingLeft: '10px',
+                  position: 'relative',
+                  zIndex: 2,
+                }}>
+                  CREATIVE<br />DEVELOPER
+                </div>
+              </motion.div>
+
+              {/* 左下角小卡片 */}
               <motion.div
                 style={{
                   position: 'absolute',
@@ -76,6 +131,11 @@ export function PhysicsWorld({ className, showHero = true }: PhysicsWorldProps) 
                   borderRadius: '8px',
                   boxShadow: '0 20px 60px var(--color-card-shadow)',
                   transform: 'rotate(-3deg)',
+                  padding: '30px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  zIndex: 1,
                 }}
                 animate={{
                   y: [0, 15, 0],
@@ -87,7 +147,20 @@ export function PhysicsWorld({ className, showHero = true }: PhysicsWorldProps) 
                   ease: 'easeInOut',
                   delay: 1,
                 }}
-              />
+              >
+                <div style={{
+                  fontFamily: 'var(--font-space-mono), monospace',
+                  color: 'var(--color-headline)',
+                  textTransform: 'uppercase',
+                }}>
+                  <div style={{ fontSize: isTablet ? '32px' : '48px', fontWeight: 'bold', lineHeight: 1 }}>CODE</div>
+                  <div style={{ fontSize: isTablet ? '14px' : '20px', fontStyle: 'italic', color: 'var(--color-cyan)', paddingLeft: '20px', marginBottom: '24px' }}>as craft</div>
+                  
+                  <div style={{ width: '40px', height: '2px', background: 'var(--color-text-secondary)', marginBottom: '24px', opacity: 0.5 }} />
+                  
+                  <div style={{ fontSize: isTablet ? '24px' : '36px', fontWeight: 'bold', lineHeight: 1.1, textAlign: 'right' }}>USER<br />FIRST</div>
+                </div>
+              </motion.div>
             </>
           )}
           
