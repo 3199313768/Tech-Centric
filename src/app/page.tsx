@@ -6,12 +6,10 @@ import { PhysicsWorld } from '@/components/PhysicsWorld'
 import { About } from '@/components/About'
 import { Experience } from '@/components/Experience'
 import { Skills } from '@/components/Skills'
-import { Stats } from '@/components/Stats'
 import { Achievements } from '@/components/Achievements'
 import { ContactChat } from '@/components/ContactChat'
 import { YearlyReview } from '@/components/YearlyReview'
 import { TravelMap } from '@/components/TravelMap'
-import { Projects } from '@/components/Projects'
 import { AiSkills } from '@/components/AiSkills'
 import { VibeCoding } from '@/components/VibeCoding'
 import { ResourceLinks } from '@/components/ResourceLinks'
@@ -90,22 +88,6 @@ export default function Home() {
             {/* 工作经历 */}
             <section style={{ position: 'relative', zIndex: 10 }}>
               <Experience compact={true} />
-            </section>
-            
-            {/* 杂志式分割线 */}
-            <div className="magazine-divider" style={{ margin: dividerMargin }} />
-            
-            {/* 作品集 */}
-            <section style={{ position: 'relative', zIndex: 10 }}>
-              <Projects compact={true} />
-            </section>
-            
-            {/* 杂志式分割线 */}
-            <div className="magazine-divider" style={{ margin: dividerMargin }} />
-            
-            {/* 统计 */}
-            <section style={{ position: 'relative', zIndex: 10 }}>
-              <Stats compact={true} />
             </section>
             
             {/* 杂志式分割线 */}

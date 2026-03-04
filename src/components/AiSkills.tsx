@@ -24,6 +24,7 @@ export function AiSkills() {
   const [isLoading, setIsLoading] = useState(true)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [editingSkill, setEditingSkill] = useState<AgentSkill | null>(null)
 
   const fetchSkills = useCallback(async () => {
     setIsLoading(true)
@@ -93,7 +94,10 @@ export function AiSkills() {
         </p>
         <div style={{ marginTop: '24px' }}>
           <button
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={() => {
+              setEditingSkill(null)
+              setIsAddModalOpen(true)
+            }}
             style={{
               padding: '12px 24px',
               backgroundColor: 'var(--color-cyan)',
@@ -206,6 +210,37 @@ export function AiSkills() {
                 borderRight: `2px solid ${hoveredId === skill.id ? 'var(--color-cyan)' : 'transparent'}`,
                 transition: 'all 0.3s ease',
               }} />
+
+              {/* Edit button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setEditingSkill(skill)
+                  setIsAddModalOpen(true)
+                }}
+                style={{
+                  position: 'absolute',
+                  top: '16px',
+                  right: '56px', // 放在删除按钮左侧
+                  background: 'rgba(56, 189, 248, 0.1)',
+                  border: '1px solid rgba(56, 189, 248, 0.3)',
+                  color: 'var(--color-cyan)',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  opacity: hoveredId === skill.id ? 1 : 0,
+                  transition: 'all 0.2s',
+                  transform: hoveredId === skill.id ? 'scale(1)' : 'scale(0.8)',
+                  zIndex: 2,
+                }}
+                title="修改此技能"
+              >
+                ✎
+              </button>
 
               {/* Delete button that appears on hover */}
               <button
@@ -336,8 +371,12 @@ export function AiSkills() {
 
       <AddSkillModal
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        onClose={() => {
+          setIsAddModalOpen(false)
+          setEditingSkill(null)
+        }}
         onSuccess={fetchSkills}
+        initialData={editingSkill}
       />
     </div>
   )

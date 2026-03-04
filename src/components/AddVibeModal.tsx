@@ -1,15 +1,24 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { useBreakpoint } from '@/utils/useBreakpoint'
+
+interface VibeProject {
+  id: string
+  name: string
+  description: string
+  url: string
+  icon: string
+}
 
 interface AddVibeModalProps {
   isOpen: boolean
   onClose: () => void
   onSuccess: () => void
+  initialData?: VibeProject | null
 }
 
-export function AddVibeModal({ isOpen, onClose, onSuccess }: AddVibeModalProps) {
+export function AddVibeModal({ isOpen, onClose, onSuccess, initialData }: AddVibeModalProps) {
   const { isMobile } = useBreakpoint()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
@@ -18,6 +27,24 @@ export function AddVibeModal({ isOpen, onClose, onSuccess }: AddVibeModalProps) 
     description: '',
     url: '',
   })
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name,
+        icon: initialData.icon,
+        description: initialData.description,
+        url: initialData.url,
+      })
+    } else {
+      setFormData({
+        name: '',
+        icon: '✨',
+        description: '',
+        url: '',
+      })
+    }
+  }, [initialData, isOpen])
 
   if (!isOpen) return null
 
@@ -33,19 +60,27 @@ export function AddVibeModal({ isOpen, onClose, onSuccess }: AddVibeModalProps) 
     const supabase = createClient()
 
     const projectData = {
-      id: crypto.randomUUID(),
       name: formData.name,
       icon: formData.icon,
       description: formData.description,
       url: formData.url,
     }
 
-    const { error } = await supabase.from('vibe_coding').insert([projectData])
+    let error
+
+    if (initialData) {
+      const response = await supabase.from('vibe_coding').update(projectData).eq('id', initialData.id)
+      error = response.error
+    } else {
+      const response = await supabase.from('vibe_coding').insert([{ id: crypto.randomUUID(), ...projectData }])
+      error = response.error
+    }
+
     setIsSubmitting(false)
 
     if (error) {
-      console.error('Error inserting vibe project:', error)
-      alert('新增项目失败：' + error.message)
+      console.error('Error saving vibe project:', error)
+      alert((initialData ? '修改' : '新增') + '项目失败：' + error.message)
     } else {
       onSuccess()
       onClose()
@@ -107,7 +142,7 @@ export function AddVibeModal({ isOpen, onClose, onSuccess }: AddVibeModalProps) 
           onClick={(e) => e.stopPropagation()}
         >
           <div style={{ padding: '24px', borderBottom: '1px solid var(--color-cyan-30)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ margin: 0, fontSize: '20px', color: 'var(--color-cyan)', fontWeight: 'bold' }}>新增 Vibe Coding 项目</h3>
+            <h3 style={{ margin: 0, fontSize: '20px', color: 'var(--color-cyan)', fontWeight: 'bold' }}>{initialData ? '修改 Vibe Coding 项目' : '新增 Vibe Coding 项目'}</h3>
             <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', fontSize: '24px', cursor: 'pointer' }}>×</button>
           </div>
           
@@ -164,7 +199,7 @@ export function AddVibeModal({ isOpen, onClose, onSuccess }: AddVibeModalProps) 
                 opacity: isSubmitting ? 0.7 : 1,
               }}
             >
-              {isSubmitting ? '提交中...' : '确认完成'}
+              {isSubmitting ? '提交中...' : (initialData ? '确认修改' : '确认完成')}
             </button>
           </div>
         </motion.div>

@@ -220,12 +220,13 @@ export function Skills({ compact = false }: SkillsProps) {
                     )}
                   </div>
 
-                  {/* 熟练度进度条 */}
+                  {/* 熟练度标签 */}
                   <div style={{ marginBottom: '20px' }}>
                     <div
                       style={{
                         display: 'flex',
                         justifyContent: 'space-between',
+                        alignItems: 'center',
                         marginBottom: '10px',
                       }}
                     >
@@ -242,40 +243,17 @@ export function Skills({ compact = false }: SkillsProps) {
                       <span
                         style={{
                           fontSize: '12px',
-                          color: '#0a0a0a',
-                          fontFamily: 'var(--font-space-mono), monospace',
+                          color: 'var(--color-cyan)',
+                          backgroundColor: 'rgba(0, 217, 255, 0.1)',
+                          padding: '4px 10px',
+                          borderRadius: '4px',
+                          border: '1px solid rgba(0, 217, 255, 0.2)',
+                          fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
                           fontWeight: 'bold',
                         }}
                       >
-                        {skill.proficiency}%
+                        {skill.proficiency >= 90 ? '专家级技术' : skill.proficiency >= 80 ? '资深应用' : skill.proficiency >= 70 ? '熟练掌握' : '独立开发'}
                       </span>
-                    </div>
-                    <div
-                      style={{
-                        width: '100%',
-                        height: '10px',
-                        backgroundColor: 'rgba(0, 217, 255, 0.15)',
-                        borderRadius: '5px',
-                        overflow: 'hidden',
-                        border: '1px solid rgba(0, 217, 255, 0.2)',
-                      }}
-                    >
-                      <motion.div
-                        style={{
-                          width: `${skill.proficiency}%`,
-                          height: '100%',
-                          backgroundColor: '#00d9ff',
-                          borderRadius: '5px',
-                          boxShadow: '0 0 10px rgba(0, 217, 255, 0.5)',
-                        }}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${skill.proficiency}%` }}
-                        transition={{
-                          duration: 1,
-                          delay: index * 0.1 + 0.3,
-                          ease: 'easeOut',
-                        }}
-                      />
                     </div>
                   </div>
 

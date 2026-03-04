@@ -1,15 +1,26 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { useBreakpoint } from '@/utils/useBreakpoint'
+
+interface AgentSkill {
+  id: string
+  name: string
+  icon: string
+  description: string
+  tags: string[]
+  platform?: string
+  link?: string
+}
 
 interface AddSkillModalProps {
   isOpen: boolean
   onClose: () => void
   onSuccess: () => void
+  initialData?: AgentSkill | null
 }
 
-export function AddSkillModal({ isOpen, onClose, onSuccess }: AddSkillModalProps) {
+export function AddSkillModal({ isOpen, onClose, onSuccess, initialData }: AddSkillModalProps) {
   const { isMobile } = useBreakpoint()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
@@ -20,6 +31,28 @@ export function AddSkillModal({ isOpen, onClose, onSuccess }: AddSkillModalProps
     platform: '',
     link: '',
   })
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name,
+        icon: initialData.icon,
+        description: initialData.description,
+        tags: Array.isArray(initialData.tags) ? initialData.tags.join(', ') : '',
+        platform: initialData.platform || '',
+        link: initialData.link || '',
+      })
+    } else {
+      setFormData({
+        name: '',
+        icon: '💡',
+        description: '',
+        tags: '',
+        platform: '',
+        link: '',
+      })
+    }
+  }, [initialData, isOpen])
 
   if (!isOpen) return null
 
@@ -36,7 +69,6 @@ export function AddSkillModal({ isOpen, onClose, onSuccess }: AddSkillModalProps
     const tagsArray = formData.tags.split(',').map(s => s.trim()).filter(Boolean)
 
     const skillData = {
-      id: crypto.randomUUID(),
       name: formData.name,
       icon: formData.icon,
       description: formData.description,
@@ -45,12 +77,21 @@ export function AddSkillModal({ isOpen, onClose, onSuccess }: AddSkillModalProps
       link: formData.link || null,
     }
 
-    const { error } = await supabase.from('ai_skills').insert([skillData])
+    let error
+
+    if (initialData) {
+      const response = await supabase.from('ai_skills').update(skillData).eq('id', initialData.id)
+      error = response.error
+    } else {
+      const response = await supabase.from('ai_skills').insert([{ id: crypto.randomUUID(), ...skillData }])
+      error = response.error
+    }
+
     setIsSubmitting(false)
 
     if (error) {
-      console.error('Error inserting skill:', error)
-      alert('新增技能失败：' + error.message)
+      console.error('Error saving skill:', error)
+      alert((initialData ? '修改' : '新增') + '技能失败：' + error.message)
     } else {
       onSuccess()
       onClose()
@@ -114,7 +155,7 @@ export function AddSkillModal({ isOpen, onClose, onSuccess }: AddSkillModalProps
           onClick={(e) => e.stopPropagation()}
         >
           <div style={{ padding: '24px', borderBottom: '1px solid var(--color-cyan-30)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ margin: 0, fontSize: '20px', color: 'var(--color-cyan)', fontWeight: 'bold' }}>新增 AI 技能</h3>
+            <h3 style={{ margin: 0, fontSize: '20px', color: 'var(--color-cyan)', fontWeight: 'bold' }}>{initialData ? '修改 AI 技能' : '新增 AI 技能'}</h3>
             <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', fontSize: '24px', cursor: 'pointer' }}>×</button>
           </div>
           
@@ -182,7 +223,7 @@ export function AddSkillModal({ isOpen, onClose, onSuccess }: AddSkillModalProps
                 opacity: isSubmitting ? 0.7 : 1,
               }}
             >
-              {isSubmitting ? '保存中...' : '确认新增'}
+              {isSubmitting ? '保存中...' : (initialData ? '确认修改' : '确认新增')}
             </button>
           </div>
         </motion.div>

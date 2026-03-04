@@ -15,12 +15,14 @@ function ProjectModal({
   project,
   isOpen,
   onClose,
-  onDeleteSuccess
+  onDeleteSuccess,
+  onEdit
 }: {
   project: AllProjectItem | null
   isOpen: boolean
   onClose: () => void
   onDeleteSuccess?: () => void
+  onEdit?: () => void
 }) {
   const { isMobile } = useBreakpoint()
   const [isDeleting, setIsDeleting] = useState(false)
@@ -166,6 +168,25 @@ function ProjectModal({
                 }}
               >
                 {isDeleting ? '删除中...' : '删除项目'}
+              </button>
+
+              <button
+                onClick={onEdit}
+                style={{
+                  padding: '10px 16px',
+                  backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                  color: 'var(--color-cyan)',
+                  border: '1px solid rgba(56, 189, 248, 0.3)',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.2s',
+                }}
+              >
+                ✎ 修改信息
               </button>
 
               {project.isPublic ? (
@@ -418,6 +439,7 @@ export function AllProjects() {
   const [activeCategory, setActiveCategory] = useState<ProjectCategory | '全部'>('全部')
   const [selectedProject, setSelectedProject] = useState<AllProjectItem | null>(null)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [editingProject, setEditingProject] = useState<AllProjectItem | null>(null)
 
   const fetchAllProjects = useCallback(async () => {
     setIsLoading(true)
@@ -549,7 +571,10 @@ export function AllProjects() {
         {/* 新增操作 */}
         <div>
           <button
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={() => {
+              setEditingProject(null)
+              setIsAddModalOpen(true)
+            }}
             style={{
               padding: '12px 24px',
               backgroundColor: 'var(--color-cyan)',
@@ -611,14 +636,28 @@ export function AllProjects() {
             isOpen={!!selectedProject}
             onClose={() => setSelectedProject(null)}
             onDeleteSuccess={fetchAllProjects}
+            onEdit={() => {
+              setEditingProject(selectedProject)
+              setIsAddModalOpen(true)
+            }}
           />
         )}
       </AnimatePresence>
 
       <AddAllProjectModal
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onSuccess={fetchAllProjects}
+        onClose={() => {
+          setIsAddModalOpen(false)
+          setEditingProject(null)
+        }}
+        onSuccess={() => {
+          fetchAllProjects()
+          // Refresh open modal data
+          if (editingProject && selectedProject) {
+            setSelectedProject(null) // Simply close details modal on update
+          }
+        }}
+        initialData={editingProject}
       />
     </div>
   )

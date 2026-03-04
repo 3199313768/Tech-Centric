@@ -54,10 +54,10 @@ export function About({ compact = false }: AboutProps) {
       <motion.div
         className="magazine-quote"
         style={{ marginBottom: '64px' }}
-        initial={{ opacity: 0, scale: 0.9 }}
-        whileInView={{ opacity: 1, scale: 1 }}
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ delay: 0.2, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       >
         <motion.p
           style={{
@@ -123,21 +123,18 @@ export function About({ compact = false }: AboutProps) {
 
             return (
               <motion.div
+                layout
                 key={index}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{
-                  delay: index * 0.1,
-                  duration: 0.6,
-                  ease: [0.22, 1, 0.36, 1]
+                  layout: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+                  opacity: { delay: index * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+                  y: { delay: index * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] },
                 }}
                 whileHover={{
                   flex: '1 1 450px',
-                  transition: {
-                    duration: 0.4,
-                    ease: [0.22, 1, 0.36, 1]
-                  },
                 }}
                 onHoverStart={() => setHoveredIndex(index)}
                 onHoverEnd={() => setHoveredIndex(null)}
@@ -239,49 +236,33 @@ export function About({ compact = false }: AboutProps) {
                       </h4>
                     </div>
 
-                    {/* 右侧：详细内容 */}
-                    <AnimatePresence mode="wait">
-                      {isHovered && (
-                        <motion.div
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -10 }}
-                          transition={{
-                            duration: 0.4,
-                            ease: [0.22, 1, 0.36, 1],
-                            delay: 0.1,
-                          }}
+                    {/* 右侧：详细内容（原生结构流式布局并简化动画链） */}
+                    <div
+                        style={{
+                          flex: isHovered ? 1 : 0,
+                          overflow: 'hidden',
+                          opacity: isHovered ? 1 : 0,
+                          paddingLeft: isHovered ? '20px' : '0',
+                          borderLeft: isHovered ? '1px solid var(--color-cyan-20)' : 'none',
+                          position: 'relative',
+                          display: 'flex',
+                          alignItems: 'center',
+                          transition: 'all 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+                        }}
+                      >
+                        <p
                           style={{
-                            flex: 1,
-                            overflow: 'hidden',
-                            paddingLeft: '20px',
-                            borderLeft: '1px solid var(--color-cyan-20)',
-                            position: 'relative',
-                            display: 'flex',
-                            alignItems: 'center',
+                            fontSize: '17px',
+                            lineHeight: '1.9',
+                            color: 'var(--color-text-secondary)',
+                            fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
+                            margin: 0,
+                            minWidth: '260px', /* 防止展开时文字过度换行跳动 */
                           }}
                         >
-                          <motion.p
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{
-                              duration: 0.3,
-                              delay: 0.2,
-                              ease: [0.22, 1, 0.36, 1],
-                            }}
-                            style={{
-                              fontSize: '17px',
-                              lineHeight: '1.9',
-                              color: 'var(--color-text-secondary)',
-                              fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
-                              margin: 0,
-                            }}
-                          >
-                            {highlightKeywords(paragraph)}
-                          </motion.p>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                          {highlightKeywords(paragraph)}
+                        </p>
+                      </div>
                   </div>
                 </PaperCard>
               </motion.div>
@@ -372,10 +353,10 @@ export function About({ compact = false }: AboutProps) {
           {education.map((edu, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.2, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ delay: index * 0.15, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             >
               <PaperCard delay={index * 0.1}>
                 <div

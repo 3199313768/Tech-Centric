@@ -21,6 +21,7 @@ export function VibeCoding() {
   const [isLoading, setIsLoading] = useState(true)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [editingProject, setEditingProject] = useState<VibeProject | null>(null)
 
   const fetchProjects = useCallback(async () => {
     setIsLoading(true)
@@ -101,7 +102,10 @@ export function VibeCoding() {
         </p>
         <div style={{ marginTop: '24px' }}>
           <button
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={() => {
+              setEditingProject(null)
+              setIsAddModalOpen(true)
+            }}
             style={{
               padding: '12px 24px',
               backgroundColor: 'var(--color-cyan)',
@@ -199,6 +203,38 @@ export function VibeCoding() {
                 color: 'inherit',
               }}
             >
+              {/* Edit button */}
+              <button
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setEditingProject(project)
+                  setIsAddModalOpen(true)
+                }}
+                style={{
+                  position: 'absolute',
+                  top: '16px',
+                  right: '56px', // 放在删除按钮左侧
+                  background: 'rgba(56, 189, 248, 0.1)',
+                  border: '1px solid rgba(56, 189, 248, 0.3)',
+                  color: 'var(--color-cyan)',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  opacity: hoveredId === project.id ? 1 : 0,
+                  transition: 'all 0.2s',
+                  transform: hoveredId === project.id ? 'scale(1)' : 'scale(0.8)',
+                  zIndex: 2,
+                }}
+                title="修改此项目"
+              >
+                ✎
+              </button>
+
               {/* Delete button that appears on hover */}
               <button
                 onClick={(e) => handleDelete(e, project.id, project.name)}
@@ -333,8 +369,12 @@ export function VibeCoding() {
 
       <AddVibeModal
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        onClose={() => {
+          setIsAddModalOpen(false)
+          setEditingProject(null)
+        }}
         onSuccess={fetchProjects}
+        initialData={editingProject}
       />
     </div>
   )
