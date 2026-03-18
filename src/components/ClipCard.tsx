@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode, useState, useEffect } from 'react'
+import { ReactNode } from 'react'
 import { motion } from 'framer-motion'
 
 interface ClipCardProps {
@@ -16,29 +16,24 @@ export function ClipCard({
   children, 
   className = '', 
   style = {}, 
-  rotation = 0,
+  rotation,
   delay = 0,
   onClick 
 }: ClipCardProps) {
-  // 使用 useState 和 useEffect 确保随机值只在客户端生成，避免 hydration 错误
-  // 初始值设为 0，确保 SSR 和客户端首次渲染一致
-  const [randomRotation, setRandomRotation] = useState(0)
-  
-  useEffect(() => {
-    // 只在客户端生成随机旋转角度（如果未传入 rotation 或 rotation 为 0）
-    if (typeof window !== 'undefined') {
-      if (rotation !== undefined && rotation !== 0) {
-        setRandomRotation(rotation)
-      } else {
-        setRandomRotation(Math.random() * 6 - 3) // -3 到 3 度
-      }
+  const randomRotation = (() => {
+    if (rotation !== undefined) return rotation
+    const seed = `${className}:${delay}`
+    let hash = 0
+    for (let i = 0; i < seed.length; i += 1) {
+      hash = (hash << 5) - hash + seed.charCodeAt(i)
+      hash |= 0
     }
-  }, [rotation])
+    return ((Math.abs(hash) % 600) - 300) / 100 // -3 到 3 度（稳定值）
+  })()
   
   return (
     <motion.div
       className={`clip-card ${className}`}
-      suppressHydrationWarning
       style={{
         padding: '20px',
         backgroundColor: 'rgba(255, 255, 255, 0.95)',

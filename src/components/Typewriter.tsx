@@ -13,36 +13,52 @@ interface TypewriterProps {
 
 export function Typewriter({ text, speed = 50, delay = 0, className = '', onComplete }: TypewriterProps) {
   const [displayedText, setDisplayedText] = useState('')
-  const [isComplete, setIsComplete] = useState(false)
 
   useEffect(() => {
+    let delayTimer: ReturnType<typeof setTimeout> | null = null
+    let typingTimer: ReturnType<typeof setInterval> | null = null
+
+    if (text.length === 0) {
+      delayTimer = setTimeout(() => {
+        setDisplayedText('')
+        onComplete?.()
+      }, 0)
+      return
+    }
+
+    const startTyping = () => {
+      let currentIndex = 0
+      setDisplayedText('')
+      typingTimer = setInterval(() => {
+        if (currentIndex < text.length) {
+          currentIndex += 1
+          setDisplayedText(text.slice(0, currentIndex))
+          return
+        }
+
+        if (typingTimer) {
+          clearInterval(typingTimer)
+          typingTimer = null
+        }
+        onComplete?.()
+      }, speed)
+    }
+
     if (delay > 0) {
-      const delayTimer = setTimeout(() => {
-        startTyping()
-      }, delay)
-      return () => clearTimeout(delayTimer)
+      delayTimer = setTimeout(startTyping, delay)
     } else {
       startTyping()
     }
-  }, [text, delay])
 
-  const startTyping = () => {
-    let currentIndex = 0
-    const timer = setInterval(() => {
-      if (currentIndex < text.length) {
-        setDisplayedText(text.slice(0, currentIndex + 1))
-        currentIndex++
-      } else {
-        clearInterval(timer)
-        setIsComplete(true)
-        if (onComplete) {
-          onComplete()
-        }
+    return () => {
+      if (delayTimer) {
+        clearTimeout(delayTimer)
       }
-    }, speed)
-
-    return () => clearInterval(timer)
-  }
+      if (typingTimer) {
+        clearInterval(typingTimer)
+      }
+    }
+  }, [text, speed, delay, onComplete])
 
   return (
     <motion.span
@@ -52,7 +68,7 @@ export function Typewriter({ text, speed = 50, delay = 0, className = '', onComp
       transition={{ duration: 0.3 }}
     >
       {displayedText}
-      {!isComplete && (
+      {displayedText.length < text.length && (
         <motion.span
           animate={{ opacity: [1, 0] }}
           transition={{ duration: 0.8, repeat: Infinity }}

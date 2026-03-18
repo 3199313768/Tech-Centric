@@ -23,6 +23,7 @@ interface Message {
 const AVATAR_SRC = '/images/avatar.jpg'
 const PHONE = '17613712197'
 const RECIPIENT_EMAIL = '3199313768@qq.com'
+const RESUME_URL: string | null = null
 
 const quickReplies = [
   { emoji: '💼', label: '合作咨询' },
@@ -279,32 +280,34 @@ function SocialLinksCard({ onRestart }: { onRestart: () => void }) {
           marginBottom: '20px',
         }}
       >
-        <motion.a
-          href="/resume.docx"
-          download="杨倩-简历-3年.docx"
-          style={{
-            padding: '8px 16px',
-            borderRadius: '20px',
-            border: '1px solid var(--color-cyan-30)',
-            backgroundColor: 'var(--color-cyan-10)',
-            color: 'var(--color-cyan)',
-            textDecoration: 'none',
-            fontSize: '13px',
-            fontFamily: 'var(--font-space-mono), monospace',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            transition: 'all 0.2s ease',
-          }}
-          whileHover={{
-            scale: 1.05,
-            backgroundColor: 'var(--color-cyan-20)',
-            borderColor: 'var(--color-cyan)',
-          }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <span>📄</span> 下载简历
-        </motion.a>
+        {RESUME_URL && (
+          <motion.a
+            href={RESUME_URL}
+            download="杨倩-简历-3年.docx"
+            style={{
+              padding: '8px 16px',
+              borderRadius: '20px',
+              border: '1px solid var(--color-cyan-30)',
+              backgroundColor: 'var(--color-cyan-10)',
+              color: 'var(--color-cyan)',
+              textDecoration: 'none',
+              fontSize: '13px',
+              fontFamily: 'var(--font-space-mono), monospace',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.2s ease',
+            }}
+            whileHover={{
+              scale: 1.05,
+              backgroundColor: 'var(--color-cyan-20)',
+              borderColor: 'var(--color-cyan)',
+            }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <span>📄</span> 下载简历
+          </motion.a>
+        )}
         {links.map((link) => (
           <motion.a
             key={link.name}
@@ -439,31 +442,33 @@ function QuickContactBar() {
         padding: '0 8px',
       }}
     >
-      <motion.a
-        href="/resume.docx"
-        download="杨倩-简历-3年.docx"
-        style={{
-          padding: '6px 14px',
-          borderRadius: '16px',
-          border: '1px solid var(--color-cyan-20)',
-          backgroundColor: 'var(--color-cyan-10)',
-          color: 'var(--color-text-secondary)',
-          textDecoration: 'none',
-          fontSize: '12px',
-          fontFamily: 'var(--font-space-mono), monospace',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          transition: 'all 0.2s ease',
-        }}
-        whileHover={{
-          scale: 1.05,
-          borderColor: 'var(--color-cyan)',
-          color: 'var(--color-cyan)',
-        }}
-      >
-        <span>📄</span> 下载简历
-      </motion.a>
+      {RESUME_URL && (
+        <motion.a
+          href={RESUME_URL}
+          download="杨倩-简历-3年.docx"
+          style={{
+            padding: '6px 14px',
+            borderRadius: '16px',
+            border: '1px solid var(--color-cyan-20)',
+            backgroundColor: 'var(--color-cyan-10)',
+            color: 'var(--color-text-secondary)',
+            textDecoration: 'none',
+            fontSize: '12px',
+            fontFamily: 'var(--font-space-mono), monospace',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            transition: 'all 0.2s ease',
+          }}
+          whileHover={{
+            scale: 1.05,
+            borderColor: 'var(--color-cyan)',
+            color: 'var(--color-cyan)',
+          }}
+        >
+          <span>📄</span> 下载简历
+        </motion.a>
+      )}
       <motion.a
         href={`mailto:${RECIPIENT_EMAIL}`}
         style={{

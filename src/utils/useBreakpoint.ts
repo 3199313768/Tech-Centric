@@ -8,20 +8,40 @@ interface Breakpoint {
   isDesktop: boolean  // > 1024px
 }
 
+function getBreakpointByWidth(width: number): Breakpoint {
+  return {
+    isMobile: width <= 768,
+    isTablet: width > 768 && width <= 1024,
+    isDesktop: width > 1024,
+  }
+}
+
+function getInitialBreakpoint(): Breakpoint {
+  if (typeof window === 'undefined') {
+    return {
+      isMobile: false,
+      isTablet: false,
+      isDesktop: true,
+    }
+  }
+  return getBreakpointByWidth(window.innerWidth)
+}
+
 export function useBreakpoint(): Breakpoint {
-  const [breakpoint, setBreakpoint] = useState<Breakpoint>({
-    isMobile: false,
-    isTablet: false,
-    isDesktop: true,
-  })
+  const [breakpoint, setBreakpoint] = useState<Breakpoint>(getInitialBreakpoint)
 
   useEffect(() => {
     const update = () => {
-      const w = window.innerWidth
-      setBreakpoint({
-        isMobile: w <= 768,
-        isTablet: w > 768 && w <= 1024,
-        isDesktop: w > 1024,
+      const next = getBreakpointByWidth(window.innerWidth)
+      setBreakpoint((prev) => {
+        if (
+          prev.isMobile === next.isMobile &&
+          prev.isTablet === next.isTablet &&
+          prev.isDesktop === next.isDesktop
+        ) {
+          return prev
+        }
+        return next
       })
     }
 
