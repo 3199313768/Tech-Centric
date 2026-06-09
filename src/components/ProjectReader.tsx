@@ -185,10 +185,10 @@ export function ProjectReader({ project, isOpen, onClose }: ProjectReaderProps) 
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = '#00b8d9'
-                  e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 217, 255, 0.5)'
+                  e.currentTarget.style.boxShadow = '0 0 20px rgba(180, 58, 36, 0.5)'
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#00d9ff'
+                  e.currentTarget.style.backgroundColor = 'var(--color-cyan)'
                   e.currentTarget.style.boxShadow = 'none'
                 }}
               >
@@ -221,8 +221,8 @@ export function ProjectReader({ project, isOpen, onClose }: ProjectReaderProps) 
                   gap: '8px',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(0, 217, 255, 0.1)'
-                  e.currentTarget.style.boxShadow = '0 0 15px rgba(0, 217, 255, 0.3)'
+                  e.currentTarget.style.backgroundColor = 'rgba(180, 58, 36, 0.1)'
+                  e.currentTarget.style.boxShadow = '0 0 15px rgba(180, 58, 36, 0.3)'
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = 'transparent'

@@ -31,14 +31,21 @@ export function Hero() {
     <motion.div
       className="relative pointer-events-auto"
       style={{
-        fontFamily: 'var(--font-space-mono), monospace',
-        zIndex: 100,
-        maxWidth: '800px',
-        padding: isMobile ? '80px 20px 40px' : isTablet ? '100px 30px 60px' : '120px 40px 80px',
-        minHeight: '100vh',
+        fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
+        zIndex: 20,
+        width: 'min(760px, calc(100vw - 32px))',
+        padding: isMobile ? '28px 22px' : isTablet ? '34px 34px' : '42px 46px',
+        minHeight: 'auto',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
+        marginTop: isMobile ? '72px' : '92px',
+        marginRight: isMobile ? '0' : 'min(28vw, 420px)',
+        background: 'linear-gradient(135deg, rgba(255, 249, 239, 0.78), rgba(255, 231, 194, 0.48))',
+        border: '1px solid rgba(180, 58, 36, 0.16)',
+        borderRadius: isMobile ? '22px' : '30px',
+        backdropFilter: 'blur(18px) saturate(1.08)',
+        boxShadow: '0 28px 80px rgba(87, 53, 38, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.34)',
       }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -57,10 +64,10 @@ export function Hero() {
 
       {/* 杂志封面大标题 */}
       <motion.h1
-        className="magazine-headline glitch"
+        className="magazine-headline"
         data-text={personalInfo.name}
         style={{
-          fontSize: 'clamp(48px, 8vw, 96px)',
+          fontSize: 'clamp(42px, 7vw, 88px)',
           fontWeight: 'bold',
           lineHeight: '1.1',
           textShadow: 'var(--color-headline-shadow)',
@@ -68,6 +75,7 @@ export function Hero() {
           display: 'block',
           marginBottom: '16px',
           color: 'var(--color-text-hero)',
+          letterSpacing: '-0.04em',
         }}
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -142,14 +150,15 @@ export function Hero() {
               display: 'inline-block',
               padding: isMobile ? '4px 10px' : '6px 16px',
               fontSize: isMobile ? '11px' : '12px',
-              fontFamily: 'var(--font-jetbrains-mono), monospace',
+              fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
+              fontWeight: 700,
               color: 'var(--color-cyan)',
               border: '1px solid var(--color-cyan-40)',
               backgroundColor: 'var(--color-cyan-10)',
-              borderRadius: '4px',
+              borderRadius: '999px',
               textTransform: 'uppercase',
-              letterSpacing: '1.5px',
-              boxShadow: '0 0 12px var(--color-cyan-glow)',
+              letterSpacing: '1px',
+              boxShadow: '0 8px 20px rgba(247, 178, 91, 0.18)',
               cursor: 'default',
             }}
             initial={{ opacity: 0, y: -50, rotate: -10 }}
@@ -162,10 +171,10 @@ export function Hero() {
             }}
             whileHover={{
               scale: 1.1,
-              rotate: Math.random() > 0.5 ? 5 : -5,
+              rotate: index % 2 === 0 ? 3 : -3,
               borderColor: 'var(--color-cyan)',
               backgroundColor: 'var(--color-cyan-15)',
-              boxShadow: '0 0 20px var(--color-cyan-glow-strong)',
+              boxShadow: '0 12px 28px rgba(247, 178, 91, 0.3)',
               transition: { duration: 0.2 }
             }}
           >
@@ -194,17 +203,17 @@ export function Hero() {
             fontFamily: 'var(--font-space-mono), monospace',
             fontWeight: 'bold',
             color: 'var(--color-bg)',
-            backgroundColor: 'var(--color-cyan)',
+            background: 'linear-gradient(135deg, #b43a24 0%, #c7812f 100%)',
             border: '2px solid var(--color-cyan)',
-            borderRadius: '0',
+            borderRadius: '999px',
             cursor: 'pointer',
             textTransform: 'uppercase',
             letterSpacing: '2px',
-            boxShadow: '0 0 25px var(--color-cyan-glow-strong)',
+            boxShadow: '0 14px 34px rgba(180, 58, 36, 0.28)',
           }}
           whileHover={{
             scale: 1.05,
-            boxShadow: '0 0 35px var(--color-cyan-glow-strong)',
+            boxShadow: '0 18px 42px rgba(180, 58, 36, 0.36)',
           }}
           whileTap={{ scale: 0.95 }}
         >
@@ -219,18 +228,18 @@ export function Hero() {
               fontFamily: 'var(--font-space-mono), monospace',
               fontWeight: 'bold',
               color: 'var(--color-cyan)',
-              backgroundColor: 'transparent',
+              backgroundColor: 'rgba(255, 249, 239, 0.42)',
               border: '2px solid var(--color-cyan)',
-              borderRadius: '0',
+              borderRadius: '999px',
               cursor: 'pointer',
               textTransform: 'uppercase',
               letterSpacing: '2px',
-              boxShadow: '0 0 20px var(--color-cyan-glow)',
+              boxShadow: '0 12px 28px rgba(247, 178, 91, 0.18)',
             }}
             whileHover={{
               scale: 1.05,
               backgroundColor: 'var(--color-cyan-15)',
-              boxShadow: '0 0 30px var(--color-cyan-glow-strong)',
+              boxShadow: '0 16px 36px rgba(247, 178, 91, 0.3)',
             }}
             whileTap={{ scale: 0.95 }}
           >

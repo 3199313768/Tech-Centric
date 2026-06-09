@@ -107,8 +107,8 @@ export function Achievements({ compact = false }: AchievementsProps) {
                       marginBottom: '20px',
                       borderRadius: '4px',
                       overflow: 'hidden',
-                      backgroundColor: 'rgba(0, 217, 255, 0.05)',
-                      border: '2px solid rgba(0, 217, 255, 0.2)',
+                      backgroundColor: 'rgba(180, 58, 36, 0.05)',
+                      border: '2px solid rgba(180, 58, 36, 0.2)',
                       position: 'relative',
                     }}
                     whileHover={{ scale: 1.05 }}
@@ -155,13 +155,13 @@ export function Achievements({ compact = false }: AchievementsProps) {
                         color: '#0a0a0a',
                         fontFamily: 'var(--font-space-mono), monospace',
                         padding: '6px 12px',
-                        border: '2px solid rgba(0, 217, 255, 0.4)',
+                        border: '2px solid rgba(180, 58, 36, 0.4)',
                         borderRadius: '4px',
                         textTransform: 'uppercase',
                         letterSpacing: '1px',
                         display: 'inline-block',
                         marginBottom: '12px',
-                        backgroundColor: 'rgba(0, 217, 255, 0.1)',
+                        backgroundColor: 'rgba(180, 58, 36, 0.1)',
                         fontWeight: 'bold',
                       }}
                     >
@@ -186,7 +186,7 @@ export function Achievements({ compact = false }: AchievementsProps) {
                       color: 'rgba(10, 10, 10, 0.6)',
                       fontFamily: 'var(--font-space-mono), monospace',
                       whiteSpace: 'nowrap',
-                      backgroundColor: 'rgba(0, 217, 255, 0.1)',
+                      backgroundColor: 'rgba(180, 58, 36, 0.1)',
                       padding: '4px 10px',
                       borderRadius: '4px',
                     }}

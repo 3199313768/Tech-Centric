@@ -33,8 +33,8 @@ export function Blog() {
           fontFamily: 'var(--font-space-mono), monospace',
           textTransform: 'uppercase',
           letterSpacing: '2px',
-          color: '#00d9ff',
-          textShadow: '0 0 20px rgba(0, 217, 255, 0.5)',
+          color: 'var(--color-cyan)',
+          textShadow: '0 0 20px rgba(180, 58, 36, 0.5)',
         }}
       >
         博客
@@ -56,9 +56,9 @@ export function Blog() {
             fontSize: '13px',
             fontFamily: 'var(--font-space-mono), monospace',
             fontWeight: selectedCategory === null ? 'bold' : 'normal',
-            color: selectedCategory === null ? '#00d9ff' : 'rgba(255, 255, 255, 0.7)',
-            backgroundColor: selectedCategory === null ? 'rgba(0, 217, 255, 0.1)' : 'transparent',
-            border: `1px solid ${selectedCategory === null ? 'rgba(0, 217, 255, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
+            color: selectedCategory === null ? 'var(--color-cyan)' : 'rgba(255, 255, 255, 0.7)',
+            backgroundColor: selectedCategory === null ? 'rgba(180, 58, 36, 0.1)' : 'transparent',
+            border: `1px solid ${selectedCategory === null ? 'rgba(180, 58, 36, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
             borderRadius: '4px',
             cursor: 'pointer',
             textTransform: 'uppercase',
@@ -77,9 +77,9 @@ export function Blog() {
               fontSize: '13px',
               fontFamily: 'var(--font-space-mono), monospace',
               fontWeight: selectedCategory === category ? 'bold' : 'normal',
-              color: selectedCategory === category ? '#00d9ff' : 'rgba(255, 255, 255, 0.7)',
-              backgroundColor: selectedCategory === category ? 'rgba(0, 217, 255, 0.1)' : 'transparent',
-              border: `1px solid ${selectedCategory === category ? 'rgba(0, 217, 255, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
+              color: selectedCategory === category ? 'var(--color-cyan)' : 'rgba(255, 255, 255, 0.7)',
+              backgroundColor: selectedCategory === category ? 'rgba(180, 58, 36, 0.1)' : 'transparent',
+              border: `1px solid ${selectedCategory === category ? 'rgba(180, 58, 36, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
               borderRadius: '4px',
               cursor: 'pointer',
               textTransform: 'uppercase',
@@ -104,8 +104,8 @@ export function Blog() {
             key={post.id}
             style={{
               padding: '24px',
-              border: '1px solid rgba(0, 217, 255, 0.3)',
-              backgroundColor: 'rgba(0, 217, 255, 0.05)',
+              border: '1px solid rgba(180, 58, 36, 0.3)',
+              backgroundColor: 'rgba(180, 58, 36, 0.05)',
               borderRadius: '8px',
               transition: 'all 0.3s ease',
               cursor: 'pointer',
@@ -116,14 +116,14 @@ export function Blog() {
               }
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(0, 217, 255, 0.6)'
-              e.currentTarget.style.backgroundColor = 'rgba(0, 217, 255, 0.1)'
-              e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 217, 255, 0.3)'
+              e.currentTarget.style.borderColor = 'rgba(180, 58, 36, 0.6)'
+              e.currentTarget.style.backgroundColor = 'rgba(180, 58, 36, 0.1)'
+              e.currentTarget.style.boxShadow = '0 0 20px rgba(180, 58, 36, 0.3)'
               e.currentTarget.style.transform = 'translateX(8px)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(0, 217, 255, 0.3)'
-              e.currentTarget.style.backgroundColor = 'rgba(0, 217, 255, 0.05)'
+              e.currentTarget.style.borderColor = 'rgba(180, 58, 36, 0.3)'
+              e.currentTarget.style.backgroundColor = 'rgba(180, 58, 36, 0.05)'
               e.currentTarget.style.boxShadow = 'none'
               e.currentTarget.style.transform = 'translateX(0)'
             }}
@@ -143,7 +143,7 @@ export function Blog() {
                   style={{
                     fontSize: '20px',
                     fontWeight: 'bold',
-                    color: '#00d9ff',
+                    color: 'var(--color-cyan)',
                     fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
                     marginBottom: '8px',
                   }}
@@ -164,7 +164,7 @@ export function Blog() {
                       color: 'rgba(255, 255, 255, 0.6)',
                       fontFamily: 'var(--font-space-mono), monospace',
                       padding: '4px 10px',
-                      border: '1px solid rgba(0, 217, 255, 0.3)',
+                      border: '1px solid rgba(180, 58, 36, 0.3)',
                       borderRadius: '4px',
                       textTransform: 'uppercase',
                     }}
@@ -213,7 +213,7 @@ export function Blog() {
                       color: 'rgba(255, 255, 255, 0.6)',
                       fontFamily: 'var(--font-space-mono), monospace',
                       padding: '2px 8px',
-                      backgroundColor: 'rgba(0, 217, 255, 0.1)',
+                      backgroundColor: 'rgba(180, 58, 36, 0.1)',
                       borderRadius: '4px',
                     }}
                   >

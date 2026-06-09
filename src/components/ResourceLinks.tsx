@@ -4,27 +4,17 @@ import { motion } from "framer-motion";
 import { useState, useEffect, useCallback } from "react";
 import { type ResourceItem } from "@/data/initialResources";
 import { createClient } from "@/lib/supabase/client";
+import { useBreakpoint } from "@/utils/useBreakpoint";
+import { SpiritSubpageHero } from "@/components/spirit/SpiritSubpageHero";
+import { ResourceToolbar } from "@/components/spirit/resource/ResourceToolbar";
+import { ResourcePinnedRail } from "@/components/spirit/resource/ResourcePinnedRail";
+import { ResourceShelfGrid } from "@/components/spirit/resource/ResourceShelfGrid";
+import type { ResourceCardHandlers } from "@/components/spirit/resource/ResourceCard";
+import { RESOURCE_CATEGORY_LABELS } from "@/utils/resourceCategory";
 
 const CANDIDATE_KEY = "tech-centric-candidates";
 
 export type { ResourceItem };
-
-const CATEGORY_LABELS: Record<string, string> = {
-  learning: "学习",
-  ai: "AI",
-  tools: "工具",
-  design: "设计",
-  other: "其他",
-};
-
-const CATEGORY_ICONS: Record<string, string> = {
-  learning: "📚",
-  ai: "🤖",
-  tools: "🛠️",
-  design: "🎨",
-  other: "🔗",
-};
-
 
 function loadCandidates(): ResourceItem[] {
   if (typeof window === "undefined") return [];
@@ -61,82 +51,6 @@ const emptyForm: FormData = {
   tags: [],
 };
 
-function getFaviconUrl(url: string): string {
-  try {
-    const host = new URL(url.startsWith("http") ? url : `https://${url}`)
-      .hostname;
-    return `https://www.google.com/s2/favicons?domain=${host}&sz=128`;
-  } catch {
-    return "";
-  }
-}
-
-function ResourceFavicon({
-  url,
-  category,
-  name,
-}: {
-  url: string;
-  category: ResourceItem["category"];
-  name: string;
-}) {
-  const [faviconFailed, setFaviconFailed] = useState(false);
-  const faviconUrl = getFaviconUrl(url);
-  const useFavicon = faviconUrl && !faviconFailed;
-
-  return (
-    <div
-      style={{
-        background: "var(--color-ai-card-icon-bg)",
-        width: "60px",
-        height: "60px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: "12px",
-        border: "1px solid var(--color-ai-card-icon-border)",
-        overflow: "hidden",
-      }}
-    >
-      {useFavicon ? (
-        // eslint-disable-next-line @next/next/no-img-element -- 动态外部 favicon，无法用 next/image 预配置
-        <img
-          src={faviconUrl}
-          alt=""
-          width={48}
-          height={48}
-          onError={(e) => {
-            // First failure: try falling back to standard /favicon.ico
-            if (!faviconUrl.includes("google.com")) {
-              setFaviconFailed(true);
-              return;
-            }
-            try {
-              const origin = new URL(
-                url.startsWith("http") ? url : `https://${url}`,
-              ).origin;
-              const fallbackUrl = `${origin}/favicon.ico`;
-              const img = e.currentTarget as HTMLImageElement;
-              if (img.src !== fallbackUrl) {
-                img.src = fallbackUrl;
-              } else {
-                setFaviconFailed(true);
-              }
-            } catch {
-              setFaviconFailed(true);
-            }
-          }}
-          style={{ objectFit: "contain" }}
-        />
-      ) : (
-        <span style={{ fontSize: "2rem" }}>
-          {name?.trim()?.[0]?.toUpperCase() ?? CATEGORY_ICONS[category]}
-        </span>
-      )}
-    </div>
-  );
-}
-
 interface ConfirmModalProps {
   isOpen: boolean;
   title: string;
@@ -155,89 +69,23 @@ function ConfirmModal({
   if (!isOpen) return null;
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        zIndex: 2000,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "20px",
-        backgroundColor: "rgba(0, 0, 0, 0.7)",
-        backdropFilter: "blur(8px)",
-      }}
-      onClick={onCancel}
-    >
+    <div className="sg-modal-backdrop" style={{ zIndex: 2000 }} onClick={onCancel}>
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        style={{
-          width: "100%",
-          maxWidth: "400px",
-          background: "var(--color-ai-card-bg)",
-          border: "1px solid var(--color-cyan-50)",
-          borderRadius: "16px",
-          padding: "32px",
-          boxShadow: "0 20px 50px rgba(0,0,0,0.5)",
-          position: "relative",
-        }}
+        className="sg-modal-panel"
+        style={{ maxWidth: "400px" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h3
-          style={{
-            fontSize: "1.2rem",
-            color: "var(--color-cyan)",
-            marginBottom: "16px",
-            fontFamily: "var(--font-space-mono), monospace",
-          }}
-        >
-          {title}
-        </h3>
-        <p
-          style={{
-            color: "var(--color-text-secondary)",
-            fontSize: "0.95rem",
-            lineHeight: 1.6,
-            marginBottom: "32px",
-          }}
-        >
+        <h3 className="sg-modal-title">{title}</h3>
+        <p className="sg-page-lead" style={{ marginBottom: "24px", textAlign: "left" }}>
           {message}
         </p>
-        <div
-          style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}
-        >
-          <button
-            onClick={onCancel}
-            style={{
-              padding: "8px 20px",
-              borderRadius: "8px",
-              border: "1px solid var(--color-ai-tag-border)",
-              background: "transparent",
-              color: "var(--color-text-muted)",
-              cursor: "pointer",
-              fontSize: "14px",
-            }}
-          >
+        <div className="sg-modal-actions" style={{ marginTop: 0, paddingTop: 0, borderTop: "none" }}>
+          <button type="button" className="sg-btn sg-btn--ghost" onClick={onCancel}>
             取消
           </button>
-          <button
-            onClick={onConfirm}
-            style={{
-              padding: "8px 20px",
-              borderRadius: "8px",
-              border: "none",
-              background: "var(--color-cyan)",
-              color: "var(--color-bg)",
-              fontWeight: 600,
-              cursor: "pointer",
-              fontSize: "14px",
-              boxShadow: "0 0 15px var(--color-cyan-30)",
-            }}
-          >
+          <button type="button" className="sg-btn sg-btn--primary" onClick={onConfirm}>
             确认
           </button>
         </div>
@@ -246,47 +94,11 @@ function ConfirmModal({
   );
 }
 
-const SearchHighlight = ({ text, query }: { text: string; query: string }) => {
-  const safeText = String(text || "");
-  const trimmedQuery = query.trim();
-
-  if (!trimmedQuery) return <span>{safeText}</span>;
-
-  let parts: string[] = [];
-  try {
-    const regex = new RegExp(
-      `(${trimmedQuery.replace(/[-[\]{}()*+?.,\\\\^$|#\\s]/g, "\\\\$&")})`,
-      "gi",
-    );
-    parts = safeText.split(regex);
-  } catch {
-    return <span>{safeText}</span>;
-  }
-
-  return (
-    <span>
-      {parts.map((part, i) =>
-        part.toLowerCase() === trimmedQuery.toLowerCase() ? (
-          <mark
-            key={i}
-            style={{
-              backgroundColor: "var(--color-cyan-30)",
-              color: "var(--color-cyan)",
-              padding: "0 2px",
-              borderRadius: "2px",
-            }}
-          >
-            {part}
-          </mark>
-        ) : (
-          part
-        ),
-      )}
-    </span>
-  );
-};
-
 export function ResourceLinks() {
+  const { isMobile, isTablet } = useBreakpoint();
+  const modalPad = isMobile ? "20px" : isTablet ? "28px" : "40px";
+  const overlayPad = isMobile ? "12px" : "20px";
+  const [nowTs] = useState(() => Date.now());
   const [items, setItems] = useState<ResourceItem[]>([]);
   const [categories, setCategories] = useState<string[]>([
     "learning",
@@ -358,43 +170,28 @@ export function ResourceLinks() {
   // AI 发现结果弹窗
   const discoveryModalContent = showDiscoveryModal ? (
       <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          zIndex: 1500,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "20px",
-          backgroundColor: "rgba(0, 0, 0, 0.8)",
-          backdropFilter: "blur(12px)",
-        }}
+        className="sg-resource-modal-shell"
+        style={{ zIndex: 1500, padding: overlayPad }}
         onClick={() => setShowDiscoveryModal(false)}
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
+          className="sg-resource-modal-panel"
           style={{
-            width: "100%",
             maxWidth: "800px",
-            maxHeight: "80vh",
-            background: "var(--color-ai-card-bg)",
-            border: "1px solid var(--color-cyan-50)",
-            borderRadius: "20px",
-            padding: "40px",
-            overflowY: "auto",
-            boxShadow: "0 0 100px rgba(0, 217, 255, 0.2)",
+            maxHeight: isMobile ? "88dvh" : "80vh",
+            padding: modalPad,
           }}
           onClick={(e) => e.stopPropagation()}
         >
           <div
+            className="sg-resource-discovery-head"
             style={{
               display: "flex",
               justifyContent: "space-between",
-              marginBottom: "32px",
+              marginBottom: isMobile ? "20px" : "32px",
+              gap: "12px",
             }}
           >
             <div>
@@ -451,15 +248,16 @@ export function ResourceLinks() {
             {discoveredItems.map((item) => (
               <div
                 key={item.id}
+                className="sg-resource-discovery-item"
                 style={{
-                  padding: "24px",
+                  padding: isMobile ? "16px" : "24px",
                   borderRadius: "12px",
                   border: "1px solid var(--color-ai-card-border)",
                   background: "rgba(255,255,255,0.03)",
                   display: "flex",
                   justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: "20px",
+                  alignItems: isMobile ? "stretch" : "center",
+                  gap: isMobile ? "12px" : "20px",
                 }}
               >
                 <div style={{ flex: 1 }}>
@@ -475,7 +273,7 @@ export function ResourceLinks() {
                       style={{
                         fontSize: "10px",
                         padding: "2px 6px",
-                        background: "rgba(0, 217, 255, 0.1)",
+                        background: "rgba(180, 58, 36, 0.1)",
                         color: "var(--color-cyan)",
                         borderRadius: "4px",
                         border: "1px solid var(--color-cyan-30)",
@@ -518,11 +316,12 @@ export function ResourceLinks() {
                     ))}
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: "8px", flexDirection: "column" }}>
+                <div className="sg-resource-discovery-actions" style={{ display: "flex", gap: "8px", flexDirection: isMobile ? "row" : "column" }}>
                   <button
                     onClick={() => addToLibrary(item)}
                     style={{
-                      padding: "8px 16px",
+                      padding: isMobile ? "10px 14px" : "8px 16px",
+                      minHeight: "var(--sg-touch-min)",
                       borderRadius: "6px",
                       background: "var(--color-cyan-10)",
                       border: "1px solid var(--color-cyan-50)",
@@ -543,7 +342,8 @@ export function ResourceLinks() {
                       saveCandidates(nextCandidates);
                     }}
                     style={{
-                      padding: "8px 16px",
+                      padding: isMobile ? "10px 14px" : "8px 16px",
+                      minHeight: "var(--sg-touch-min)",
                       borderRadius: "6px",
                       background: "rgba(239, 68, 68, 0.1)",
                       border: "1px solid rgba(239, 68, 68, 0.3)",
@@ -945,803 +745,149 @@ export function ResourceLinks() {
     e.target.value = ""; // reset
   };
 
-  return (
-    <div
-      style={{
-        padding: "120px 24px 80px",
-        maxWidth: "1200px",
-        margin: "0 auto",
-        minHeight: "100vh",
-        color: "var(--color-text-primary)",
-        fontFamily: "var(--font-inter), sans-serif",
-      }}
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        style={{ marginBottom: "40px", textAlign: "center" }}
-      >
-        <p
-          style={{
-            color: "var(--color-text-secondary)",
-            fontSize: "1.2rem",
-            maxWidth: "600px",
-            margin: "0 auto",
-            lineHeight: 1.6,
-          }}
-        >
-          学习网站、AI 相关网站等常用链接
-          {items.length > 0 && (
-            <span
-              style={{
-                display: "block",
-                fontSize: "12px",
-                opacity: 0.5,
-                marginTop: "8px",
-              }}
-            >
-              已索引 {items.length} 个技术资源
-            </span>
-          )}
-        </p>
-      </motion.div>
+  const pinnedCount = items.filter((i) => i.isPinned).length;
+  const categoryCount = new Set(items.map((i) => i.category)).size;
 
-      {/* 搜索框 */}
+  const cardHandlers: ResourceCardHandlers = {
+    onCopy: handleCopy,
+    onTogglePin: togglePin,
+    onEdit: (e, item) => {
+      e.stopPropagation();
+      openForm(item);
+    },
+    onDeleteRequest: (e, id) => {
+      e.stopPropagation();
+      setDeleteConfirmId(id);
+    },
+    onDeleteConfirm: (e, id) => {
+      e.stopPropagation();
+      handleDelete(id);
+    },
+    onDeleteCancel: (e) => {
+      e.stopPropagation();
+      setDeleteConfirmId(null);
+    },
+    onTagClick: handleTagClick,
+    onVisit: incrementClick,
+    onSelectToggle: (id) => {
+      const next = new Set(selectedIds);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      setSelectedIds(next);
+    },
+  };
+
+  const handlePinnedVisit = (item: ResourceItem) => {
+    incrementClick(item.id);
+    window.open(item.url, "_blank", "noopener,noreferrer");
+  };
+
+  return (
+    <div className="sg-page sg-resource-page">
+      <SpiritSubpageHero
+        theme="library"
+        eyebrow="行囊藏阁"
+        title="资源"
+        lead="学习网站、AI 相关网站等常用链接，像整理行囊一样收藏与检索技术资源。"
+        stats={[
+          { label: "资源总数", value: items.length },
+          { label: "置顶书签", value: pinnedCount },
+          { label: "分类维度", value: categoryCount },
+        ]}
+      />
+
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.15 }}
-        style={{
-          marginBottom: "20px",
-          maxWidth: "400px",
-          margin: "0 auto 20px",
-        }}
+        className="sg-resource-search-wrap"
       >
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="搜索名称、描述或标签..."
-          style={{
-            width: "100%",
-            padding: "12px 16px",
-            fontSize: "14px",
-            background: "var(--color-ai-tag-bg)",
-            border: "1px solid var(--color-ai-tag-border)",
-            borderRadius: "10px",
-            color: "var(--color-text-primary)",
-            outline: "none",
-          }}
+          className="sg-form-input sg-resource-search"
         />
       </motion.div>
 
-      {/* 分类筛选 + 添加按钮 */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "12px",
-          justifyContent: "center",
-          alignItems: "center",
-          marginBottom: "32px",
+      <ResourceToolbar
+        categories={categories}
+        filter={filter}
+        isManageMode={isManageMode}
+        isExploring={isExploring}
+        candidateCount={candidateItems.length}
+        onFilterChange={setFilter}
+        onToggleManage={() => setIsManageMode(!isManageMode)}
+        onAdd={() => openForm()}
+        onOpenCandidates={() => {
+          setDiscoveredItems(candidateItems);
+          setShowDiscoveryModal(true);
         }}
-      >
-        {(["all", ...categories] as const).map((key) => (
-          <button
-            key={key}
-            onClick={() => setFilter(key)}
-            style={{
-              padding: "8px 16px",
-              fontSize: "13px",
-              fontFamily: "var(--font-space-mono), monospace",
-              fontWeight: filter === key ? "bold" : "normal",
-              color:
-                filter === key
-                  ? "var(--color-cyan)"
-                  : "var(--color-text-secondary)",
-              backgroundColor:
-                filter === key
-                  ? "var(--color-cyan-10)"
-                  : "var(--color-ai-tag-bg)",
-              border: `1px solid ${filter === key ? "var(--color-cyan-50)" : "var(--color-ai-tag-border)"}`,
-              borderRadius: "8px",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-            }}
-          >
-            {key === "all" ? "全部" : CATEGORY_LABELS[key] || key}
-          </button>
-        ))}
-        <div
-          style={{
-            width: "1px",
-            height: "24px",
-            background: "var(--color-ai-tag-border)",
-            margin: "0 8px",
-          }}
-        />
-        <button
-          onClick={() => setIsManageMode(!isManageMode)}
-          style={{
-            padding: "8px 16px",
-            fontSize: "13px",
-            fontFamily: "var(--font-space-mono), monospace",
-            color: isManageMode
-              ? "var(--color-cyan)"
-              : "var(--color-text-muted)",
-            backgroundColor: isManageMode
-              ? "var(--color-cyan-10)"
-              : "transparent",
-            border: `1px solid ${isManageMode ? "var(--color-cyan-50)" : "var(--color-ai-tag-border)"}`,
-            borderRadius: "8px",
-            cursor: "pointer",
-          }}
-        >
-          {isManageMode ? "退出管理" : "批量管理"}
-        </button>
-        <button
-          onClick={() => openForm()}
-          style={{
-            padding: "8px 20px",
-            fontSize: "13px",
-            fontFamily: "var(--font-space-mono), monospace",
-            fontWeight: 600,
-            color: "var(--color-bg)",
-            backgroundColor: "var(--color-cyan)",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            transition: "all 0.2s ease",
-            marginLeft: "8px",
-          }}
-        >
-          + 添加
-        </button>
+        onExplore={handleExplore}
+        onExport={handleExport}
+        onImport={handleImport}
+      />
 
-        <button
-          onClick={() => {
-            setDiscoveredItems(candidateItems);
-            setShowDiscoveryModal(true);
-          }}
-          disabled={candidateItems.length === 0}
-          title={candidateItems.length === 0 ? "暂无待选灵感" : "查看待选灵感"}
-          style={{
-            padding: "8px 16px",
-            fontSize: "13px",
-            background:
-              candidateItems.length > 0
-                ? "rgba(168, 85, 247, 0.1)"
-                : "var(--color-ai-tag-bg)",
-            border: `1px solid ${candidateItems.length > 0 ? "rgba(168, 85, 247, 0.3)" : "var(--color-ai-tag-border)"}`,
-            borderRadius: "8px",
-            color:
-              candidateItems.length > 0 ? "#a855f7" : "var(--color-text-muted)",
-            cursor: candidateItems.length > 0 ? "pointer" : "not-allowed",
-            fontWeight: 600,
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            opacity: candidateItems.length > 0 ? 1 : 0.6,
-          }}
-        >
-          💡 灵感待选{" "}
-          {candidateItems.length > 0 ? `(${candidateItems.length})` : ""}
-        </button>
+      <ResourcePinnedRail items={items} onVisit={handlePinnedVisit} />
 
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleExplore}
-          disabled={isExploring}
-          title="AI 灵感发现"
-          style={{
-            padding: "8px 20px",
-            fontSize: "13px",
-            fontFamily: "var(--font-space-mono), monospace",
-            fontWeight: 700,
-            color: "var(--color-bg)",
-            background: "linear-gradient(135deg, #a855f7 0%, var(--color-cyan) 100%)",
-            border: "none",
-            borderRadius: "10px",
-            cursor: isExploring ? "wait" : "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            boxShadow: "0 4px 15px rgba(168, 85, 247, 0.4)",
-            backdropFilter: "blur(10px)",
-          }}
-        >
-          {isExploring ? "正在扫描趋势..." : "✨ AI 发现"}
-        </motion.button>
-        <button
-          onClick={handleExport}
-          title="导出备份 (JSON)"
-          style={{
-            padding: "8px",
-            fontSize: "16px",
-            background: "transparent",
-            border: "1px solid var(--color-ai-tag-border)",
-            borderRadius: "8px",
-            cursor: "pointer",
-            color: "var(--color-text-muted)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          📥
-        </button>
-        <label
-          title="导入备份"
-          style={{
-            padding: "8px",
-            fontSize: "16px",
-            background: "transparent",
-            border: "1px solid var(--color-ai-tag-border)",
-            borderRadius: "8px",
-            cursor: "pointer",
-            color: "var(--color-text-muted)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          📤
-          <input
-            type="file"
-            accept=".json"
-            onChange={handleImport}
-            style={{ display: "none" }}
-          />
-        </label>
-      </motion.div>
-
-      {/* 批量操作工具栏 */}
-      {isManageMode && selectedIds.size > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          style={{
-            position: "fixed",
-            bottom: "24px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 100,
-            background: "var(--color-ai-card-bg)",
-            border: "1px solid var(--color-cyan-50)",
-            borderRadius: "12px",
-            padding: "12px 24px",
-            display: "flex",
-            alignItems: "center",
-            gap: "16px",
-            boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
-            backdropFilter: "blur(10px)",
-          }}
-        >
-          <span
-            style={{ fontSize: "14px", color: "var(--color-text-primary)" }}
-          >
-            已选择 <strong>{selectedIds.size}</strong> 项
-          </span>
-          <button
-            onClick={handleBatchDelete}
-            style={{
-              padding: "6px 12px",
-              fontSize: "13px",
-              color: "var(--color-red, #ef4444)",
-              background: "rgba(239,68,68,0.1)",
-              border: "1px solid rgba(239,68,68,0.3)",
-              borderRadius: "6px",
-              cursor: "pointer",
-            }}
-          >
-            批量删除
-          </button>
-          <button
-            onClick={() => setSelectedIds(new Set())}
-            style={{
-              padding: "6px 12px",
-              fontSize: "13px",
-              color: "var(--color-text-secondary)",
-              background: "transparent",
-              border: "1px solid var(--color-ai-tag-border)",
-              borderRadius: "6px",
-              cursor: "pointer",
-            }}
-          >
-            取消选择
-          </button>
-        </motion.div>
-      )}
-
-      {/* 空状态 */}
-      {filteredItems.length === 0 && (
+      {filteredItems.length === 0 ? (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          style={{
-            textAlign: "center",
-            padding: "60px 24px",
-            color: "var(--color-text-muted)",
-          }}
+          className="sg-state sg-state--empty"
         >
-          <p style={{ fontSize: "1rem", marginBottom: "20px" }}>
+          <p style={{ marginBottom: "20px" }}>
             {items.length === 0
               ? "暂无资源，点击上方「添加」添加第一个"
               : searchQuery.trim()
                 ? "未找到匹配的资源，尝试调整搜索关键词"
                 : "当前分类暂无资源"}
           </p>
-          {items.length === 0 && (
-            <button
-              onClick={() => openForm()}
-              style={{
-                padding: "12px 24px",
-                fontSize: "14px",
-                color: "var(--color-cyan)",
-                backgroundColor: "var(--color-cyan-10)",
-                border: "1px solid var(--color-cyan-50)",
-                borderRadius: "8px",
-                cursor: "pointer",
-                fontFamily: "var(--font-space-mono), monospace",
-              }}
-            >
+          {items.length === 0 ? (
+            <button type="button" className="sg-btn sg-btn--ghost" onClick={() => openForm()}>
               添加第一个
             </button>
-          )}
+          ) : null}
         </motion.div>
+      ) : (
+        <ResourceShelfGrid
+          items={filteredItems}
+          categories={categories}
+          filter={filter}
+          searchQuery={searchQuery}
+          nowTs={nowTs}
+          hoveredId={hoveredId}
+          isManageMode={isManageMode}
+          selectedIds={selectedIds}
+          copyingId={copyingId}
+          deleteConfirmId={deleteConfirmId}
+          onHoverChange={setHoveredId}
+          handlers={cardHandlers}
+        />
       )}
 
-      {/* 卡片列表 */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(clamp(280px, 30vw, 360px), 1fr))",
-          gap: "24px",
-        }}
-      >
-        {filteredItems.map((item) => (
-          <motion.div
-            layout
-            key={item.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            onMouseEnter={() => setHoveredId(item.id)}
-            onMouseLeave={() => setHoveredId(null)}
-            style={{
-              position: "relative",
-              background: "rgba(255, 255, 255, 0.02)",
-              border: `1px solid ${item.isPinned ? "var(--color-cyan-70)" : hoveredId === item.id ? "rgba(0, 217, 255, 0.4)" : "rgba(255, 255, 255, 0.05)"}`,
-              borderRadius: "20px",
-              padding: "32px 32px 24px",
-              display: "block",
-              overflow: "hidden",
-              transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-              transform:
-                hoveredId === item.id ? "translateY(-8px)" : "translateY(0)",
-              boxShadow: item.isPinned
-                ? `0 10px 30px rgba(0, 217, 255, 0.15)`
-                : hoveredId === item.id
-                  ? `0 20px 40px rgba(0, 0, 0, 0.4), 0 0 40px rgba(0, 217, 255, 0.12)`
-                  : `0 4px 20px rgba(0,0,0,0.2)`,
-              backdropFilter: "blur(24px)",
-              WebkitBackdropFilter: "blur(24px)",
-            }}
+      {isManageMode && selectedIds.size > 0 ? (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="sg-resource-batch-bar"
+        >
+          <span style={{ fontSize: "14px", color: "var(--color-text-primary)" }}>
+            已选择 <strong>{selectedIds.size}</strong> 项
+          </span>
+          <button type="button" className="sg-btn sg-btn--ghost" onClick={handleBatchDelete}>
+            批量删除
+          </button>
+          <button
+            type="button"
+            className="sg-btn sg-btn--ghost"
+            onClick={() => setSelectedIds(new Set())}
           >
-            {/* 顶层光晕层 (Ambient Glow) */}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: "radial-gradient(ellipse at 50% 120%, rgba(0,217,255,0.15) 0%, transparent 60%)",
-                opacity: hoveredId === item.id ? 1 : 0,
-                transition: "opacity 0.5s ease",
-                pointerEvents: "none",
-                zIndex: 0,
-              }}
-            />
-            {/* 内容封装层提升层级以防被光效遮挡 */}
-            <div style={{ position: "relative", zIndex: 1, width: "100%", display: "block" }}>
-            {item.isPinned && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "-10px",
-                  left: "-30px",
-                  background: "var(--color-cyan)",
-                  color: "var(--color-bg)",
-                  padding: "15px 30px 5px",
-                  transform: "rotate(-45deg)",
-                  fontSize: "10px",
-                  fontWeight: "bold",
-                  zIndex: 2,
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                }}
-              >
-                PINNED
-              </div>
-            )}
-            {Date.now() - item.createdAt < 7 * 24 * 60 * 60 * 1000 &&
-              !item.isPinned && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "12px",
-                    left: "12px",
-                    background: "var(--color-red, #ef4444)",
-                    color: "white",
-                    padding: "2px 6px",
-                    borderRadius: "4px",
-                    fontSize: "10px",
-                    fontWeight: "bold",
-                    zIndex: 2,
-                  }}
-                >
-                  NEW
-                </div>
-              )}
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "2px",
-                background:
-                  "linear-gradient(90deg, transparent, var(--color-cyan), transparent)",
-                opacity: hoveredId === item.id ? 1 : 0,
-                transition: "opacity 0.3s ease",
-              }}
-            />
-            {isManageMode && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "16px",
-                  left: "16px",
-                  zIndex: 10,
-                }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedIds.has(item.id)}
-                  onChange={() => {
-                    const next = new Set(selectedIds);
-                    if (next.has(item.id)) next.delete(item.id);
-                    else next.add(item.id);
-                    setSelectedIds(next);
-                  }}
-                  style={{
-                    width: "20px",
-                    height: "20px",
-                    cursor: "pointer",
-                    accentColor: "var(--color-cyan)",
-                  }}
-                />
-              </div>
-            )}
-            <div
-              style={{
-                position: "absolute",
-                top: "-5px",
-                right: "-5px",
-                width: "20px",
-                height: "20px",
-                borderTop: `2px solid ${hoveredId === item.id ? "var(--color-cyan)" : "transparent"}`,
-                borderRight: `2px solid ${hoveredId === item.id ? "var(--color-cyan)" : "transparent"}`,
-                transition: "all 0.3s ease",
-              }}
-            />
-
-            {/* 分级操作按钮: Ghost UIs */}
-            <div
-              style={{
-                position: "absolute",
-                top: "12px",
-                right: "12px",
-                display: "flex",
-                gap: "8px",
-                opacity: hoveredId === item.id ? 1 : 0.4,
-                transition: "opacity 0.2s ease",
-                zIndex: 20,
-              }}
-            >
-              <motion.button
-                whileHover={{ scale: 1.1, backgroundColor: "var(--color-cyan-10)" }}
-                whileTap={{ scale: 0.9 }}
-                onClick={(e) => handleCopy(e, item.url, item.id)}
-                title="复制链接"
-                style={{
-                  padding: "4px",
-                  fontSize: "14px",
-                  color: copyingId === item.id ? "var(--color-green, #10b981)" : "var(--color-text-muted)",
-                  background: "transparent",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center"
-                }}
-              >
-                {copyingId === item.id ? "✅" : "📄"}
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1, backgroundColor: item.isPinned ? "var(--color-cyan)" : "var(--color-cyan-10)" }}
-                whileTap={{ scale: 0.9 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  togglePin(e, item.id);
-                }}
-                title={item.isPinned ? "取消置顶" : "置顶"}
-                style={{
-                  padding: "4px",
-                  fontSize: "14px",
-                  color: item.isPinned ? "var(--color-bg)" : "var(--color-text-muted)",
-                  background: item.isPinned ? "var(--color-cyan)" : "transparent",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center"
-                }}
-              >
-                📌
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1, backgroundColor: "var(--color-cyan-10)" }}
-                whileTap={{ scale: 0.9 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openForm(item);
-                }}
-                title="编辑"
-                style={{
-                  padding: "4px",
-                  fontSize: "14px",
-                  color: "var(--color-text-muted)",
-                  background: "transparent",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center"
-                }}
-              >
-                ✏️
-              </motion.button>
-              {deleteConfirmId === item.id ? (
-                <>
-                  <motion.button
-                    whileHover={{ scale: 1.1, backgroundColor: "rgba(239,68,68,0.2)" }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(item.id);
-                    }}
-                    title="确认删除"
-                    style={{
-                      padding: "4px",
-                      fontSize: "14px",
-                      color: "var(--color-red, #ef4444)",
-                      background: "rgba(239,68,68,0.1)",
-                      border: "none",
-                      borderRadius: "6px",
-                      cursor: "pointer"
-                    }}
-                  >
-                    🗑️✓
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteConfirmId(null);
-                    }}
-                    title="取消"
-                    style={{
-                      padding: "4px",
-                      fontSize: "14px",
-                      color: "var(--color-text-muted)",
-                      background: "transparent",
-                      border: "none",
-                      borderRadius: "6px",
-                      cursor: "pointer"
-                    }}
-                  >
-                    ❌
-                  </motion.button>
-                </>
-              ) : (
-                <motion.button
-                  whileHover={{ scale: 1.1, backgroundColor: "rgba(239,68,68,0.1)" }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeleteConfirmId(item.id);
-                  }}
-                  title="删除"
-                  style={{
-                    padding: "4px",
-                    fontSize: "14px",
-                    color: "var(--color-text-muted)",
-                    background: "transparent",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center"
-                  }}
-                >
-                  🗑️
-                </motion.button>
-              )}
-            </div>
-
-            <div style={{ paddingRight: "12px" }}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  justifyContent: "space-between",
-                  marginBottom: "20px",
-                }}
-              >
-                <div style={{ position: "relative" }}>
-                  <ResourceFavicon
-                    url={item.url}
-                    category={item.category}
-                    name={item.name}
-                  />
-                </div>
-                <span
-                  style={{
-                    fontSize: "0.75rem",
-                    padding: "4px 8px",
-                    background: "var(--color-cyan-10)",
-                    color: "var(--color-cyan)",
-                    borderRadius: "20px",
-                    fontFamily: "var(--font-space-mono), monospace",
-                    letterSpacing: "0.5px",
-                    border: "1px solid var(--color-cyan-20)",
-                  }}
-                >
-                  {CATEGORY_LABELS[item.category]}
-                </span>
-              </div>
-
-              <h3
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: 600,
-                  marginBottom: "12px",
-                  color: "var(--color-text-primary)",
-                }}
-              >
-                <SearchHighlight text={item.name} query={searchQuery} />
-              </h3>
-              <p
-                style={{
-                  color: "var(--color-text-muted)",
-                  fontSize: "0.9rem",
-                  lineHeight: 1.6,
-                  marginBottom: "12px",
-                  minHeight: item.description ? "auto" : "24px",
-                }}
-              >
-                {item.description ? (
-                  <SearchHighlight
-                    text={item.description}
-                    query={searchQuery}
-                  />
-                ) : (
-                  <span style={{ opacity: 0.5 }}>{item.url}</span>
-                )}
-              </p>
-
-              {(item.tags ?? []).length > 0 && (
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: "6px",
-                    marginBottom: "12px",
-                  }}
-                >
-                  {(item.tags ?? []).map((tag) => (
-                    <span
-                      key={tag}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleTagClick(tag);
-                      }}
-                      style={{
-                        fontSize: "0.75rem",
-                        padding: "2px 8px",
-                        background: "var(--color-ai-tag-bg)",
-                        color: "var(--color-text-secondary)",
-                        borderRadius: "6px",
-                        border: "1px solid var(--color-ai-tag-border)",
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor =
-                          "var(--color-cyan-50)";
-                        e.currentTarget.style.color = "var(--color-cyan)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor =
-                          "var(--color-ai-tag-border)";
-                        e.currentTarget.style.color =
-                          "var(--color-text-secondary)";
-                      }}
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              <div
-                style={{
-                  marginTop: "auto",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  fontSize: "0.75rem",
-                  color: "var(--color-text-muted)",
-                }}
-              >
-                <span title="访问次数">🔥 {item.clickCount || 0}</span>
-                <span title="添加日期">
-                  📅 {new Date(item.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-
-              <a
-                href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  incrementClick(item.id);
-                }}
-                style={{
-                  fontSize: "0.85rem",
-                  color: "var(--color-cyan)",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  textDecoration: "none",
-                  cursor: "pointer",
-                  marginTop: "12px",
-                }}
-              >
-                访问 →
-                {item.clickCount ? (
-                  <span
-                    style={{
-                      fontSize: "10px",
-                      opacity: 0.6,
-                      marginLeft: "4px",
-                    }}
-                  >
-                    ({item.clickCount} 次访问)
-                  </span>
-                ) : null}
-              </a>
-            </div>
-          </div>
-          </motion.div>
-        ))}
-      </div>
+            取消选择
+          </button>
+        </motion.div>
+      ) : null}
 
       {/* 表单弹窗 */}
       <ConfirmModal
@@ -1760,21 +906,7 @@ export function ResourceLinks() {
           initial={{ opacity: 0, y: -20, x: "-50%" }}
           animate={{ opacity: 1, y: 0, x: "-50%" }}
           exit={{ opacity: 0, y: -20, x: "-50%" }}
-          style={{
-            position: "fixed",
-            top: "24px",
-            left: "50%",
-            zIndex: 9999,
-            background: "var(--color-ai-card-bg)",
-            color: "var(--color-cyan)",
-            border: "1px solid var(--color-cyan-50)",
-            padding: "12px 24px",
-            borderRadius: "50px",
-            boxShadow: "0 10px 30px rgba(0,217,255,0.2)",
-            backdropFilter: "blur(10px)",
-            fontWeight: 600,
-            fontSize: "14px",
-          }}
+          className="sg-resource-toast"
         >
           {toastMessage}
         </motion.div>
@@ -1782,13 +914,15 @@ export function ResourceLinks() {
 
       {showForm && (
         <div
+          className="sg-resource-modal-shell"
           style={{
             position: "fixed",
             inset: 0,
             zIndex: 300,
             display: "flex",
-            alignItems: "center",
+            alignItems: isMobile ? "flex-end" : "center",
             justifyContent: "center",
+            padding: overlayPad,
             background: "rgba(0,0,0,0.5)",
             backdropFilter: "blur(4px)",
           }}
@@ -1801,10 +935,12 @@ export function ResourceLinks() {
             style={{
               background: "var(--color-bg)",
               border: "1px solid var(--color-ai-card-border)",
-              borderRadius: "16px",
-              padding: "32px",
+              borderRadius: isMobile ? "16px 16px 0 0" : "16px",
+              padding: modalPad,
               maxWidth: "420px",
-              width: "90%",
+              width: "100%",
+              maxHeight: isMobile ? "92dvh" : "90vh",
+              overflowY: "auto",
               boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
             }}
           >
@@ -1866,7 +1002,7 @@ export function ResourceLinks() {
                 >
                   URL *
                 </label>
-                <div style={{ display: "flex", gap: "8px" }}>
+                <div className="sg-resource-form-url-row">
                   <input
                     id="field-url"
                     type="url"
@@ -2001,7 +1137,7 @@ export function ResourceLinks() {
                 >
                   {categories.map((cat) => (
                     <option key={cat} value={cat}>
-                      {CATEGORY_LABELS[cat] || cat}
+                      {RESOURCE_CATEGORY_LABELS[cat] || cat}
                     </option>
                   ))}
                   {!categories.includes(formData.category) && formData.category !== "other" && formData.category && (

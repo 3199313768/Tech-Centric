@@ -26,7 +26,7 @@ export function Recommendations() {
         key={i}
         style={{
           fontSize: '16px',
-          color: i < rating ? '#00d9ff' : 'rgba(255, 255, 255, 0.2)',
+          color: i < rating ? 'var(--color-cyan)' : 'rgba(255, 255, 255, 0.2)',
         }}
       >
         ★
@@ -51,8 +51,8 @@ export function Recommendations() {
           fontFamily: 'var(--font-space-mono), monospace',
           textTransform: 'uppercase',
           letterSpacing: '2px',
-          color: '#00d9ff',
-          textShadow: '0 0 20px rgba(0, 217, 255, 0.5)',
+          color: 'var(--color-cyan)',
+          textShadow: '0 0 20px rgba(180, 58, 36, 0.5)',
         }}
       >
         推荐清单
@@ -74,9 +74,9 @@ export function Recommendations() {
             fontSize: '13px',
             fontFamily: 'var(--font-space-mono), monospace',
             fontWeight: selectedType === null ? 'bold' : 'normal',
-            color: selectedType === null ? '#00d9ff' : 'rgba(255, 255, 255, 0.7)',
-            backgroundColor: selectedType === null ? 'rgba(0, 217, 255, 0.1)' : 'transparent',
-            border: `1px solid ${selectedType === null ? 'rgba(0, 217, 255, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
+            color: selectedType === null ? 'var(--color-cyan)' : 'rgba(255, 255, 255, 0.7)',
+            backgroundColor: selectedType === null ? 'rgba(180, 58, 36, 0.1)' : 'transparent',
+            border: `1px solid ${selectedType === null ? 'rgba(180, 58, 36, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
             borderRadius: '4px',
             cursor: 'pointer',
             textTransform: 'uppercase',
@@ -95,9 +95,9 @@ export function Recommendations() {
               fontSize: '13px',
               fontFamily: 'var(--font-space-mono), monospace',
               fontWeight: selectedType === type ? 'bold' : 'normal',
-              color: selectedType === type ? '#00d9ff' : 'rgba(255, 255, 255, 0.7)',
-              backgroundColor: selectedType === type ? 'rgba(0, 217, 255, 0.1)' : 'transparent',
-              border: `1px solid ${selectedType === type ? 'rgba(0, 217, 255, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
+              color: selectedType === type ? 'var(--color-cyan)' : 'rgba(255, 255, 255, 0.7)',
+              backgroundColor: selectedType === type ? 'rgba(180, 58, 36, 0.1)' : 'transparent',
+              border: `1px solid ${selectedType === type ? 'rgba(180, 58, 36, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
               borderRadius: '4px',
               cursor: 'pointer',
               textTransform: 'uppercase',
@@ -123,8 +123,8 @@ export function Recommendations() {
             key={rec.id}
             style={{
               padding: '24px',
-              border: '1px solid rgba(0, 217, 255, 0.3)',
-              backgroundColor: 'rgba(0, 217, 255, 0.05)',
+              border: '1px solid rgba(180, 58, 36, 0.3)',
+              backgroundColor: 'rgba(180, 58, 36, 0.05)',
               borderRadius: '8px',
               transition: 'all 0.3s ease',
               cursor: rec.link ? 'pointer' : 'default',
@@ -135,16 +135,16 @@ export function Recommendations() {
               }
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(0, 217, 255, 0.6)'
-              e.currentTarget.style.backgroundColor = 'rgba(0, 217, 255, 0.1)'
-              e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 217, 255, 0.3)'
+              e.currentTarget.style.borderColor = 'rgba(180, 58, 36, 0.6)'
+              e.currentTarget.style.backgroundColor = 'rgba(180, 58, 36, 0.1)'
+              e.currentTarget.style.boxShadow = '0 0 20px rgba(180, 58, 36, 0.3)'
               if (rec.link) {
                 e.currentTarget.style.transform = 'translateY(-4px)'
               }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(0, 217, 255, 0.3)'
-              e.currentTarget.style.backgroundColor = 'rgba(0, 217, 255, 0.05)'
+              e.currentTarget.style.borderColor = 'rgba(180, 58, 36, 0.3)'
+              e.currentTarget.style.backgroundColor = 'rgba(180, 58, 36, 0.05)'
               e.currentTarget.style.boxShadow = 'none'
               e.currentTarget.style.transform = 'translateY(0)'
             }}
@@ -169,10 +169,10 @@ export function Recommendations() {
                   <span
                     style={{
                       fontSize: '11px',
-                      color: '#00d9ff',
+                      color: 'var(--color-cyan)',
                       fontFamily: 'var(--font-space-mono), monospace',
                       padding: '4px 10px',
-                      border: '1px solid rgba(0, 217, 255, 0.3)',
+                      border: '1px solid rgba(180, 58, 36, 0.3)',
                       borderRadius: '4px',
                       textTransform: 'uppercase',
                       letterSpacing: '1px',
@@ -185,7 +185,7 @@ export function Recommendations() {
                   style={{
                     fontSize: '20px',
                     fontWeight: 'bold',
-                    color: '#00d9ff',
+                    color: 'var(--color-cyan)',
                     fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
                     marginBottom: '8px',
                   }}
@@ -248,7 +248,7 @@ export function Recommendations() {
                       color: 'rgba(255, 255, 255, 0.6)',
                       fontFamily: 'var(--font-space-mono), monospace',
                       padding: '2px 8px',
-                      backgroundColor: 'rgba(0, 217, 255, 0.1)',
+                      backgroundColor: 'rgba(180, 58, 36, 0.1)',
                       borderRadius: '4px',
                     }}
                   >
@@ -264,7 +264,7 @@ export function Recommendations() {
                 style={{
                   marginTop: '12px',
                   fontSize: '12px',
-                  color: 'rgba(0, 217, 255, 0.7)',
+                  color: 'rgba(180, 58, 36, 0.7)',
                   fontFamily: 'var(--font-space-mono), monospace',
                   textAlign: 'right',
                 }}

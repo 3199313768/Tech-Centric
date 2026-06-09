@@ -43,8 +43,8 @@ export function LifeLog() {
           fontFamily: 'var(--font-space-mono), monospace',
           textTransform: 'uppercase',
           letterSpacing: '2px',
-          color: '#00d9ff',
-          textShadow: '0 0 20px rgba(0, 217, 255, 0.5)',
+          color: 'var(--color-cyan)',
+          textShadow: '0 0 20px rgba(180, 58, 36, 0.5)',
         }}
       >
         日常随笔
@@ -66,9 +66,9 @@ export function LifeLog() {
             fontSize: '13px',
             fontFamily: 'var(--font-space-mono), monospace',
             fontWeight: selectedTag === null ? 'bold' : 'normal',
-            color: selectedTag === null ? '#00d9ff' : 'rgba(255, 255, 255, 0.7)',
-            backgroundColor: selectedTag === null ? 'rgba(0, 217, 255, 0.1)' : 'transparent',
-            border: `1px solid ${selectedTag === null ? 'rgba(0, 217, 255, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
+            color: selectedTag === null ? 'var(--color-cyan)' : 'rgba(255, 255, 255, 0.7)',
+            backgroundColor: selectedTag === null ? 'rgba(180, 58, 36, 0.1)' : 'transparent',
+            border: `1px solid ${selectedTag === null ? 'rgba(180, 58, 36, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
             borderRadius: '4px',
             cursor: 'pointer',
             textTransform: 'uppercase',
@@ -87,9 +87,9 @@ export function LifeLog() {
               fontSize: '13px',
               fontFamily: 'var(--font-space-mono), monospace',
               fontWeight: selectedTag === tag ? 'bold' : 'normal',
-              color: selectedTag === tag ? '#00d9ff' : 'rgba(255, 255, 255, 0.7)',
-              backgroundColor: selectedTag === tag ? 'rgba(0, 217, 255, 0.1)' : 'transparent',
-              border: `1px solid ${selectedTag === tag ? 'rgba(0, 217, 255, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
+              color: selectedTag === tag ? 'var(--color-cyan)' : 'rgba(255, 255, 255, 0.7)',
+              backgroundColor: selectedTag === tag ? 'rgba(180, 58, 36, 0.1)' : 'transparent',
+              border: `1px solid ${selectedTag === tag ? 'rgba(180, 58, 36, 0.5)' : 'rgba(255, 255, 255, 0.1)'}`,
               borderRadius: '4px',
               cursor: 'pointer',
               textTransform: 'uppercase',
@@ -122,8 +122,8 @@ export function LifeLog() {
               key={log.id}
               style={{
                 padding: '24px',
-                border: '1px solid rgba(0, 217, 255, 0.3)',
-                backgroundColor: 'rgba(0, 217, 255, 0.05)',
+                border: '1px solid rgba(180, 58, 36, 0.3)',
+                backgroundColor: 'rgba(180, 58, 36, 0.05)',
                 borderRadius: '8px',
                 transition: 'all 0.3s ease',
                 cursor: 'pointer',
@@ -134,13 +134,13 @@ export function LifeLog() {
                 }
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(0, 217, 255, 0.6)'
-                e.currentTarget.style.backgroundColor = 'rgba(0, 217, 255, 0.1)'
-                e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 217, 255, 0.3)'
+                e.currentTarget.style.borderColor = 'rgba(180, 58, 36, 0.6)'
+                e.currentTarget.style.backgroundColor = 'rgba(180, 58, 36, 0.1)'
+                e.currentTarget.style.boxShadow = '0 0 20px rgba(180, 58, 36, 0.3)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(0, 217, 255, 0.3)'
-                e.currentTarget.style.backgroundColor = 'rgba(0, 217, 255, 0.05)'
+                e.currentTarget.style.borderColor = 'rgba(180, 58, 36, 0.3)'
+                e.currentTarget.style.backgroundColor = 'rgba(180, 58, 36, 0.05)'
                 e.currentTarget.style.boxShadow = 'none'
               }}
             >
@@ -159,7 +159,7 @@ export function LifeLog() {
                     style={{
                       fontSize: '20px',
                       fontWeight: 'bold',
-                      color: '#00d9ff',
+                      color: 'var(--color-cyan)',
                       fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
                       marginBottom: '8px',
                     }}
@@ -209,7 +209,7 @@ export function LifeLog() {
                         color: 'rgba(255, 255, 255, 0.6)',
                         fontFamily: 'var(--font-space-mono), monospace',
                         padding: '2px 8px',
-                        backgroundColor: 'rgba(0, 217, 255, 0.1)',
+                        backgroundColor: 'rgba(180, 58, 36, 0.1)',
                         borderRadius: '4px',
                       }}
                     >

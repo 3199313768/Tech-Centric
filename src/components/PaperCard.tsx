@@ -19,12 +19,13 @@ export function PaperCard({ children, className = '', style = {}, hover = true, 
         padding: '24px',
         border: '1px solid var(--color-card-border)',
         backgroundColor: 'var(--color-card-bg)',
-        borderRadius: '8px',
-        boxShadow: `0 4px 20px var(--color-card-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.05)`,
+        borderRadius: '18px',
+        boxShadow: `0 18px 46px var(--color-card-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.34)`,
         position: 'relative',
+        backdropFilter: 'blur(12px)',
         backgroundImage: `
-          linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 0%, transparent 100%),
-          url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='paper' x='0' y='0' width='20' height='20' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='10' cy='10' r='0.5' fill='rgba(255,255,255,0.02)'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23paper)'/%3E%3C/svg%3E")
+          linear-gradient(135deg, rgba(255, 243, 226, 0.64) 0%, rgba(244, 216, 182, 0.24) 100%),
+          url("data:image/svg+xml,%3Csvg width='120' height='120' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='paper' x='0' y='0' width='24' height='24' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='8' cy='9' r='0.45' fill='rgba(122,85,58,0.04)'/%3E%3Ccircle cx='19' cy='17' r='0.32' fill='rgba(180,58,36,0.032)'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='120' height='120' fill='url(%23paper)'/%3E%3C/svg%3E")
         `,
         ...style,
       }}
@@ -33,10 +34,9 @@ export function PaperCard({ children, className = '', style = {}, hover = true, 
       viewport={{ once: true, margin: '-100px' }}
       transition={{ duration: 0.6, delay }}
       whileHover={hover ? {
-        rotateY: 2,
-        rotateX: -2,
-        scale: 1.02,
-        boxShadow: `0 8px 30px var(--color-card-shadow-hover), inset 0 1px 0 rgba(255, 255, 255, 0.1)`,
+        y: -4,
+        scale: 1.01,
+        boxShadow: `0 24px 58px var(--color-card-shadow-hover), inset 0 1px 0 rgba(255, 255, 255, 0.42)`,
         transition: { duration: 0.3 }
       } : {}}
     >

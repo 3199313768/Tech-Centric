@@ -15,9 +15,9 @@ export function MessageBubble({ message, onAction }: MessageBubbleProps) {
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div className={`max-w-[86%] rounded-[1.35rem] px-4 py-3 text-sm leading-6 shadow-lg ${
         isUser
-          ? 'rounded-br-md bg-gradient-to-br from-cyan-200 via-cyan-300 to-sky-400 text-zinc-950 shadow-cyan-500/20'
+          ? 'rounded-br-md bg-gradient-to-br from-[var(--sg-green-light)] via-[var(--sg-green-mid)] to-[var(--sg-green-deep)] text-[var(--sg-cream)] shadow-[rgba(21,66,18,0.2)]'
           : message.variant === 'contact'
-            ? 'rounded-bl-md border border-cyan-300/15 bg-cyan-300/[0.08] text-zinc-100 shadow-cyan-950/20 backdrop-blur-xl'
+            ? 'rounded-bl-md border border-[var(--sg-green-light)]/15 bg-[var(--sg-green-light)]/[0.08] text-zinc-100 shadow-[rgba(21,66,18,0.2)] backdrop-blur-xl'
             : 'rounded-bl-md border border-white/10 bg-white/[0.07] text-zinc-100 shadow-black/20 backdrop-blur-xl'
       }`}
       >

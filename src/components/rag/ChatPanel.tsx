@@ -253,31 +253,31 @@ export function ChatPanel() {
   }
 
   return (
-    <div className="relative flex h-[min(660px,calc(100vh-6.5rem))] w-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-950/85 shadow-[0_30px_120px_rgba(0,0,0,0.55),0_0_80px_rgba(6,182,212,0.18)] backdrop-blur-2xl md:w-[440px]">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(34,211,238,0.22),transparent_34%),radial-gradient(circle_at_90%_12%,rgba(168,85,247,0.16),transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.06),transparent_26%)]" />
+    <div className="relative flex h-[min(660px,calc(100vh-6.5rem))] w-full flex-col overflow-hidden rounded-[2rem] border border-[var(--sg-green-light)]/15 bg-[var(--sg-ink)]/85 shadow-[0_30px_120px_rgba(0,0,0,0.55),0_0_80px_rgba(21,66,18,0.18)] backdrop-blur-2xl md:w-[440px]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(161,212,148,0.22),transparent_34%),radial-gradient(circle_at_90%_12%,rgba(129,193,253,0.12),transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.06),transparent_26%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:28px_28px] opacity-25" />
 
       <div className="relative border-b border-white/10 px-5 py-5">
         <div className="flex items-center gap-3">
-          <div className="grid h-11 w-11 place-items-center rounded-2xl bg-cyan-300 text-zinc-950 shadow-lg shadow-cyan-400/20">
+          <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[var(--sg-green-deep)] text-[var(--sg-cream)] shadow-lg shadow-[rgba(21,66,18,0.2)]">
             <Bot className="h-5 w-5" />
           </div>
           <div className="min-w-0">
             <p className="flex items-center gap-2 text-sm font-semibold text-zinc-50">
               Tech-Centric AI 助手
               <span className="rounded-full border border-emerald-300/20 bg-emerald-300/10 px-2 py-0.5 text-[10px] font-medium text-emerald-200">Online</span>
-              {mode === 'contact' ? <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-2 py-0.5 text-[10px] font-medium text-cyan-100">Contact</span> : null}
+              {mode === 'contact' ? <span className="rounded-full border border-[var(--sg-green-light)]/20 bg-[var(--sg-green-light)]/10 px-2 py-0.5 text-[10px] font-medium text-[var(--sg-green-light)]">Contact</span> : null}
             </p>
             <p className="mt-1 text-xs text-zinc-400">基于站内资料检索，也可以直接联系我。</p>
           </div>
         </div>
       </div>
 
-      <div className="relative flex-1 space-y-4 overflow-y-auto px-4 py-5 [scrollbar-width:thin] [scrollbar-color:rgba(34,211,238,0.35)_transparent]">
+      <div className="relative flex-1 space-y-4 overflow-y-auto px-4 py-5 [scrollbar-width:thin] [scrollbar-color:rgba(161,212,148,0.35)_transparent]">
         {messages.length === 0 ? (
           <div className="space-y-4">
-            <div className="relative overflow-hidden rounded-3xl border border-cyan-300/15 bg-white/[0.06] p-4 text-sm leading-6 text-cyan-50 shadow-inner shadow-white/5">
-              <div className="absolute right-3 top-3 rounded-full bg-cyan-300/10 p-2 text-cyan-200">
+            <div className="relative overflow-hidden rounded-3xl border border-[var(--sg-green-light)]/15 bg-white/[0.06] p-4 text-sm leading-6 text-[var(--sg-cream)] shadow-inner shadow-white/5">
+              <div className="absolute right-3 top-3 rounded-full bg-[var(--sg-green-light)]/10 p-2 text-[var(--sg-green-light)]">
                 <Sparkles className="h-4 w-4" />
               </div>
               <p className="pr-10 font-medium text-white">你好，我是这个网站的 AI 导览。</p>
@@ -299,7 +299,7 @@ export function ChatPanel() {
 
         {isLoading ? (
           <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-zinc-400">
-            <Loader2 className="h-4 w-4 animate-spin text-cyan-300" />
+            <Loader2 className="h-4 w-4 animate-spin text-[var(--sg-green-light)]" />
             正在检索站内资料...
           </div>
         ) : null}
@@ -313,7 +313,7 @@ export function ChatPanel() {
       </div>
 
       <form onSubmit={handleSubmit} className="relative border-t border-white/10 bg-zinc-950/40 p-4">
-        <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.06] px-3 py-2 shadow-inner shadow-white/5 transition-colors focus-within:border-cyan-300/50 focus-within:bg-white/[0.08]">
+        <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.06] px-3 py-2 shadow-inner shadow-white/5 transition-colors focus-within:border-[var(--sg-green-light)]/50 focus-within:bg-white/[0.08]">
           <input
             ref={inputRef}
             value={input}
@@ -325,7 +325,7 @@ export function ChatPanel() {
           <button
             type="submit"
             disabled={isLoading || !input.trim()}
-            className="rounded-xl bg-cyan-300 p-2.5 text-zinc-950 shadow-lg shadow-cyan-400/20 transition-all hover:-translate-y-0.5 hover:bg-cyan-200 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-40"
+            className="rounded-xl bg-[var(--sg-green-deep)] p-2.5 text-[var(--sg-cream)] shadow-lg shadow-[rgba(21,66,18,0.2)] transition-all hover:-translate-y-0.5 hover:bg-[var(--sg-green-mid)] disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-40"
             aria-label="发送"
           >
             <Send className="h-4 w-4" />

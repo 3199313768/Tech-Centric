@@ -25,7 +25,7 @@ export function SuggestedQuestions({ items = DEFAULT_ITEMS, onSelect }: Suggeste
           key={item.id}
           type="button"
           onClick={() => onSelect(item)}
-          className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-xs text-zinc-300 shadow-sm shadow-black/10 transition-all hover:-translate-y-0.5 hover:border-cyan-300/40 hover:bg-cyan-300/10 hover:text-cyan-100"
+          className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-xs text-zinc-300 shadow-sm shadow-black/10 transition-all hover:-translate-y-0.5 hover:border-[var(--sg-green-light)]/40 hover:bg-[var(--sg-green-light)]/10 hover:text-[var(--sg-green-light)]"
         >
           {item.label}
         </button>

@@ -210,7 +210,7 @@ export function Skills({ compact = false }: SkillsProps) {
                           fontSize: '12px',
                           color: 'rgba(10, 10, 10, 0.6)',
                           fontFamily: 'var(--font-space-mono), monospace',
-                          backgroundColor: 'rgba(0, 217, 255, 0.1)',
+                          backgroundColor: 'rgba(180, 58, 36, 0.1)',
                           padding: '4px 10px',
                           borderRadius: '4px',
                         }}
@@ -244,10 +244,10 @@ export function Skills({ compact = false }: SkillsProps) {
                         style={{
                           fontSize: '12px',
                           color: 'var(--color-cyan)',
-                          backgroundColor: 'rgba(0, 217, 255, 0.1)',
+                          backgroundColor: 'rgba(180, 58, 36, 0.1)',
                           padding: '4px 10px',
                           borderRadius: '4px',
-                          border: '1px solid rgba(0, 217, 255, 0.2)',
+                          border: '1px solid rgba(180, 58, 36, 0.2)',
                           fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
                           fontWeight: 'bold',
                         }}
@@ -287,9 +287,9 @@ export function Skills({ compact = false }: SkillsProps) {
                               color: 'rgba(10, 10, 10, 0.7)',
                               fontFamily: 'var(--font-geist-sans), system-ui, sans-serif',
                               padding: '4px 10px',
-                              backgroundColor: 'rgba(0, 217, 255, 0.1)',
+                              backgroundColor: 'rgba(180, 58, 36, 0.1)',
                               borderRadius: '4px',
-                              border: '1px solid rgba(0, 217, 255, 0.2)',
+                              border: '1px solid rgba(180, 58, 36, 0.2)',
                             }}
                           >
                             {project}

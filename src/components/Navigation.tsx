@@ -1,117 +1,120 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+import Image from 'next/image'
+import { Menu, X } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 import { useBreakpoint } from '@/utils/useBreakpoint'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 
 interface NavigationProps {
   activeTab: string
   onTabChange: (tab: string) => void
+  transparent?: boolean
 }
 
 const tabs = [
-  { id: 'home', label: '首页' },
-  { id: 'all-projects', label: '全部项目' },
-  { id: 'ai-skills', label: 'AI Skills' },
-  { id: 'vibe-coding', label: 'Vibe Coding' },
-  { id: 'resources', label: '资源' }
-]
+  { id: 'home', label: '庭院' },
+  { id: 'all-projects', label: '归档' },
+  { id: 'ai-skills', label: '技能工坊' },
+  { id: 'vibe-coding', label: '草本集' },
+  { id: 'resources', label: '资源' },
+] as const
 
-export function Navigation({ activeTab, onTabChange }: NavigationProps) {
-  const { isMobile } = useBreakpoint()
-  const pathname = usePathname()
-  const isKnowledgePage = pathname === '/knowledge'
+export function Navigation({ activeTab, onTabChange, transparent = false }: NavigationProps) {
+  const { isMobile, isTablet } = useBreakpoint()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const showCompactNav = isMobile || isTablet
+
+  useEffect(() => {
+    document.body.style.overflow = showCompactNav && menuOpen ? 'hidden' : ''
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [showCompactNav, menuOpen])
+
+  const handleTabChange = (tab: string) => {
+    onTabChange(tab)
+    setMenuOpen(false)
+  }
 
   return (
-    <nav
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 200,
-        backgroundColor: 'var(--color-nav-bg)',
-        backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid var(--color-nav-border)',
-        padding: isMobile ? '8px 12px' : '12px 24px',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: isMobile ? '4px' : '8px',
-          flexWrap: 'wrap',
-          maxWidth: '1400px',
-          margin: '0 auto',
-          position: 'relative',
-        }}>
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => onTabChange(tab.id)}
-            style={{
-              padding: isMobile ? '6px 10px' : '8px 16px',
-              fontSize: isMobile ? '11px' : '13px',
-              fontFamily: 'var(--font-space-mono), monospace',
-              fontWeight: activeTab === tab.id ? 'bold' : 'normal',
-              color: activeTab === tab.id ? 'var(--color-cyan)' : 'var(--color-nav-text)',
-              backgroundColor: activeTab === tab.id ? 'var(--color-cyan-10)' : 'transparent',
-              border: `1px solid ${activeTab === tab.id ? 'var(--color-cyan-50)' : 'var(--color-btn-inactive-border)'}`,
-              borderRadius: '4px',
-              cursor: 'pointer',
-              textTransform: 'uppercase',
-              letterSpacing: isMobile ? '0.5px' : '1px',
-              transition: 'all 0.2s ease',
-              boxShadow: activeTab === tab.id ? '0 0 10px var(--color-cyan-glow)' : 'none',
-            }}
-            onMouseEnter={(e) => {
-              if (activeTab !== tab.id) {
-                e.currentTarget.style.color = 'var(--color-cyan)'
-                e.currentTarget.style.borderColor = 'var(--color-cyan-30)'
-                e.currentTarget.style.backgroundColor = 'var(--color-cyan-10)'
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (activeTab !== tab.id) {
-                e.currentTarget.style.color = 'var(--color-nav-text)'
-                e.currentTarget.style.borderColor = 'var(--color-btn-inactive-border)'
-                e.currentTarget.style.backgroundColor = 'transparent'
-              }
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
-        {/* Knowledge Base Link */}
-        <Link 
-           href="/knowledge"
-           style={{
-             padding: isMobile ? '6px 10px' : '8px 16px',
-             fontSize: isMobile ? '11px' : '13px',
-             fontFamily: 'var(--font-space-mono), monospace',
-             fontWeight: isKnowledgePage ? 'bold' : 'normal',
-             color: isKnowledgePage ? 'var(--color-cyan)' : 'var(--color-nav-text)',
-             backgroundColor: isKnowledgePage ? 'var(--color-cyan-10)' : 'transparent',
-             border: `1px solid ${isKnowledgePage ? 'var(--color-cyan-50)' : 'var(--color-cyan-30)'}`,
-             borderRadius: '4px',
-             cursor: 'pointer',
-             textTransform: 'uppercase',
-             letterSpacing: isMobile ? '0.5px' : '1px',
-             transition: 'all 0.2s ease',
-             textDecoration: 'none',
-             boxShadow: isKnowledgePage ? '0 0 10px var(--color-cyan-glow)' : 'none',
-           }}
+    <nav className={`sg-nav ${transparent ? 'sg-nav--transparent' : ''} ${transparent ? 'sg-enter sg-enter--0' : ''}`}>
+      <div className="sg-nav-inner">
+        <button
+          type="button"
+          className="sg-nav-brand"
+          onClick={() => handleTabChange('home')}
+          aria-label="返回首页"
         >
-          知识库
-        </Link>
-        {/* 主题切换按钮 */}
-        <div style={{ marginLeft: isMobile ? '8px' : '16px' }}>
-          <ThemeToggle />
-        </div>
+          <Image src="/spirit-garden/logo.png" alt="" width={40} height={40} />
+          {!isMobile ? <span>SpiritGarden</span> : null}
+        </button>
+
+        {showCompactNav ? (
+          <div className="sg-nav-actions sg-nav-actions--compact">
+            <ThemeToggle />
+            <button
+              type="button"
+              className="sg-nav-menu-toggle"
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-expanded={menuOpen}
+              aria-controls="sg-nav-drawer"
+              aria-label={menuOpen ? '关闭导航菜单' : '打开导航菜单'}
+            >
+              {menuOpen ? <X size={22} aria-hidden /> : <Menu size={22} aria-hidden />}
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="sg-nav-links">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  className={`sg-nav-link ${activeTab === tab.id ? 'sg-nav-link--active' : ''}`}
+                  onClick={() => handleTabChange(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <div className="sg-nav-actions">
+              <ThemeToggle />
+            </div>
+          </>
+        )}
       </div>
+
+      {showCompactNav ? (
+        <>
+          <div
+            className={`sg-nav-overlay${menuOpen ? ' sg-nav-overlay--open' : ''}`}
+            onClick={() => setMenuOpen(false)}
+            aria-hidden={!menuOpen}
+          />
+          <div
+            id="sg-nav-drawer"
+            className={`sg-nav-drawer${menuOpen ? ' sg-nav-drawer--open' : ''}`}
+            role="dialog"
+            aria-modal={menuOpen}
+            aria-label="站点导航"
+            aria-hidden={!menuOpen}
+          >
+            <div className="sg-nav-drawer-links">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  className={`sg-nav-drawer-link ${activeTab === tab.id ? 'sg-nav-drawer-link--active' : ''}`}
+                  onClick={() => handleTabChange(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      ) : null}
     </nav>
   )
 }

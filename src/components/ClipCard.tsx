@@ -36,12 +36,12 @@ export function ClipCard({
       className={`clip-card ${className}`}
       style={{
         padding: '20px',
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        borderRadius: '4px',
+        backgroundColor: 'var(--color-card-bg)',
+        borderRadius: '14px',
         boxShadow: `
-          0 4px 15px rgba(0, 0, 0, 0.2),
-          0 0 0 1px rgba(0, 0, 0, 0.05),
-          inset 0 1px 0 rgba(255, 255, 255, 0.9)
+          0 16px 36px var(--color-card-shadow),
+          0 0 0 1px var(--color-card-border),
+          inset 0 1px 0 rgba(255, 255, 255, 0.36)
         `,
         position: 'relative',
         cursor: onClick ? 'pointer' : 'default',
@@ -61,9 +61,9 @@ export function ClipCard({
         scale: 1.05,
         zIndex: 10,
         boxShadow: `
-          0 8px 25px rgba(0, 0, 0, 0.3),
-          0 0 0 1px rgba(0, 0, 0, 0.1),
-          inset 0 1px 0 rgba(255, 255, 255, 0.9)
+          0 24px 52px var(--color-card-shadow-hover),
+          0 0 0 1px var(--color-cyan-20),
+          inset 0 1px 0 rgba(255, 255, 255, 0.42)
         `,
         transition: { duration: 0.2 }
       }}
@@ -78,12 +78,12 @@ export function ClipCard({
           right: 0,
           bottom: 0,
           backgroundImage: `
-            url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,0 L100,0 L100,100 L0,100 Z' fill='none' stroke='rgba(0,0,0,0.1)' stroke-width='0.5' stroke-dasharray='2,2'/%3E%3C/svg%3E"),
-            repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)
+            url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,0 L100,0 L100,100 L0,100 Z' fill='none' stroke='rgba(180,58,36,0.12)' stroke-width='0.5' stroke-dasharray='3,3'/%3E%3C/svg%3E"),
+            repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(122,85,58,0.026) 2px, rgba(122,85,58,0.026) 4px)
           `,
           pointerEvents: 'none',
-          borderRadius: '4px',
-          opacity: 0.3,
+          borderRadius: '14px',
+          opacity: 0.5,
         }}
       />
       {children}

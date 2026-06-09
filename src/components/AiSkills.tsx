@@ -1,9 +1,11 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { AddSkillModal } from './AddSkillModal'
+import { SpiritSubpageHero } from '@/components/spirit/SpiritSubpageHero'
+import { SpiritListCard } from '@/components/spirit/SpiritListCard'
+import { getPlatformClass } from '@/utils/platformAccent'
 
 interface AgentSkill {
   id: string
@@ -15,7 +17,6 @@ interface AgentSkill {
   link?: string
 }
 
-// SKILL_REPO link constant will remain if needed.
 const SKILL_REPO = 'https://github.com/3199313768/SKILL'
 
 export function AiSkills() {
@@ -25,6 +26,8 @@ export function AiSkills() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [editingSkill, setEditingSkill] = useState<AgentSkill | null>(null)
+  const [activePlatform, setActivePlatform] = useState<string>('全部')
+  const [activeTag, setActiveTag] = useState<string | null>(null)
 
   const fetchSkills = useCallback(async () => {
     setIsLoading(true)
@@ -45,12 +48,32 @@ export function AiSkills() {
   }, [])
 
   useEffect(() => {
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSkills()
   }, [fetchSkills])
 
+  const platforms = useMemo(() => {
+    const set = new Set<string>()
+    skills.forEach((s) => {
+      if (s.platform) set.add(s.platform)
+    })
+    return ['全部', ...Array.from(set)]
+  }, [skills])
+
+  const allTags = useMemo(() => Array.from(new Set(skills.flatMap((s) => s.tags))), [skills])
+
+  const filteredSkills = useMemo(() => {
+    return skills.filter((skill) => {
+      const platformMatch = activePlatform === '全部' || skill.platform === activePlatform
+      const tagMatch = !activeTag || skill.tags.includes(activeTag)
+      return platformMatch && tagMatch
+    })
+  }, [skills, activePlatform, activeTag])
+
+  const scrollRailSkills = filteredSkills.slice(0, 4)
+
   const handleDelete = async (e: React.MouseEvent, id: string, name: string) => {
-    e.stopPropagation() // Prevent triggering the card click
+    e.stopPropagation()
     if (!window.confirm(`确定要删除技能 "${name}" 吗？此操作不可逆。`)) {
       return
     }
@@ -66,308 +89,170 @@ export function AiSkills() {
     }
   }
 
-  // Unused variants removed
+  const openAddModal = () => {
+    setEditingSkill(null)
+    setIsAddModalOpen(true)
+  }
+
+  const openSkill = (skill: AgentSkill) => {
+    const url = skill.link || SKILL_REPO
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
 
   return (
-    <div style={{
-      padding: '120px 24px 80px',
-      maxWidth: '1200px',
-      margin: '0 auto',
-      minHeight: '100vh',
-      color: 'var(--color-text-primary)',
-      fontFamily: 'var(--font-inter), sans-serif',
-    }}>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        style={{ marginBottom: '60px', textAlign: 'center' }}
-      >
-        <p style={{
-          color: 'var(--color-text-secondary)',
-          fontSize: '1.2rem',
-          maxWidth: '600px',
-          margin: '0 auto',
-          lineHeight: 1.6
-        }}>
-          一套提高开发效率的 Agent Skills 集合，包含代码提交、提交规范、周报生成、UI 优化、代码审计等实用技能
-        </p>
-        <div style={{ marginTop: '24px' }}>
-          <button
-            onClick={() => {
-              setEditingSkill(null)
-              setIsAddModalOpen(true)
-            }}
-            style={{
-              padding: '12px 24px',
-              backgroundColor: 'var(--color-cyan)',
-              color: 'var(--color-bg)',
-              border: 'none',
-              borderRadius: '8px',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              boxShadow: '0 4px 14px 0 var(--color-cyan-glow)',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)'
-              e.currentTarget.style.boxShadow = '0 6px 20px 0 var(--color-cyan-glow)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.boxShadow = '0 4px 14px 0 var(--color-cyan-glow)'
-            }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <div className="sg-page">
+      <SpiritSubpageHero
+        theme="workshop"
+        eyebrow="卷轴工房"
+        title="技能工坊"
+        lead="一套提高开发效率的 Agent Skills 集合，包含代码提交、提交规范、周报生成、UI 优化、代码审计等实用技能。"
+        stats={[
+          { label: '技能卷轴', value: isLoading ? '—' : skills.length },
+          { label: '平台覆盖', value: isLoading ? '—' : Math.max(platforms.length - 1, 0) },
+          { label: '标签维度', value: isLoading ? '—' : allTags.length },
+        ]}
+        actions={
+          <button type="button" className="sg-btn sg-btn--primary" onClick={openAddModal}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
             新增技能
           </button>
+        }
+      />
+
+      {isLoading ? (
+        <div className="sg-state sg-state--loading">
+          <div className="sg-state__spinner" aria-hidden />
+          加载中...
         </div>
-      </motion.div>
+      ) : skills.length === 0 ? (
+        <div className="sg-state sg-state--empty">
+          暂无技能数据，通过上方按钮添加一个吧！
+        </div>
+      ) : (
+        <>
+          {scrollRailSkills.length > 0 ? (
+            <div className="sg-scroll-rail" aria-label="精选技能卷轴">
+              {scrollRailSkills.map((skill) => {
+                const platformClass = getPlatformClass(skill.platform)
+                return (
+                  <button
+                    key={`rail-${skill.id}`}
+                    type="button"
+                    className={`sg-scroll-rail__item sg-scroll-rail__item--${platformClass}`}
+                    onClick={() => openSkill(skill)}
+                  >
+                    <div className="sg-scroll-rail__icon">{skill.icon}</div>
+                    <p className="sg-scroll-rail__name">{skill.name}</p>
+                    {skill.platform ? (
+                      <span className="sg-scroll-rail__platform">{skill.platform}</span>
+                    ) : null}
+                  </button>
+                )
+              })}
+            </div>
+          ) : null}
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-          gap: '24px',
-        }}
-      >
-        {isLoading ? (
-          <div style={{ textAlign: 'center', gridColumn: '1 / -1', padding: '100px 0', color: 'var(--color-text-muted)' }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              border: '3px solid var(--color-cyan-30)',
-              borderTopColor: 'var(--color-cyan)',
-              borderRadius: '50%',
-              margin: '0 auto 16px',
-              animation: 'spin 1s linear infinite',
-            }} />
-            <style>{`
-              @keyframes spin {
-                to { transform: rotate(360deg); }
-              }
-            `}</style>
-            加载中...
-          </div>
-        ) : skills.length === 0 ? (
-          <div style={{ textAlign: 'center', gridColumn: '1 / -1', padding: '100px 0', color: 'var(--color-text-muted)' }}>
-            暂无技能数据，通过上方按钮添加一个吧！
-          </div>
-        ) : (
-          skills.map((skill, index) => (
-            <motion.div
-              key={skill.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                type: 'spring',
-                stiffness: 100,
-                damping: 12,
-                delay: index * 0.1
-              }}
-              onHoverStart={() => setHoveredId(skill.id)}
-              onHoverEnd={() => setHoveredId(null)}
-              onClick={() => {
-                const url = skill.link || SKILL_REPO
-                window.open(url, '_blank', 'noopener,noreferrer')
-              }}
-              style={{
-                background: 'var(--color-ai-card-bg)',
-                border: `1px solid ${hoveredId === skill.id ? 'var(--color-cyan-50)' : 'var(--color-ai-card-border)'}`,
-                borderRadius: '16px',
-                padding: '32px 24px',
-                position: 'relative',
-                overflow: 'hidden',
-                cursor: 'pointer',
-                transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                transform: hoveredId === skill.id ? 'translateY(-8px)' : 'translateY(0)',
-                boxShadow: hoveredId === skill.id ? `0 15px 30px var(--color-ai-shadow-hover)` : `0 5px 15px var(--color-ai-shadow)`,
-                backdropFilter: 'blur(10px)',
-              }}
-            >
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '2px',
-                background: 'linear-gradient(90deg, transparent, var(--color-cyan), transparent)',
-                opacity: hoveredId === skill.id ? 1 : 0,
-                transition: 'opacity 0.3s ease',
-              }} />
-              <div style={{
-                position: 'absolute',
-                top: '-5px',
-                right: '-5px',
-                width: '20px',
-                height: '20px',
-                borderTop: `2px solid ${hoveredId === skill.id ? 'var(--color-cyan)' : 'transparent'}`,
-                borderRight: `2px solid ${hoveredId === skill.id ? 'var(--color-cyan)' : 'transparent'}`,
-                transition: 'all 0.3s ease',
-              }} />
-
-              {/* Edit button */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setEditingSkill(skill)
-                  setIsAddModalOpen(true)
-                }}
-                style={{
-                  position: 'absolute',
-                  top: '16px',
-                  right: '56px', // 放在删除按钮左侧
-                  background: 'rgba(56, 189, 248, 0.1)',
-                  border: '1px solid rgba(56, 189, 248, 0.3)',
-                  color: 'var(--color-cyan)',
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  opacity: hoveredId === skill.id ? 1 : 0,
-                  transition: 'all 0.2s',
-                  transform: hoveredId === skill.id ? 'scale(1)' : 'scale(0.8)',
-                  zIndex: 2,
-                }}
-                title="修改此技能"
-              >
-                ✎
-              </button>
-
-              {/* Delete button that appears on hover */}
-              <button
-                onClick={(e) => handleDelete(e, skill.id, skill.name)}
-                disabled={deletingId === skill.id}
-                style={{
-                  position: 'absolute',
-                  top: '16px',
-                  right: '16px',
-                  background: 'rgba(239, 68, 68, 0.1)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  color: '#ef4444',
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: deletingId === skill.id ? 'not-allowed' : 'pointer',
-                  opacity: (hoveredId === skill.id || deletingId === skill.id) ? 1 : 0,
-                  transition: 'all 0.2s',
-                  transform: (hoveredId === skill.id || deletingId === skill.id) ? 'scale(1)' : 'scale(0.8)',
-                  zIndex: 2,
-                }}
-                title="删除此技能"
-              >
-                {deletingId === skill.id ? '...' : '×'}
-              </button>
-
-              <div style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                justifyContent: 'space-between',
-                marginBottom: '20px'
-              }}>
-                <div style={{
-                  fontSize: '2.5rem',
-                  background: 'var(--color-ai-card-icon-bg)',
-                  width: '60px',
-                  height: '60px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '12px',
-                  border: '1px solid var(--color-ai-card-icon-border)',
-                }}>
-                  {skill.icon}
-                </div>
-                {skill.platform && (
-                  <span style={{
-                    fontSize: '0.75rem',
-                    padding: '4px 8px',
-                    background: 'var(--color-cyan-10)',
-                    color: 'var(--color-cyan)',
-                    borderRadius: '20px',
-                    fontFamily: 'var(--font-space-mono), monospace',
-                    letterSpacing: '0.5px',
-                    border: '1px solid var(--color-cyan-20)'
-                  }}>
-                    {skill.platform}
-                  </span>
-                )}
-              </div>
-
-              <h3 style={{
-                fontSize: '1.25rem',
-                fontWeight: 600,
-                marginBottom: '12px',
-                color: 'var(--color-text-primary)',
-                transition: 'color 0.3s ease',
-                paddingRight: '30px', // Prevent overlap with delete button
-              }}>
-                {skill.name}
-              </h3>
-              <p style={{
-                color: 'var(--color-text-muted)',
-                fontSize: '0.9rem',
-                lineHeight: 1.6,
-                marginBottom: '24px',
-                minHeight: '70px',
-              }}>
-                {skill.description}
-              </p>
-
-              <div style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '8px',
-              }}>
-                {skill.tags.map((tag, index) => (
-                  <span key={index} style={{
-                    fontSize: '0.75rem',
-                    color: 'var(--color-text-muted)',
-                    background: 'var(--color-ai-tag-bg)',
-                    padding: '4px 10px',
-                    borderRadius: '4px',
-                    borderWidth: '1px',
-                    borderStyle: 'solid',
-                    borderColor: 'var(--color-ai-tag-border)',
-                    transition: 'all 0.2s ease',
-                    ...(hoveredId === skill.id ? {
-                      color: 'var(--color-cyan)',
-                      borderColor: 'var(--color-cyan-20)',
-                      background: 'var(--color-cyan-10)'
-                    } : {})
-                  }}>
+          <div className="sg-workshop-toolbar">
+            <div className="sg-filter-bar">
+              {platforms.map((platform) => (
+                <button
+                  key={platform}
+                  type="button"
+                  onClick={() => setActivePlatform(platform)}
+                  className={`sg-filter-chip${activePlatform === platform ? ' sg-filter-chip--active' : ''}`}
+                >
+                  {platform}
+                </button>
+              ))}
+            </div>
+            {allTags.length > 0 ? (
+              <div className="sg-filter-bar">
+                <button
+                  type="button"
+                  onClick={() => setActiveTag(null)}
+                  className={`sg-filter-chip${activeTag === null ? ' sg-filter-chip--active' : ''}`}
+                >
+                  全部标签
+                </button>
+                {allTags.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => setActiveTag(tag)}
+                    className={`sg-filter-chip${activeTag === tag ? ' sg-filter-chip--active' : ''}`}
+                  >
                     #{tag}
-                  </span>
+                  </button>
                 ))}
               </div>
+            ) : null}
+          </div>
 
-              <div style={{
-                position: 'absolute',
-                bottom: '-50%',
-                left: '-20%',
-                width: '140%',
-                height: '100%',
-                background: 'radial-gradient(ellipse at bottom, var(--color-cyan-15) 0%, transparent 70%)',
-                opacity: hoveredId === skill.id ? 1 : 0,
-                transition: 'opacity 0.5s ease',
-                pointerEvents: 'none',
-                zIndex: -1
-              }} />
-            </motion.div>
-          ))
-        )}
-      </div>
+          <div className="sg-workshop-grid">
+            {filteredSkills.length === 0 ? (
+              <div className="sg-state sg-state--empty" style={{ gridColumn: '1 / -1' }}>
+                暂无符合筛选条件的技能
+              </div>
+            ) : (
+              filteredSkills.map((skill, index) => (
+                <SpiritListCard
+                  key={skill.id}
+                  variant="scroll"
+                  platform={skill.platform}
+                  index={index}
+                  actionsVisible={hoveredId === skill.id || deletingId === skill.id}
+                  onClick={() => openSkill(skill)}
+                  actions={
+                    <>
+                      <button
+                        type="button"
+                        className="sg-icon-btn"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setEditingSkill(skill)
+                          setIsAddModalOpen(true)
+                        }}
+                        title="修改此技能"
+                      >
+                        ✎
+                      </button>
+                      <button
+                        type="button"
+                        className="sg-icon-btn sg-icon-btn--danger"
+                        onClick={(e) => handleDelete(e, skill.id, skill.name)}
+                        disabled={deletingId === skill.id}
+                        title="删除此技能"
+                      >
+                        {deletingId === skill.id ? '...' : '×'}
+                      </button>
+                    </>
+                  }
+                >
+                  <div
+                    onMouseEnter={() => setHoveredId(skill.id)}
+                    onMouseLeave={() => setHoveredId(null)}
+                  >
+                    <div className="sg-card__head-row">
+                      <div className="sg-card__icon-wrap">{skill.icon}</div>
+                    </div>
+                    <h3 className="sg-card__title">{skill.name}</h3>
+                    <p className="sg-card__desc">{skill.description}</p>
+                    <div className="sg-card__tags">
+                      {skill.tags.map((tag) => (
+                        <span key={tag} className="sg-tag">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </SpiritListCard>
+              ))
+            )}
+          </div>
+        </>
+      )}
 
       <AddSkillModal
         isOpen={isAddModalOpen}

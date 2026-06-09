@@ -6,9 +6,9 @@ interface ContactActionsProps {
 }
 
 const actionClassName = {
-  primary: 'border-cyan-300/40 bg-cyan-300 text-zinc-950 hover:bg-cyan-200',
-  secondary: 'border-white/10 bg-white/[0.08] text-zinc-100 hover:border-cyan-300/35 hover:bg-cyan-300/10',
-  ghost: 'border-transparent bg-transparent text-zinc-400 hover:text-cyan-100',
+  primary: 'border-[var(--sg-green-light)]/40 bg-[var(--sg-green-deep)] text-[var(--sg-cream)] hover:bg-[var(--sg-green-mid)]',
+  secondary: 'border-white/10 bg-white/[0.08] text-zinc-100 hover:border-[var(--sg-green-light)]/35 hover:bg-[var(--sg-green-light)]/10',
+  ghost: 'border-transparent bg-transparent text-zinc-400 hover:text-[var(--sg-green-light)]',
 }
 
 export function ContactActions({ actions, onAction }: ContactActionsProps) {

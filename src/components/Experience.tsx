@@ -160,9 +160,9 @@ export function Experience({ compact = false }: ExperienceProps) {
                   <span
                     className="magazine-date-label"
                     style={{
-                      backgroundColor: 'rgba(0, 217, 255, 0.15)',
+                      backgroundColor: 'rgba(180, 58, 36, 0.15)',
                       color: '#0a0a0a',
-                      borderColor: 'rgba(0, 217, 255, 0.4)',
+                      borderColor: 'rgba(180, 58, 36, 0.4)',
                     }}
                   >
                     {exp.period}
@@ -192,7 +192,7 @@ export function Experience({ compact = false }: ExperienceProps) {
                       style={{
                         marginTop: '20px',
                         paddingTop: '20px',
-                        borderTop: '2px solid rgba(0, 217, 255, 0.2)',
+                        borderTop: '2px solid rgba(180, 58, 36, 0.2)',
                         overflow: 'hidden',
                       }}
                     >
@@ -236,7 +236,7 @@ export function Experience({ compact = false }: ExperienceProps) {
                               style={{
                                 position: 'absolute',
                                 left: '0',
-                                color: '#00d9ff',
+                                color: 'var(--color-cyan)',
                                 fontSize: '18px',
                               }}
                             >
@@ -274,8 +274,8 @@ export function Experience({ compact = false }: ExperienceProps) {
                               fontSize: '12px',
                               fontFamily: 'var(--font-jetbrains-mono), monospace',
                               color: '#0a0a0a',
-                              border: '1px solid rgba(0, 217, 255, 0.4)',
-                              backgroundColor: 'rgba(0, 217, 255, 0.1)',
+                              border: '1px solid rgba(180, 58, 36, 0.4)',
+                              backgroundColor: 'rgba(180, 58, 36, 0.1)',
                               padding: '6px 12px',
                               borderRadius: '4px',
                               textTransform: 'uppercase',
@@ -286,7 +286,7 @@ export function Experience({ compact = false }: ExperienceProps) {
                             transition={{ delay: idx * 0.05, duration: 0.3 }}
                             whileHover={{
                               scale: 1.1,
-                              backgroundColor: 'rgba(0, 217, 255, 0.2)',
+                              backgroundColor: 'rgba(180, 58, 36, 0.2)',
                             }}
                           >
                             {tech}
