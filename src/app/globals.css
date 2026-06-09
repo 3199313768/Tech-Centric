@@ -737,21 +737,3 @@ body {
     font-size: 18px;
   }
 }
-
-/* ========== 聊天对话式联系页 ========== */
-
-/* 打字指示器三点弹跳 */
-@keyframes typing-bounce {
-  0%, 60%, 100% {
-    transform: translateY(0);
-    opacity: 0.4;
-  }
-  30% {
-    transform: translateY(-6px);
-    opacity: 1;
-  }
-}
-
-.typing-dot {
-  animation: typing-bounce 1s ease-in-out infinite;
-}

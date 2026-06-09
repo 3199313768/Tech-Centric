@@ -15,10 +15,7 @@ const tabs = [
   { id: 'all-projects', label: '全部项目' },
   { id: 'ai-skills', label: 'AI Skills' },
   { id: 'vibe-coding', label: 'Vibe Coding' },
-  { id: 'yearlyreview', label: '年度回顾' },
-  { id: 'resources', label: '资源' },
-  { id: 'travel', label: '旅行' },
-  { id: 'contact', label: '联系' }
+  { id: 'resources', label: '资源' }
 ]
 
 export function Navigation({ activeTab, onTabChange }: NavigationProps) {

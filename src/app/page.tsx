@@ -7,11 +7,11 @@ import { About } from '@/components/About'
 import { Experience } from '@/components/Experience'
 import { Skills } from '@/components/Skills'
 import { Achievements } from '@/components/Achievements'
-import { ContactChat } from '@/components/ContactChat'
 import { AiSkills } from '@/components/AiSkills'
 import { VibeCoding } from '@/components/VibeCoding'
 import { ResourceLinks } from '@/components/ResourceLinks'
 import { AllProjects } from '@/components/AllProjects'
+import { FloatingAssistant } from '@/components/rag/FloatingAssistant'
 import { motion } from 'framer-motion'
 import { useBreakpoint } from '@/utils/useBreakpoint'
 
@@ -138,8 +138,6 @@ export default function Home() {
         return <AllProjects />
       case 'resources':
         return <ResourceLinks />
-      case 'contact':
-        return <ContactChat />
       default:
         return <PhysicsWorld />
     }
@@ -162,6 +160,7 @@ export default function Home() {
       )}
       
       {renderContent()}
+      {activeTab === 'home' ? <FloatingAssistant /> : null}
     </div>
   )
 }

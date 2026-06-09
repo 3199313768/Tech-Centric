@@ -6,7 +6,9 @@
     "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "rag:index": "ts-node --project tsconfig.json --compiler-options '{\"module\":\"CommonJS\",\"moduleResolution\":\"node\"}' scripts/index-rag.ts",
+    "rag:check": "ts-node --project tsconfig.json --compiler-options '{\"module\":\"CommonJS\",\"moduleResolution\":\"node\"}' scripts/check-rag-env.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.8.0",
@@ -21,7 +23,8 @@
     "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",
     "react-use": "^17.4.2",
-    "rehype-highlight": "^7.0.2"
+    "rehype-highlight": "^7.0.2",
+    "undici": "^8.4.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
