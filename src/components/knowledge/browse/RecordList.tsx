@@ -9,6 +9,7 @@ import { useToast } from '@/components/spirit/feedback/ToastProvider'
 import { KB_RECORDS_PAGE_SIZE } from '@/lib/knowledge/constants'
 import type { KbRecord } from '@/lib/knowledge/types'
 import { SpiritEmptyState } from '@/components/spirit/feedback/SpiritEmptyState'
+import { SpiritListSkeleton } from '@/components/spirit/feedback/SpiritListSkeleton'
 import { useBreakpoint } from '@/utils/useBreakpoint'
 
 const KB_VIEW_KEY = 'sg-kb-view-mode'
@@ -146,6 +147,10 @@ export function RecordList({
 
       {loadError ? (
         <div className="sg-kb-error sg-kb-error--inline">{loadError}</div>
+      ) : null}
+
+      {loading && records.length > 0 ? (
+        <SpiritListSkeleton count={2} className="sg-kb-load-skeleton" />
       ) : null}
 
       {hasMore ? (

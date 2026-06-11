@@ -5,6 +5,7 @@ import {
   ResourceCard,
   type ResourceCardHandlers,
 } from '@/components/spirit/resource/ResourceCard'
+import { ScrollReveal } from '@/components/spirit/feedback/ScrollReveal'
 import {
   getResourceCategoryIcon,
   getResourceCategoryLabel,
@@ -27,22 +28,24 @@ interface ResourceShelfGridProps {
 
 function renderCard(
   item: ResourceItem,
+  index: number,
   props: Omit<ResourceShelfGridProps, 'items' | 'categories' | 'filter'>,
 ) {
   return (
-    <ResourceCard
-      key={item.id}
-      item={item}
-      searchQuery={props.searchQuery}
-      nowTs={props.nowTs}
-      isHovered={props.hoveredId === item.id}
-      isManageMode={props.isManageMode}
-      isSelected={props.selectedIds.has(item.id)}
-      copyingId={props.copyingId}
-      deleteConfirmId={props.deleteConfirmId}
-      onHoverChange={props.onHoverChange}
-      handlers={props.handlers}
-    />
+    <ScrollReveal key={item.id} index={index}>
+      <ResourceCard
+        item={item}
+        searchQuery={props.searchQuery}
+        nowTs={props.nowTs}
+        isHovered={props.hoveredId === item.id}
+        isManageMode={props.isManageMode}
+        isSelected={props.selectedIds.has(item.id)}
+        copyingId={props.copyingId}
+        deleteConfirmId={props.deleteConfirmId}
+        onHoverChange={props.onHoverChange}
+        handlers={props.handlers}
+      />
+    </ScrollReveal>
   )
 }
 
@@ -81,7 +84,7 @@ export function ResourceShelfGrid({
   if (!useShelfLayout) {
     return (
       <div className="sg-resource-grid">
-        {items.map((item) => renderCard(item, cardProps))}
+        {items.map((item, index) => renderCard(item, index, cardProps))}
       </div>
     )
   }
@@ -106,7 +109,7 @@ export function ResourceShelfGrid({
               <span className="sg-resource-shelf__count">{sectionItems.length} 项</span>
             </header>
             <div className="sg-resource-shelf__grid sg-shelf--depth">
-              {sectionItems.map((item) => renderCard(item, cardProps))}
+              {sectionItems.map((item, index) => renderCard(item, index, cardProps))}
             </div>
           </section>
         )

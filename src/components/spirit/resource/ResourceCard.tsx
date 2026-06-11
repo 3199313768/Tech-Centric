@@ -1,6 +1,5 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import { type ResourceItem } from '@/data/resources/initialResources'
 import { ResourceFavicon } from '@/components/spirit/resource/ResourceFavicon'
 import { SearchHighlight } from '@/components/spirit/resource/SearchHighlight'
@@ -48,9 +47,7 @@ export function ResourceCard({
   const accent = getResourceAccent(item.category)
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+    <div
       onMouseEnter={() => onHoverChange(item.id)}
       onMouseLeave={() => onHoverChange(null)}
       onMouseMove={handleWatercolorHover}
@@ -185,6 +182,6 @@ export function ResourceCard({
           <span className="sg-resource-card__link-count">({item.clickCount} 次)</span>
         ) : null}
       </a>
-    </motion.div>
+    </div>
   )
 }

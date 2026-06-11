@@ -10,6 +10,7 @@ import { DeleteConfirmBar } from '@/components/spirit/feedback/DeleteConfirmBar'
 import { getPlatformClass } from '@/utils/platformAccent'
 import { useToast } from '@/components/spirit/feedback/ToastProvider'
 import type { AgentSkill } from '@/lib/skills/queries'
+import { ScrollReveal } from '@/components/spirit/feedback/ScrollReveal'
 import { SpiritEmptyState } from '@/components/spirit/feedback/SpiritEmptyState'
 import { useSyncInitialData } from '@/utils/useSyncInitialData'
 
@@ -193,11 +194,11 @@ export function AiSkills({ initialSkills }: { initialSkills: AgentSkill[] }) {
               />
             ) : (
               filteredSkills.map((skill, index) => (
+                <ScrollReveal key={skill.id} index={index}>
                 <SpiritListCard
-                  key={skill.id}
                   variant="scroll"
                   platform={skill.platform}
-                  index={index}
+                  index={0}
                   actionsVisible={hoveredId === skill.id || deletingId === skill.id || confirmDeleteId === skill.id}
                   onClick={() => openSkill(skill)}
                   actions={
@@ -260,6 +261,7 @@ export function AiSkills({ initialSkills }: { initialSkills: AgentSkill[] }) {
                     ) : null}
                   </div>
                 </SpiritListCard>
+                </ScrollReveal>
               ))
             )}
           </div>

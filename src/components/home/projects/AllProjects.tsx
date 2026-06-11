@@ -12,6 +12,7 @@ import { getArchiveAccent, getArchiveCode } from '@/utils/archiveCategory'
 import { handleWatercolorHover } from '@/utils/watercolorHover'
 import { useToast } from '@/components/spirit/feedback/ToastProvider'
 import { DeleteConfirmBar } from '@/components/spirit/feedback/DeleteConfirmBar'
+import { ScrollReveal } from '@/components/spirit/feedback/ScrollReveal'
 import { SpiritEmptyState } from '@/components/spirit/feedback/SpiritEmptyState'
 import { useSyncInitialData } from '@/utils/useSyncInitialData'
 
@@ -322,17 +323,14 @@ const FeaturedProjectCard = ({
   const accent = getArchiveAccent(project.category)
 
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '0px' }}
-      transition={{ duration: 0.6 }}
-      {...bindHover}
-      onMouseMove={handleWatercolorHover}
-      onClick={onClick}
-      className="sg-card sg-card--watercolor sg-card--exhibit sg-archive-featured sg-bento-archive__featured"
-      style={{ ['--archive-accent' as string]: accent }}
-    >
+    <ScrollReveal index={0}>
+      <article
+        {...bindHover}
+        onMouseMove={handleWatercolorHover}
+        onClick={onClick}
+        className="sg-card sg-card--watercolor sg-card--exhibit sg-archive-featured sg-bento-archive__featured"
+        style={{ ['--archive-accent' as string]: accent }}
+      >
       <span className="sg-project-card__code">{getArchiveCode(project.category, 0)}</span>
       <div className={`sg-project-card__badge ${project.isPublic ? 'sg-project-card__badge--public' : 'sg-project-card__badge--private'}`}>
         {project.isPublic ? '公网可见' : '内部系统'}
@@ -358,7 +356,8 @@ const FeaturedProjectCard = ({
           ))}
         </div>
       </div>
-    </motion.article>
+      </article>
+    </ScrollReveal>
   )
 }
 
@@ -367,12 +366,10 @@ const FeaturedProjectCard = ({
 // ==========================================
 const ProjectCard = ({
   project,
-  delay,
   index,
   onClick,
 }: {
   project: AllProjectItem
-  delay: number
   index: number
   onClick: () => void
 }) => {
@@ -380,17 +377,22 @@ const ProjectCard = ({
   const accent = getArchiveAccent(project.category)
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '0px' }}
-      transition={{ duration: 0.5, delay }}
-      {...bindHover}
-      onMouseMove={handleWatercolorHover}
-      onClick={onClick}
-      className="sg-card sg-card--watercolor sg-card--exhibit sg-project-card sg-project-card--accent sg-bento-archive__item"
-      style={{ ['--archive-accent' as string]: accent }}
-    >
+    <ScrollReveal index={index}>
+      <div
+        role="button"
+        tabIndex={0}
+        {...bindHover}
+        onMouseMove={handleWatercolorHover}
+        onClick={onClick}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            onClick()
+          }
+        }}
+        className="sg-card sg-card--watercolor sg-card--exhibit sg-project-card sg-project-card--accent sg-bento-archive__item"
+        style={{ ['--archive-accent' as string]: accent }}
+      >
       <span className="sg-project-card__code">{getArchiveCode(project.category, index)}</span>
       <div className={`sg-project-card__badge ${project.isPublic ? 'sg-project-card__badge--public' : 'sg-project-card__badge--private'}`}>
         {project.isPublic ? '公网可见' : '内部系统'}
@@ -425,7 +427,8 @@ const ProjectCard = ({
           )}
         </div>
       </div>
-    </motion.div>
+      </div>
+    </ScrollReveal>
   )
 }
 
@@ -528,7 +531,6 @@ export function AllProjects({ initialProjects }: { initialProjects: AllProjectIt
             key={project.id}
             project={project}
             index={showBento ? idx + 1 : idx}
-            delay={idx * 0.05}
             onClick={() => setSelectedProject(project)}
           />
         ))}

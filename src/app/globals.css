@@ -6537,7 +6537,13 @@ svg {
 }
 
 .sg-subpage-hero__decor--float {
+  transition: transform var(--sg-motion-fast);
   animation: sg-hero-decor-float 6s ease-in-out infinite;
+}
+
+.sg-subpage-hero:hover .sg-subpage-hero__decor--float {
+  animation-play-state: paused;
+  transform: translateY(-10px) rotate(-5deg);
 }
 
 .sg-card--exhibit {
@@ -6738,6 +6744,15 @@ svg {
 .sg-state__label {
   margin: 0;
   color: var(--color-text-muted);
+}
+
+.sg-state--loading-label {
+  margin-top: 8px;
+  text-align: center;
+}
+
+.sg-kb-load-skeleton {
+  margin-top: 16px;
 }
 
 @media (prefers-reduced-motion: reduce) {
