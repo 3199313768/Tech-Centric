@@ -3,12 +3,9 @@
 import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
 import { Navigation } from '@/components/home/shell/Navigation'
+import { SpiritAtmosphereShell } from '@/components/spirit/shell/SpiritAtmosphereShell'
 import { SITE_ROUTES } from '@/lib/site/routes'
 
-const FloatingAssistant = dynamic(
-  () => import('@/components/rag/shell/FloatingAssistant').then((m) => ({ default: m.FloatingAssistant })),
-  { ssr: false },
-)
 const SpiritCursorTrail = dynamic(
   () => import('@/components/home/shell/SpiritCursorTrail').then((m) => ({ default: m.SpiritCursorTrail })),
   { ssr: false },
@@ -23,16 +20,19 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   const isHome = pathname === SITE_ROUTES.home
 
   return (
-    <div className={`spirit-garden-shell${isHome ? ' spirit-garden-shell--home' : ''}`}>
-      {isHome ? (
-        <>
-          <SpiritCursorTrail />
-          <SpiritCursor />
-        </>
-      ) : null}
-      <Navigation transparent={isHome} />
+    <SpiritAtmosphereShell
+      variant={isHome ? 'home' : 'default'}
+      nav={<Navigation transparent={isHome} />}
+      homeEffects={
+        isHome ? (
+          <>
+            <SpiritCursorTrail />
+            <SpiritCursor />
+          </>
+        ) : null
+      }
+    >
       {children}
-      {isHome ? <FloatingAssistant /> : null}
-    </div>
+    </SpiritAtmosphereShell>
   )
 }

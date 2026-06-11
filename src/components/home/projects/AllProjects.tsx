@@ -12,6 +12,7 @@ import { getArchiveAccent, getArchiveCode } from '@/utils/archiveCategory'
 import { handleWatercolorHover } from '@/utils/watercolorHover'
 import { useToast } from '@/components/spirit/feedback/ToastProvider'
 import { DeleteConfirmBar } from '@/components/spirit/feedback/DeleteConfirmBar'
+import { SpiritEmptyState } from '@/components/spirit/feedback/SpiritEmptyState'
 import { useSyncInitialData } from '@/utils/useSyncInitialData'
 
 const AddAllProjectModal = dynamic(
@@ -329,7 +330,7 @@ const FeaturedProjectCard = ({
       {...bindHover}
       onMouseMove={handleWatercolorHover}
       onClick={onClick}
-      className="sg-card sg-card--watercolor sg-archive-featured sg-bento-archive__featured"
+      className="sg-card sg-card--watercolor sg-card--exhibit sg-archive-featured sg-bento-archive__featured"
       style={{ ['--archive-accent' as string]: accent }}
     >
       <span className="sg-project-card__code">{getArchiveCode(project.category, 0)}</span>
@@ -387,7 +388,7 @@ const ProjectCard = ({
       {...bindHover}
       onMouseMove={handleWatercolorHover}
       onClick={onClick}
-      className="sg-card sg-card--watercolor sg-project-card sg-project-card--accent sg-bento-archive__item"
+      className="sg-card sg-card--watercolor sg-card--exhibit sg-project-card sg-project-card--accent sg-bento-archive__item"
       style={{ ['--archive-accent' as string]: accent }}
     >
       <span className="sg-project-card__code">{getArchiveCode(project.category, index)}</span>
@@ -532,9 +533,12 @@ export function AllProjects({ initialProjects }: { initialProjects: AllProjectIt
           />
         ))}
         {filteredProjects.length === 0 ? (
-          <div className="sg-state sg-state--empty" style={{ gridColumn: '1 / -1' }}>
-            暂无该分类下的项目
-          </div>
+          <SpiritEmptyState
+            className="sg-empty-state--grid"
+            imageSrc="/spirit-garden/icon-book.png"
+            title="暂无该分类下的项目"
+            description="切换其他分类，或通过上方按钮新增归档。"
+          />
         ) : null}
       </div>
 

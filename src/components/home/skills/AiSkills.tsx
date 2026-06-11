@@ -10,6 +10,7 @@ import { DeleteConfirmBar } from '@/components/spirit/feedback/DeleteConfirmBar'
 import { getPlatformClass } from '@/utils/platformAccent'
 import { useToast } from '@/components/spirit/feedback/ToastProvider'
 import type { AgentSkill } from '@/lib/skills/queries'
+import { SpiritEmptyState } from '@/components/spirit/feedback/SpiritEmptyState'
 import { useSyncInitialData } from '@/utils/useSyncInitialData'
 
 const AddSkillModal = dynamic(
@@ -17,6 +18,10 @@ const AddSkillModal = dynamic(
 )
 
 const SKILL_REPO = 'https://github.com/3199313768/SKILL'
+
+function skillInkLevel(skill: AgentSkill): number {
+  return Math.min(100, 42 + skill.tags.length * 14)
+}
 
 export function AiSkills({ initialSkills }: { initialSkills: AgentSkill[] }) {
   const { toast } = useToast()
@@ -108,9 +113,16 @@ export function AiSkills({ initialSkills }: { initialSkills: AgentSkill[] }) {
       />
 
       {skills.length === 0 ? (
-        <div className="sg-state sg-state--empty">
-          暂无技能数据，通过上方按钮添加一个吧！
-        </div>
+        <SpiritEmptyState
+          imageSrc="/spirit-garden/icon-sparkle.png"
+          title="卷轴工房尚空"
+          description="通过上方按钮收录第一条 Agent Skill。"
+          action={
+            <button type="button" className="sg-btn sg-btn--primary" onClick={openAddModal}>
+              新增技能
+            </button>
+          }
+        />
       ) : (
         <>
           {scrollRailSkills.length > 0 ? (
@@ -173,9 +185,12 @@ export function AiSkills({ initialSkills }: { initialSkills: AgentSkill[] }) {
 
           <div className="sg-workshop-grid">
             {filteredSkills.length === 0 ? (
-              <div className="sg-state sg-state--empty" style={{ gridColumn: '1 / -1' }}>
-                暂无符合筛选条件的技能
-              </div>
+              <SpiritEmptyState
+                className="sg-empty-state--grid"
+                imageSrc="/spirit-garden/icon-sparkle.png"
+                title="暂无符合筛选条件的技能"
+                description="调整平台或标签筛选后重试。"
+              />
             ) : (
               filteredSkills.map((skill, index) => (
                 <SpiritListCard
@@ -220,6 +235,14 @@ export function AiSkills({ initialSkills }: { initialSkills: AgentSkill[] }) {
                     </div>
                     <h3 className="sg-card__title">{skill.name}</h3>
                     <p className="sg-card__desc">{skill.description}</p>
+                    <div className="sg-skill-ink-meter" aria-hidden>
+                      <div className="sg-meter-track">
+                        <div
+                          className="sg-meter-fill sg-meter-fill--ink"
+                          style={{ width: `${skillInkLevel(skill)}%` }}
+                        />
+                      </div>
+                    </div>
                     <div className="sg-card__tags">
                       {skill.tags.map((tag) => (
                         <span key={tag} className="sg-tag">

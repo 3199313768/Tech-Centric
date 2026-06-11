@@ -4,7 +4,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Code2, ExternalLink, FlaskConical, Paintbrush, Paperclip, Sparkles, Terminal } from 'lucide-react'
 import { SpiritDustCanvas } from '@/components/home/landing/SpiritDustCanvas'
-import { personalInfo, skillsDetail } from '@/data/site/personal'
+import type { AllProjectItem } from '@/data/site/allProjects'
+import { personalInfo } from '@/data/site/personal'
+import type { HeroSeason, SoulMeterItem } from '@/lib/site/homeStats'
 import { handleWatercolorHover } from '@/utils/watercolorHover'
 import { SITE_ROUTES } from '@/lib/site/routes'
 
@@ -15,24 +17,65 @@ const SKILL_CHIPS = [
   { name: 'Next.js', icon: Terminal },
 ] as const
 
-const SOUL_METERS = [
+const FALLBACK_SOUL_METERS: SoulMeterItem[] = [
   { label: '创造力能量', value: 94 },
   { label: '咖啡因法力值', value: 62 },
   { label: '内心宁静度', value: 100 },
-] as const
+]
 
-function avgFrontend() {
-  const items = skillsDetail.filter((s) => s.category === 'frontend')
-  if (!items.length) return 94
-  return Math.round(items.reduce((sum, s) => sum + s.proficiency, 0) / items.length)
+const FALLBACK_FEATURED = {
+  eyebrow: '最新案例 | 项目回顾',
+  title: '幻梦之森 3D',
+  description:
+    '基于 Three.js 构建的沉浸式森林场景，灵感源自《幽灵公主》中的精灵之森，探索 WebGL 光影与程序化动画的边界。',
+  image: '/spirit-garden/project-forest.png',
+  imageAlt: '幻梦之森 3D 预览',
+  tags: ['WebGL', 'GSAP'],
+  href: SITE_ROUTES.projects,
+  external: false,
+} as const
+
+interface FeaturedDisplay {
+  eyebrow: string
+  title: string
+  description: string
+  image: string
+  imageAlt: string
+  tags: string[]
+  href: string
+  external: boolean
 }
 
-export function SpiritGardenHome() {
-  const creativity = avgFrontend()
+function resolveFeaturedDisplay(featured?: AllProjectItem | null): FeaturedDisplay {
+  if (!featured) {
+    return { ...FALLBACK_FEATURED, tags: [...FALLBACK_FEATURED.tags] }
+  }
 
-  const meters = SOUL_METERS.map((item) =>
-    item.label === '创造力能量' ? { ...item, value: creativity } : item,
-  )
+  return {
+    eyebrow: '最新案例 | 项目回顾',
+    title: featured.name,
+    description: featured.description || FALLBACK_FEATURED.description,
+    image: featured.screenshots[0] ?? FALLBACK_FEATURED.image,
+    imageAlt: `${featured.name} 预览`,
+    tags: featured.tags.length > 0 ? featured.tags.slice(0, 4) : ['项目'],
+    href: featured.url || SITE_ROUTES.projects,
+    external: Boolean(featured.url),
+  }
+}
+
+interface SpiritGardenHomeProps {
+  featured?: AllProjectItem | null
+  soulMeters?: SoulMeterItem[]
+  heroSeason?: HeroSeason
+}
+
+export function SpiritGardenHome({
+  featured,
+  soulMeters = FALLBACK_SOUL_METERS,
+  heroSeason = 'spring',
+}: SpiritGardenHomeProps) {
+  const featuredDisplay = resolveFeaturedDisplay(featured)
+  const meters = soulMeters.length > 0 ? soulMeters : FALLBACK_SOUL_METERS
 
   return (
     <>
@@ -48,7 +91,9 @@ export function SpiritGardenHome() {
             className="sg-hero-backdrop-img sg-hero-backdrop-img--blend"
           />
           <SpiritDustCanvas className="sg-spirit-dust-canvas" />
-          <div className="sg-hero-backdrop-overlay sg-hero-backdrop-overlay--garden" />
+          <div
+            className={`sg-hero-backdrop-overlay sg-hero-backdrop-overlay--garden sg-hero-season--${heroSeason}`}
+          />
         </div>
 
         <div className="sg-hero-inner-wrap sg-hero-inner-wrap--garden sg-hero-enter">
@@ -101,27 +146,43 @@ export function SpiritGardenHome() {
           >
             <div className="sg-card-featured-head">
               <div>
-                <p className="sg-card-eyebrow">最新案例 | 项目回顾</p>
-                <h2>幻梦之森 3D</h2>
-                <p className="sg-card-desc">
-                  基于 Three.js 构建的沉浸式森林场景，灵感源自《幽灵公主》中的精灵之森，
-                  探索 WebGL 光影与程序化动画的边界。
-                </p>
+                <p className="sg-card-eyebrow">{featuredDisplay.eyebrow}</p>
+                <h2>{featuredDisplay.title}</h2>
+                <p className="sg-card-desc">{featuredDisplay.description}</p>
               </div>
-              <ExternalLink size={18} className="sg-card-link-icon" aria-hidden />
+              {featuredDisplay.external ? (
+                <a
+                  href={featuredDisplay.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="sg-card-link-hit"
+                  aria-label={`查看项目：${featuredDisplay.title}`}
+                >
+                  <ExternalLink size={18} className="sg-card-link-icon" aria-hidden />
+                </a>
+              ) : (
+                <Link
+                  href={featuredDisplay.href}
+                  className="sg-card-link-hit"
+                  aria-label={`查看项目：${featuredDisplay.title}`}
+                >
+                  <ExternalLink size={18} className="sg-card-link-icon" aria-hidden />
+                </Link>
+              )}
             </div>
             <div className="sg-card-featured-media">
               <Image
-                src="/spirit-garden/project-forest.png"
-                alt="幻梦之森 3D 预览"
+                src={featuredDisplay.image}
+                alt={featuredDisplay.imageAlt}
                 fill
                 sizes="(max-width: 768px) 100vw, 720px"
                 className="sg-card-featured-img"
               />
             </div>
             <div className="sg-card-tags">
-              <span>WebGL</span>
-              <span>GSAP</span>
+              {featuredDisplay.tags.map((tag) => (
+                <span key={tag}>{tag}</span>
+              ))}
             </div>
           </article>
 

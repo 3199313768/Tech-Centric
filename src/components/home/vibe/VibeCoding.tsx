@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { deleteVibeProject } from '@/lib/vibe/actions'
 import { SpiritSubpageHero } from '@/components/spirit/shell/SpiritSubpageHero'
-import { SpiritListCard } from '@/components/spirit/shell/SpiritListCard'
-import { DeleteConfirmBar } from '@/components/spirit/feedback/DeleteConfirmBar'
+import { HerbEntry } from '@/components/home/vibe/HerbEntry'
 import { useToast } from '@/components/spirit/feedback/ToastProvider'
 import type { VibeProject } from '@/lib/vibe/queries'
+import { SpiritEmptyState } from '@/components/spirit/feedback/SpiritEmptyState'
 import { useSyncInitialData } from '@/utils/useSyncInitialData'
 
 const AddVibeModal = dynamic(
@@ -85,69 +85,36 @@ export function VibeCoding({ initialProjects }: { initialProjects: VibeProject[]
       />
 
       {projects.length === 0 ? (
-        <div className="sg-state sg-state--empty">
-          暂无手札数据，通过上方按钮添加一条吧！
-        </div>
+        <SpiritEmptyState
+          imageSrc="/spirit-garden/icon-leaf.png"
+          title="草本集尚待播种"
+          description="记录每一次 Vibe 实验，从这里开始。"
+          action={
+            <button type="button" className="sg-btn sg-btn--primary" onClick={openAddModal}>
+              新增手札
+            </button>
+          }
+        />
       ) : (
         <div className="sg-herb-journal">
           {projects.map((project, index) => (
-            <div
+            <HerbEntry
               key={project.id}
-              className={`sg-herb-entry ${index % 2 === 0 ? 'sg-herb-entry--left' : 'sg-herb-entry--right'}`}
-            >
-              <span className="sg-herb-entry__node" aria-hidden />
-              <SpiritListCard
-                variant="herb"
-                index={index}
-                href={project.url}
-                actionsVisible={hoveredId === project.id || deletingId === project.id || confirmDeleteId === project.id}
-                actions={
-                  <>
-                    <button
-                      type="button"
-                      className="sg-icon-btn"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        setEditingProject(project)
-                        setIsAddModalOpen(true)
-                      }}
-                      title="修改此项目"
-                    >
-                      ✎
-                    </button>
-                    <button
-                      type="button"
-                      className="sg-icon-btn sg-icon-btn--danger"
-                      onClick={(e) => requestDelete(e, project.id)}
-                      disabled={deletingId === project.id}
-                      title="删除此项目"
-                    >
-                      {deletingId === project.id ? '...' : '×'}
-                    </button>
-                  </>
-                }
-              >
-                <div
-                  onMouseEnter={() => setHoveredId(project.id)}
-                  onMouseLeave={() => setHoveredId(null)}
-                >
-                  <span className="sg-herb-date">{formatHerbDate(index)}</span>
-                  <div className="sg-card__icon-wrap">{project.icon}</div>
-                  <h3 className="sg-card__title">{project.name}</h3>
-                  <p className="sg-card__desc">{project.description}</p>
-                  <span className="sg-herb-link">访问实验</span>
-                  {confirmDeleteId === project.id ? (
-                    <DeleteConfirmBar
-                      message={`确定删除「${project.name}」？不可撤销`}
-                      onCancel={() => setConfirmDeleteId(null)}
-                      onConfirm={() => executeDelete(project.id)}
-                      isLoading={deletingId === project.id}
-                    />
-                  ) : null}
-                </div>
-              </SpiritListCard>
-            </div>
+              project={project}
+              index={index}
+              dateLabel={formatHerbDate(index)}
+              hoveredId={hoveredId}
+              deletingId={deletingId}
+              confirmDeleteId={confirmDeleteId}
+              onHover={setHoveredId}
+              onEdit={(item) => {
+                setEditingProject(item)
+                setIsAddModalOpen(true)
+              }}
+              onRequestDelete={requestDelete}
+              onConfirmDelete={executeDelete}
+              onCancelDelete={() => setConfirmDeleteId(null)}
+            />
           ))}
         </div>
       )}

@@ -1,7 +1,8 @@
 'use client'
 
 import { FormEvent, useEffect, useRef, useState } from 'react'
-import { Bot, Loader2, Send, Sparkles } from 'lucide-react'
+import Image from 'next/image'
+import { Loader2, Send } from 'lucide-react'
 import type { ChatMessage, RagSource } from '@/lib/rag/types'
 import {
   buildMailtoUrl,
@@ -17,6 +18,7 @@ import {
   validateContactEmail,
 } from '@/lib/rag/contactFlow'
 import { MessageBubble } from '@/components/rag/chat/MessageBubble'
+import { TypingIndicator } from '@/components/rag/contact/TypingIndicator'
 import { SuggestedItem, SuggestedQuestions } from '@/components/rag/chat/SuggestedQuestions'
 
 interface RagChatResponse {
@@ -255,12 +257,20 @@ export function ChatPanel() {
   return (
     <div className="sg-rag-panel">
       <div className="sg-rag-panel__header">
-        <div className="sg-rag-panel__avatar">
-          <Bot className="sg-rag-panel__avatar-icon" aria-hidden />
+        <div className="sg-rag-panel__avatar sg-rag-panel__avatar--sprite">
+          <Image
+            src="/spirit-garden/icon-sparkle.png"
+            alt=""
+            width={22}
+            height={22}
+            className="sg-rag-panel__avatar-sprite"
+            aria-hidden
+            unoptimized
+          />
         </div>
         <div className="sg-rag-panel__meta">
           <p className="sg-rag-panel__title">
-            Tech-Centric AI 助手
+            庭院导引
             <span className="sg-rag-badge">在线</span>
             {mode === 'contact' ? <span className="sg-rag-badge">联系</span> : null}
           </p>
@@ -270,13 +280,23 @@ export function ChatPanel() {
 
       <div className="sg-rag-panel__body">
         {messages.length === 0 ? (
-          <div className="sg-rag-welcome-stack">
+          <div className="sg-rag-welcome-stack sg-rag-welcome-stack--garden">
             <div className="sg-rag-welcome">
               <div className="sg-rag-welcome__icon">
-                <Sparkles className="sg-rag-welcome__icon-svg" aria-hidden />
+                <Image
+                  src="/spirit-garden/icon-sparkle.png"
+                  alt=""
+                  width={16}
+                  height={16}
+                  className="sg-rag-welcome__icon-img"
+                  aria-hidden
+                  unoptimized
+                />
               </div>
-              <p className="sg-rag-welcome__title">你好，我是这个网站的 AI 导览。</p>
-              <p className="sg-rag-welcome__text">可以问我站长的项目、技术栈、经历，也可以直接联系我。</p>
+              <p className="sg-rag-welcome__title">你好，我是庭院的导引精灵。</p>
+              <p className="sg-rag-welcome__text">
+                可以问我站长的项目、技术栈、经历，也可以直接联系我。
+              </p>
             </div>
             <SuggestedQuestions onSelect={(item: SuggestedItem) => {
               if (item.type === 'action' && item.value === 'start-contact') {
@@ -293,10 +313,14 @@ export function ChatPanel() {
         ))}
 
         {isLoading ? (
-          <div className="sg-rag-loading">
-            <Loader2 className="sg-rag-loading__icon" aria-hidden />
-            正在检索站内资料...
-          </div>
+          mode === 'contact' ? (
+            <TypingIndicator />
+          ) : (
+            <div className="sg-rag-loading">
+              <Loader2 className="sg-rag-loading__icon" aria-hidden />
+              正在检索站内资料...
+            </div>
+          )
         ) : null}
 
         {copiedLabel ? (

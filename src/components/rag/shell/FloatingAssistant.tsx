@@ -1,7 +1,8 @@
 'use client'
 
+import Image from 'next/image'
 import { useState } from 'react'
-import { Bot, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { ChatPanel } from '@/components/rag/chat/ChatPanel'
 
 export function FloatingAssistant() {
@@ -18,12 +19,24 @@ export function FloatingAssistant() {
       <button
         type="button"
         onClick={() => setIsOpen((value) => !value)}
-        className="sg-rag-trigger sg-rag-trigger--icon-only"
+        className="sg-rag-trigger sg-rag-trigger--icon-only sg-rag-trigger--sprite"
         aria-expanded={isOpen}
-        aria-label={isOpen ? '关闭 AI 助手' : '打开 AI 助手'}
+        aria-label={isOpen ? '关闭庭院导引' : '打开庭院导引'}
       >
         <span className="sg-rag-trigger__icon">
-          {isOpen ? <X className="sg-rag-trigger__icon-svg" /> : <Bot className="sg-rag-trigger__icon-svg" />}
+          {isOpen ? (
+            <X className="sg-rag-trigger__icon-svg" aria-hidden />
+          ) : (
+            <Image
+              src="/spirit-garden/icon-sparkle.png"
+              alt=""
+              width={24}
+              height={24}
+              className="sg-rag-trigger__sprite-img"
+              aria-hidden
+              unoptimized
+            />
+          )}
         </span>
       </button>
     </div>

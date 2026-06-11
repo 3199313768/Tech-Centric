@@ -1,14 +1,10 @@
 import { KnowledgeNav } from '@/components/knowledge/shell/KnowledgeNav'
+import { SpiritAtmosphereShell } from '@/components/spirit/shell/SpiritAtmosphereShell'
 
 export default function KnowledgeLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  return (
-    <div className="spirit-garden-shell">
-      <KnowledgeNav />
-      {children}
-    </div>
-  )
+  return <SpiritAtmosphereShell nav={<KnowledgeNav />}>{children}</SpiritAtmosphereShell>
 }

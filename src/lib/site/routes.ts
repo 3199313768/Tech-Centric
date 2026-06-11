@@ -13,6 +13,7 @@ export const SITE_NAV_TABS = [
   { href: SITE_ROUTES.skills, label: '技能工坊' },
   { href: SITE_ROUTES.vibe, label: '草本集' },
   { href: SITE_ROUTES.resources, label: '资源' },
+  { href: SITE_ROUTES.knowledge, label: '档案馆' },
 ] as const
 
 export function isSiteNavActive(pathname: string, href: string): boolean {

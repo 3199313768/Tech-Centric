@@ -105,7 +105,7 @@ export function ResourceShelfGrid({
               <h2 className="sg-resource-shelf__title">{getResourceCategoryLabel(category)}</h2>
               <span className="sg-resource-shelf__count">{sectionItems.length} 项</span>
             </header>
-            <div className="sg-resource-shelf__grid">
+            <div className="sg-resource-shelf__grid sg-shelf--depth">
               {sectionItems.map((item) => renderCard(item, cardProps))}
             </div>
           </section>

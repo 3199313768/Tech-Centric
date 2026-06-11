@@ -15,9 +15,11 @@ export function KnowledgeNav() {
 
         <div className="sg-nav-links">
           <Link href="/" className="sg-nav-link">
-            返回庭院
+            庭院
           </Link>
-          <span className="sg-nav-link sg-nav-link--active">档案馆</span>
+          <span className="sg-nav-link sg-nav-link--active" aria-current="page">
+            档案馆
+          </span>
         </div>
 
         <div className="sg-nav-actions">

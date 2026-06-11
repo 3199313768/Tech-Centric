@@ -47,7 +47,7 @@ export function SpiritSubpageHero({
         alt={decor.alt}
         width={decor.width}
         height={decor.height}
-        className="sg-subpage-hero__decor"
+        className="sg-subpage-hero__decor sg-subpage-hero__decor--float"
         aria-hidden
         unoptimized
       />

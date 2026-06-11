@@ -22,6 +22,7 @@ import { KB_SIGNED_URL_TTL_SEC } from '@/lib/knowledge/constants'
 import { EditRecordModal } from '@/components/knowledge/capture/EditRecordModal'
 import { DeleteConfirmBar } from '@/components/spirit/feedback/DeleteConfirmBar'
 import type { KbRecord } from '@/lib/knowledge/types'
+import { scrollRevealClass, useScrollReveal } from '@/utils/useScrollReveal'
 
 interface RecordCardProps {
   record: KbRecord
@@ -35,7 +36,16 @@ const TYPE_LABELS: Record<string, string> = {
   file: '附件',
 }
 
+const KB_TYPE_CLASS: Record<string, string> = {
+  text: 'sg-kb-card--text',
+  code: 'sg-kb-card--code',
+  image: 'sg-kb-card--image',
+  file: 'sg-kb-card--file',
+}
+
 export function RecordCard({ record, index = 0 }: RecordCardProps) {
+  const { ref, isVisible } = useScrollReveal<HTMLDivElement>()
+  const typeClass = KB_TYPE_CLASS[record.type] ?? 'sg-kb-card--text'
   const isMediaType = record.type === 'image' || record.type === 'file'
   const [assetUrl, setAssetUrl] = useState<string | null>(null)
   const [assetLoading, setAssetLoading] = useState(isMediaType)
@@ -114,11 +124,11 @@ export function RecordCard({ record, index = 0 }: RecordCardProps) {
   }
 
   return (
-    <>
+    <div ref={ref} className={scrollRevealClass(isVisible, index)}>
       <SpiritListCard
         variant="list"
         index={index}
-        className={`sg-kb-card break-inside-avoid${isDeleting ? ' sg-kb-card--deleting' : ''}`}
+        className={`sg-kb-card ${typeClass} break-inside-avoid${isDeleting ? ' sg-kb-card--deleting' : ''}`}
         actionsVisible={actionsVisible || isDeleting || showDeleteConfirm}
         actions={
           <>
@@ -277,6 +287,6 @@ export function RecordCard({ record, index = 0 }: RecordCardProps) {
           onClose={() => setEditingRecord(null)}
         />
       ) : null}
-    </>
+    </div>
   )
 }
