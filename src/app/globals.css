@@ -2973,6 +2973,7 @@ svg {
   color: var(--sg-ink);
   cursor: pointer;
   text-align: left;
+  text-decoration: none;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
@@ -2985,6 +2986,26 @@ svg {
   background: rgba(188, 240, 174, 0.42);
   color: var(--sg-green-deep);
   font-weight: 600;
+}
+
+.dark .sg-nav-drawer-link {
+  color: var(--sg-cream);
+}
+
+.dark .sg-nav-drawer-link:hover,
+.dark .sg-nav-drawer-link--active {
+  color: var(--sg-green-light);
+}
+
+.sg-nav-drawer-link:focus-visible,
+.sg-nav-menu-toggle:focus-visible {
+  outline: 2px solid var(--sg-green-deep);
+  outline-offset: 2px;
+}
+
+.dark .sg-nav-drawer-link:focus-visible,
+.dark .sg-nav-menu-toggle:focus-visible {
+  outline-color: var(--sg-green-light);
 }
 
 /* 触控友好按钮 */
@@ -5740,6 +5761,48 @@ svg {
   }
 }
 
+@media (max-width: 640px) {
+  .sg-rag-shell.sg-rag-shell--open {
+    left: 0;
+    right: 0;
+    align-items: stretch;
+    gap: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .sg-rag-shell.sg-rag-shell--open .sg-rag-panel-wrap {
+    width: 100%;
+    animation: sg-rag-sheet-enter 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .sg-rag-shell.sg-rag-shell--open .sg-rag-panel {
+    max-width: none;
+    width: 100%;
+    height: min(78dvh, calc(100dvh - 3rem));
+    border-radius: 20px 20px 0 0;
+    border-bottom: none;
+  }
+
+  .sg-rag-shell.sg-rag-shell--open .sg-rag-trigger {
+    position: fixed;
+    z-index: 51;
+    bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+    right: max(1rem, env(safe-area-inset-right, 0px));
+  }
+}
+
+@keyframes sg-rag-sheet-enter {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes sg-rag-enter {
   from {
     opacity: 0;
@@ -5773,6 +5836,15 @@ svg {
   transform: translateY(-2px);
   border-color: var(--color-cyan-30);
   box-shadow: 0 16px 40px -12px var(--color-card-shadow-hover);
+}
+
+.sg-rag-trigger:focus-visible {
+  outline: 2px solid var(--sg-green-deep);
+  outline-offset: 2px;
+}
+
+.dark .sg-rag-trigger:focus-visible {
+  outline-color: var(--sg-green-light);
 }
 
 .sg-rag-trigger--icon-only {
@@ -5843,6 +5915,10 @@ svg {
   height: 20px;
 }
 
+.sg-rag-panel__meta {
+  min-width: 0;
+}
+
 .sg-rag-panel__title {
   margin: 0;
   display: flex;
@@ -5883,6 +5959,12 @@ svg {
   gap: 16px;
   scrollbar-width: thin;
   scrollbar-color: var(--color-cyan-30) transparent;
+}
+
+.sg-rag-welcome-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .sg-rag-welcome {

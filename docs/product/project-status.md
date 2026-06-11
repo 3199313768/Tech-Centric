@@ -14,7 +14,7 @@
 | 知识库 `/knowledge` | ✅ MVP 完成 | CRUD、标签、分页、全局 Cmd+K 录入 |
 | 公开 RAG 助手 | ✅ 核心完成 | 首页浮动助手 + Ask / Contact 双模式 |
 | SpiritGarden 暖色主题 | ✅ 基本完成 | 全局 token + 子页样式 |
-| 移动端导航 / RAG 样式收敛 | 🔄 进行中 | 工作区有未提交改动（见 §2） |
+| 移动端导航 / RAG 样式收敛 | ✅ 完成 | 抽屉导航 + `sg-rag-*` 样式 + 移动端 bottom-sheet |
 | RAG × 知识库索引闭环 | ❌ 未闭环 | RLS 与索引策略矛盾（见 §3.1） |
 | 自动化测试 | ❌ 缺失 | 无 unit / e2e 套件 |
 | 独立联系聊天气泡页 | ❌ 未实现 | 归档设计未落地（见 §7） |
@@ -23,19 +23,14 @@
 
 ---
 
-## 2. 工作区进行中（未提交）
+## 2. 近期已完成（移动端导航 / RAG 样式）
 
-当前 `git status` 显示 10 个文件有本地修改，尚未 commit：
-
-| 文件 | 改动方向 |
-|------|----------|
-| `src/app/globals.css` | 新增/扩展 `sg-nav-drawer`、`sg-rag-*` 等 SpiritGarden 样式（约 +596 行） |
-| `src/components/home/shell/Navigation.tsx` | 紧凑屏（≤1024px）抽屉导航 + overlay |
-| `src/components/rag/shell/FloatingAssistant.tsx` | 由内联 Tailwind 改为 `sg-rag-*` class |
-| `src/components/rag/chat/*`、`contact/*` | RAG 面板与联系模式样式对齐设计系统 |
-| `src/utils/useBreakpoint.ts` | 断点 hook 优化（SSR 首屏默认值、监听收敛） |
-
-**待完成动作**：自测移动端导航与 RAG 面板、跑 `pnpm lint && pnpm build`、合并提交。
+| 文件 | 内容 |
+|------|------|
+| `src/app/globals.css` | `sg-nav-drawer`、`sg-rag-*`；移动端 RAG bottom-sheet（`sg-rag-shell--open`） |
+| `src/components/home/shell/Navigation.tsx` | ≤1024px 抽屉导航、Esc 关闭、body 滚动锁定 |
+| `src/components/rag/**` | 全面改用 `sg-rag-*`，移除内联 Tailwind 装饰 |
+| `src/utils/useBreakpoint.ts` | SSR 首屏默认值、监听收敛 |
 
 ---
 
@@ -166,8 +161,7 @@ README 已列清单；缺任一关键项会导致聊天或索引失败：
 
 ## 9. 建议执行顺序
 
-1. **合并 §2 未提交改动**并完成移动端自测。
-2. **决策并实施 §3.1**（知识库与 RAG 数据策略）——阻塞「助手懂知识库」。
+1. **决策并实施 §3.1**（知识库与 RAG 数据策略）——阻塞「助手懂知识库」。
 3. **在生产 Supabase 执行推荐 SQL 补丁** + `pnpm rag:check` + `pnpm rag:index`。
 4. **替换 `personal.ts` 社交占位链接**。
 5. 按 PRD 处理 P2（代码语言、图片优化）。

@@ -258,7 +258,7 @@ export function ChatPanel() {
         <div className="sg-rag-panel__avatar">
           <Bot className="sg-rag-panel__avatar-icon" aria-hidden />
         </div>
-        <div className="min-w-0">
+        <div className="sg-rag-panel__meta">
           <p className="sg-rag-panel__title">
             Tech-Centric AI 助手
             <span className="sg-rag-badge">在线</span>
@@ -270,7 +270,7 @@ export function ChatPanel() {
 
       <div className="sg-rag-panel__body">
         {messages.length === 0 ? (
-          <div className="space-y-4">
+          <div className="sg-rag-welcome-stack">
             <div className="sg-rag-welcome">
               <div className="sg-rag-welcome__icon">
                 <Sparkles className="sg-rag-welcome__icon-svg" aria-hidden />

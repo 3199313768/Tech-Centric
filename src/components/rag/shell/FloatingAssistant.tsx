@@ -8,7 +8,7 @@ export function FloatingAssistant() {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="sg-rag-shell">
+    <div className={`sg-rag-shell${isOpen ? ' sg-rag-shell--open' : ''}`}>
       {isOpen ? (
         <div className="sg-rag-panel-wrap">
           <ChatPanel />
