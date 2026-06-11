@@ -19,13 +19,13 @@ interface SuggestedQuestionsProps {
 
 export function SuggestedQuestions({ items = DEFAULT_ITEMS, onSelect }: SuggestedQuestionsProps) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="sg-rag-chips">
       {items.map((item) => (
         <button
           key={item.id}
           type="button"
           onClick={() => onSelect(item)}
-          className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-xs text-zinc-300 shadow-sm shadow-black/10 transition-all hover:-translate-y-0.5 hover:border-[var(--sg-green-light)]/40 hover:bg-[var(--sg-green-light)]/10 hover:text-[var(--sg-green-light)]"
+          className="sg-filter-chip sg-rag-chip"
         >
           {item.label}
         </button>

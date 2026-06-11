@@ -12,31 +12,16 @@ interface Breakpoint {
 const MOBILE_MAX = 768
 const TABLET_MAX = 1024
 
-function getBreakpointByWidth(width: number): Omit<Breakpoint, 'isLandscape'> {
-  return {
-    isMobile: width <= MOBILE_MAX,
-    isTablet: width > MOBILE_MAX && width <= TABLET_MAX,
-    isDesktop: width > TABLET_MAX,
-  }
-}
-
-function getInitialBreakpoint(): Breakpoint {
-  if (typeof window === 'undefined') {
-    return {
-      isMobile: false,
-      isTablet: false,
-      isDesktop: true,
-      isLandscape: false,
-    }
-  }
-  return {
-    ...getBreakpointByWidth(window.innerWidth),
-    isLandscape: window.matchMedia('(orientation: landscape)').matches,
-  }
+/** SSR 与 hydrate 首屏共用，避免服务端/客户端 DOM 不一致 */
+const DESKTOP_BREAKPOINT: Breakpoint = {
+  isMobile: false,
+  isTablet: false,
+  isDesktop: true,
+  isLandscape: false,
 }
 
 export function useBreakpoint(): Breakpoint {
-  const [breakpoint, setBreakpoint] = useState<Breakpoint>(getInitialBreakpoint)
+  const [breakpoint, setBreakpoint] = useState<Breakpoint>(DESKTOP_BREAKPOINT)
 
   useEffect(() => {
     const mobileQuery = window.matchMedia(`(max-width: ${MOBILE_MAX}px)`)
