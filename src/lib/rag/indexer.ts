@@ -4,13 +4,14 @@ import { createEmbedding } from './embedding'
 import { getStaticRagDocuments } from './staticSources'
 import type { RagDocumentInput } from './types'
 
-const MANAGED_SOURCE_TYPES = ['static_personal', 'static_project', 'static_resource', 'knowledge_record']
+const MANAGED_SOURCE_TYPES = ['static_personal', 'static_project', 'static_resource', 'knowledge_record', 'vibe_entry']
 
 interface KnowledgeRecord {
   id: string
   type: string
   content: string
   tags?: string[] | null
+  is_public?: boolean | null
   created_at?: string
   updated_at?: string | null
 }
@@ -18,12 +19,16 @@ interface KnowledgeRecord {
 interface AllProjectRecord {
   id: string
   name: string
+  slug?: string | null
   url?: string | null
   is_public?: boolean | null
   category?: string | null
   description?: string | null
   role_and_contribution?: string | null
   tags?: string[] | null
+  body?: string | null
+  highlights?: string[] | null
+  tech_stack?: string[] | null
 }
 
 interface ExistingRagDocument {
@@ -77,21 +82,24 @@ async function loadKnowledgeDocuments(): Promise<RagDocumentInput[]> {
   const supabase = createPublicReadClient()
   const { data, error } = await supabase
     .from('kb_records')
-    .select('id,type,content,tags,created_at,updated_at')
+    .select('id,type,content,tags,is_public,created_at,updated_at')
+    .eq('is_public', true)
     .in('type', ['text', 'code'])
     .order('created_at', { ascending: false })
     .limit(500)
 
   if (error) {
-    console.warn(`Skipping kb_records ingestion because no public records are readable: ${error.message}`)
+    console.warn(`Skipping kb_records ingestion: ${error.message}`)
     return []
   }
 
-  return ((data || []) as KnowledgeRecord[]).filter(record => record.content?.trim()).map(record => ({
+  return ((data || []) as KnowledgeRecord[])
+    .filter(record => record.content?.trim() && record.is_public === true)
+    .map(record => ({
     sourceType: 'knowledge_record',
     sourceId: record.id,
     title: `知识库记录 ${record.created_at ? new Date(record.created_at).toLocaleDateString('zh-CN') : record.id.slice(0, 8)}`,
-    url: '/knowledge',
+    url: `/knowledge/${record.id}`,
     summary: record.content.slice(0, 120),
     tags: record.tags || [],
     isPublic: true,
@@ -103,15 +111,61 @@ async function loadKnowledgeDocuments(): Promise<RagDocumentInput[]> {
   }))
 }
 
+interface VibeEntryRecord {
+  id: string
+  name: string
+  slug?: string | null
+  description?: string | null
+  kind?: string | null
+  body?: string | null
+  is_public?: boolean | null
+  tags?: string[] | null
+}
+
+async function loadVibeDocuments(): Promise<RagDocumentInput[]> {
+  const supabase = createPublicReadClient()
+  const { data, error } = await supabase
+    .from('vibe_coding')
+    .select('id,name,slug,description,kind,body,is_public,tags')
+    .eq('is_public', true)
+    .in('kind', ['note', 'article'])
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.warn(`Skipping vibe_coding ingestion: ${error.message}`)
+    return []
+  }
+
+  return ((data || []) as VibeEntryRecord[])
+    .filter((entry) => entry.body?.trim() || entry.description?.trim())
+    .map((entry) => {
+      const slug = entry.slug?.trim() || entry.id
+      return {
+        sourceType: 'vibe_entry' as const,
+        sourceId: entry.id,
+        title: entry.name,
+        url: `/vibe/${encodeURIComponent(slug)}`,
+        summary: entry.description || null,
+        tags: ['草本集', entry.kind || 'note', ...(entry.tags || [])],
+        isPublic: true,
+        content: [
+          `标题：${entry.name}`,
+          entry.kind ? `类型：${entry.kind}` : '',
+          entry.description ? `摘要：${entry.description}` : '',
+          entry.body ? `正文：${entry.body}` : '',
+          entry.tags?.length ? `标签：${entry.tags.join('、')}` : '',
+        ].filter(Boolean).join('\n'),
+      }
+    })
+}
+
 async function loadProjectDocuments(): Promise<RagDocumentInput[]> {
   const supabase = createPublicReadClient()
   const documents: RagDocumentInput[] = []
 
-  console.warn('Skipping projects ingestion until the projects table has an explicit public visibility field')
-
   const { data: allProjects, error: allProjectsError } = await supabase
     .from('all_projects')
-    .select('id,name,url,is_public,category,description,role_and_contribution,tags')
+    .select('id,slug,name,url,is_public,category,description,role_and_contribution,tags,body,highlights,tech_stack')
     .eq('is_public', true)
     .order('created_at', { ascending: false })
 
@@ -119,11 +173,12 @@ async function loadProjectDocuments(): Promise<RagDocumentInput[]> {
     console.warn(`Skipping all_projects ingestion: ${allProjectsError.message}`)
   } else {
     for (const project of (allProjects || []) as AllProjectRecord[]) {
+      const slug = project.slug?.trim() || project.id
       documents.push({
         sourceType: 'static_project',
         sourceId: `all-project-${project.id}`,
         title: project.name,
-        url: project.url || '/',
+        url: `/projects/${encodeURIComponent(slug)}`,
         summary: project.description || null,
         tags: ['全部项目', project.category || '未分类', ...(project.tags || [])],
         isPublic: project.is_public !== false,
@@ -132,6 +187,9 @@ async function loadProjectDocuments(): Promise<RagDocumentInput[]> {
           project.category ? `分类：${project.category}` : '',
           project.description ? `描述：${project.description}` : '',
           project.role_and_contribution ? `职责与贡献：${project.role_and_contribution}` : '',
+          project.body ? `详细说明：${project.body}` : '',
+          project.highlights?.length ? `亮点：${project.highlights.join('；')}` : '',
+          project.tech_stack?.length ? `技术栈：${project.tech_stack.join('、')}` : '',
           project.tags?.length ? `标签：${project.tags.join('、')}` : '',
         ].filter(Boolean).join('\n'),
       })
@@ -268,6 +326,7 @@ export async function loadRagDocuments() {
     ...getStaticRagDocuments(),
     ...await loadProjectDocuments(),
     ...await loadKnowledgeDocuments(),
+    ...await loadVibeDocuments(),
   ]
 }
 

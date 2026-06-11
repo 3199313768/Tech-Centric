@@ -2,25 +2,32 @@
 
 import { SpiritListCard } from '@/components/spirit/shell/SpiritListCard'
 import { DeleteConfirmBar } from '@/components/spirit/feedback/DeleteConfirmBar'
-import type { VibeProject } from '@/lib/vibe/queries'
+import type { VibeEntry } from '@/lib/vibe/types'
 import { scrollRevealClass, useScrollReveal } from '@/utils/useScrollReveal'
 
 interface HerbEntryProps {
-  project: VibeProject
+  entry: VibeEntry
   index: number
   dateLabel: string
   hoveredId: string | null
   deletingId: string | null
   confirmDeleteId: string | null
   onHover: (id: string | null) => void
-  onEdit: (project: VibeProject) => void
+  onEdit: (entry: VibeEntry) => void
+  onOpen: (entry: VibeEntry) => void
   onRequestDelete: (e: React.MouseEvent, id: string) => void
   onConfirmDelete: (id: string) => void
   onCancelDelete: () => void
 }
 
+const KIND_LABELS: Record<VibeEntry['kind'], string> = {
+  project: '实验',
+  note: '笔记',
+  article: '长文',
+}
+
 export function HerbEntry({
-  project,
+  entry,
   index,
   dateLabel,
   hoveredId,
@@ -28,11 +35,15 @@ export function HerbEntry({
   confirmDeleteId,
   onHover,
   onEdit,
+  onOpen,
   onRequestDelete,
   onConfirmDelete,
   onCancelDelete,
 }: HerbEntryProps) {
   const { ref, isVisible } = useScrollReveal<HTMLDivElement>()
+  const isExternal = entry.kind === 'project'
+  const href = isExternal ? entry.url : undefined
+  const linkLabel = isExternal ? '访问实验' : '阅读全文'
 
   return (
     <div
@@ -43,8 +54,9 @@ export function HerbEntry({
       <SpiritListCard
         variant="herb"
         index={0}
-        href={project.url}
-        actionsVisible={hoveredId === project.id || deletingId === project.id || confirmDeleteId === project.id}
+        href={href}
+        onClick={isExternal ? undefined : () => onOpen(entry)}
+        actionsVisible={hoveredId === entry.id || deletingId === entry.id || confirmDeleteId === entry.id}
         actions={
           <>
             <button
@@ -53,39 +65,43 @@ export function HerbEntry({
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
-                onEdit(project)
+                onEdit(entry)
               }}
-              title="修改此项目"
+              title="修改此手札"
+              aria-label={`修改：${entry.name}`}
             >
               ✎
             </button>
             <button
               type="button"
               className="sg-icon-btn sg-icon-btn--danger"
-              onClick={(e) => onRequestDelete(e, project.id)}
-              disabled={deletingId === project.id}
-              title="删除此项目"
+              onClick={(e) => onRequestDelete(e, entry.id)}
+              disabled={deletingId === entry.id}
+              title="删除此手札"
+              aria-label={`删除：${entry.name}`}
             >
-              {deletingId === project.id ? '...' : '×'}
+              {deletingId === entry.id ? '...' : '×'}
             </button>
           </>
         }
       >
         <div
-          onMouseEnter={() => onHover(project.id)}
+          onMouseEnter={() => onHover(entry.id)}
           onMouseLeave={() => onHover(null)}
         >
-          <span className="sg-herb-date sg-tag sg-tag--leaf">{dateLabel}</span>
-          <div className="sg-card__icon-wrap">{project.icon}</div>
-          <h3 className="sg-card__title">{project.name}</h3>
-          <p className="sg-card__desc">{project.description}</p>
-          <span className="sg-herb-link">访问实验</span>
-          {confirmDeleteId === project.id ? (
+          <span className="sg-herb-date sg-tag sg-tag--leaf">
+            {dateLabel} · {KIND_LABELS[entry.kind]}
+          </span>
+          <div className="sg-card__icon-wrap">{entry.icon}</div>
+          <h3 className="sg-card__title">{entry.name}</h3>
+          <p className="sg-card__desc">{entry.description}</p>
+          <span className="sg-herb-link">{linkLabel}</span>
+          {confirmDeleteId === entry.id ? (
             <DeleteConfirmBar
-              message={`确定删除「${project.name}」？不可撤销`}
+              message={`确定删除「${entry.name}」？不可撤销`}
               onCancel={onCancelDelete}
-              onConfirm={() => onConfirmDelete(project.id)}
-              isLoading={deletingId === project.id}
+              onConfirm={() => onConfirmDelete(entry.id)}
+              isLoading={deletingId === entry.id}
             />
           ) : null}
         </div>

@@ -3,6 +3,8 @@
 import dynamic from 'next/dynamic'
 import type { ReactNode } from 'react'
 
+import { SiteFooter } from '@/components/home/shell/SiteFooter'
+
 const FloatingAssistant = dynamic(
   () => import('@/components/rag/shell/FloatingAssistant').then((m) => ({ default: m.FloatingAssistant })),
   { ssr: false },
@@ -40,6 +42,7 @@ export function SpiritAtmosphereShell({
       ) : null}
       {nav}
       {children}
+      <SiteFooter />
       <FloatingAssistant />
     </div>
   )

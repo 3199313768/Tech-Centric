@@ -14,13 +14,13 @@ export const metadata = {
 }
 
 async function VibePageContent() {
-  const { projects, error } = await fetchVibePageData()
+  const { entries, error } = await fetchVibePageData()
 
   if (error) {
     return <div className="sg-kb-error">加载手札失败：{error.message}</div>
   }
 
-  return <VibeCoding initialProjects={projects} />
+  return <VibeCoding initialEntries={entries} />
 }
 
 export default function VibePage() {

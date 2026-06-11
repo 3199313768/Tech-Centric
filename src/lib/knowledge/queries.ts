@@ -87,3 +87,19 @@ export async function fetchKnowledgePageData(
     recordsError: recordsError ? new Error(recordsError.message) : null,
   }
 }
+
+export async function fetchPublicKbRecord(id: string): Promise<KbRecord | null> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('kb_records')
+    .select('*')
+    .eq('id', id)
+    .eq('is_public', true)
+    .maybeSingle()
+
+  if (error || !data) {
+    return null
+  }
+
+  return data as KbRecord
+}

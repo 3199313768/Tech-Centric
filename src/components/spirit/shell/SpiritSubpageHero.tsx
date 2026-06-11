@@ -56,7 +56,7 @@ export function SpiritSubpageHero({
         <div className="sg-subpage-hero__copy">
           <p className="sg-subpage-hero__eyebrow">{eyebrow}</p>
           <h1 className="sg-subpage-hero__title">{title}</h1>
-          {lead ? <p className="sg-subpage-hero__lead">{lead}</p> : null}
+          {lead ? <div className="sg-subpage-hero__lead">{lead}</div> : null}
           {actions ? <div className="sg-subpage-hero__actions">{actions}</div> : null}
         </div>
 

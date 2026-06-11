@@ -40,7 +40,18 @@
 | `src/utils/useBreakpoint.ts` | SSR 首屏默认值、监听收敛 |
 | `docs/product/project-status.md` | 首版状态文档 |
 
-### 2.2 工作区待提交（UI 创意优化 Phase 1–3）
+### 2.3 工作区待提交（产品设计优化 Phase A–D）
+
+| Phase | 范围 | 内容 |
+|-------|------|------|
+| **A** | 信任与转化 | 园主页 `/about`、Footer、项目详情、知识库 `is_public`、RAG 公开索引 |
+| **B** | 内容深度 | vibe 长文 `/vibe/[slug]`、知识库公开详情、RAG 情境化、项目精选 |
+| **C** | 发现与运营 | 展柜 `/showcase`、全站搜索 `/search`、技能↔项目关联、庭园志 `/changelog`、工作台 `/studio` |
+| **D** | 探索 | 庭园度量 `/stats`、资源失效检测、知识库 tag 关联推荐（i18n 暂缓） |
+
+详见 [phase-a-work-items.md](./phase-a-work-items.md) … [phase-d-work-items.md](./phase-d-work-items.md)。
+
+### 2.4 工作区待提交（UI 创意优化 Phase 1–3）
 
 | Phase | 范围 | 内容 |
 |-------|------|------|
@@ -103,11 +114,12 @@ Skipping kb_records ingestion because no public records are readable
 
 ## 4. 产品 Backlog
 
-来源：[knowledge-prd.md](./knowledge-prd.md)、[knowledge-issues.md](./knowledge-issues.md)、[knowledge-walkthrough.md](../delivery/knowledge-walkthrough.md)。
+来源：[knowledge-prd.md](./knowledge-prd.md)、[knowledge-issues.md](./knowledge-issues.md)、[product-design-optimization.md](./product-design-optimization.md)（**Q1–Q5 已确认，2026-06-11**）。
 
 | 优先级 | 项 | 状态 |
 |--------|-----|------|
-| P1 | 标签 RPC 聚合 | SQL + 代码已有；待 Supabase 部署 |
+| **P0** | Phase A：园主 Tab + `/about` + Footer 邮箱 + `all_projects` 详情字段 + `kb_records.is_public` | 代码已落地，待 SQL |
+| **P0** | Phase B：vibe 长文 + RAG 深链 + 知识库公开详情 + 项目精选 | 代码已落地，待 SQL |
 | P2 | Code 类型显式语言字段 | 未实现 |
 | P2 | 知识库图片 `next/image`（`RecordCard` 等仍 `<img>`） | 未实现 |
 | P3 | 图片 OCR 自动打标签 | 交付文档延伸 |
@@ -122,7 +134,7 @@ Skipping kb_records ingestion because no public records are readable
 | 项 | 位置 | 说明 |
 |----|------|------|
 | 社交链接占位 | `src/data/site/personal.ts` | GitHub / LinkedIn / Twitter 仍为 `yourusername` |
-| 知识库入口 | `SITE_NAV_TABS` | 无 `/knowledge` Tab；首页「档案馆」链接 + 直链 |
+| 知识库入口 | `SITE_NAV_TABS` | 含「庭院」「档案馆」「园主」 |
 | 匿名写 RLS | `patch-projects-rls-write.sql` | 个人站临时；生产慎用 |
 
 ---

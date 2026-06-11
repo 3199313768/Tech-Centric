@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { type AllProjectItem, type ProjectCategory } from '@/data/site/allProjects'
 import { deleteAllProject } from '@/lib/projects/actions'
+import { projectRoute } from '@/lib/site/routes'
 import { SpiritSubpageHero } from '@/components/spirit/shell/SpiritSubpageHero'
 import { getArchiveAccent, getArchiveCode } from '@/utils/archiveCategory'
 import { handleWatercolorHover } from '@/utils/watercolorHover'
@@ -314,10 +315,12 @@ function useProjectCarousel(screenshotCount: number) {
 
 const FeaturedProjectCard = ({
   project,
-  onClick,
+  onManage,
+  onOpen,
 }: {
   project: AllProjectItem
-  onClick: () => void
+  onManage: (project: AllProjectItem) => void
+  onOpen: (project: AllProjectItem) => void
 }) => {
   const { isHovered, currentImageIndex, bindHover } = useProjectCarousel(project.screenshots.length)
   const accent = getArchiveAccent(project.category)
@@ -327,10 +330,21 @@ const FeaturedProjectCard = ({
       <article
         {...bindHover}
         onMouseMove={handleWatercolorHover}
-        onClick={onClick}
+        onClick={() => onOpen(project)}
         className="sg-card sg-card--watercolor sg-card--exhibit sg-card--archive sg-archive-featured"
         style={{ ['--archive-accent' as string]: accent }}
       >
+      <button
+        type="button"
+        className="sg-project-card__manage"
+        aria-label={`管理项目：${project.name}`}
+        onClick={(event) => {
+          event.stopPropagation()
+          onManage(project)
+        }}
+      >
+        管理
+      </button>
       <span className="sg-project-card__code">{getArchiveCode(project.category, 0)}</span>
       <div className={`sg-project-card__badge ${project.isPublic ? 'sg-project-card__badge--public' : 'sg-project-card__badge--private'}`}>
         {project.isPublic ? '公网可见' : '内部系统'}
@@ -367,11 +381,13 @@ const FeaturedProjectCard = ({
 const ProjectCard = ({
   project,
   index,
-  onClick,
+  onManage,
+  onOpen,
 }: {
   project: AllProjectItem
   index: number
-  onClick: () => void
+  onManage: (project: AllProjectItem) => void
+  onOpen: (project: AllProjectItem) => void
 }) => {
   const { isHovered, currentImageIndex, bindHover } = useProjectCarousel(project.screenshots.length)
   const accent = getArchiveAccent(project.category)
@@ -383,16 +399,27 @@ const ProjectCard = ({
         tabIndex={0}
         {...bindHover}
         onMouseMove={handleWatercolorHover}
-        onClick={onClick}
+        onClick={() => onOpen(project)}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault()
-            onClick()
+            onOpen(project)
           }
         }}
         className="sg-card sg-card--watercolor sg-card--exhibit sg-card--archive sg-project-card sg-project-card--accent"
         style={{ ['--archive-accent' as string]: accent }}
       >
+      <button
+        type="button"
+        className="sg-project-card__manage"
+        aria-label={`管理项目：${project.name}`}
+        onClick={(event) => {
+          event.stopPropagation()
+          onManage(project)
+        }}
+      >
+        管理
+      </button>
       <span className="sg-project-card__code">{getArchiveCode(project.category, index)}</span>
       <div className={`sg-project-card__badge ${project.isPublic ? 'sg-project-card__badge--public' : 'sg-project-card__badge--private'}`}>
         {project.isPublic ? '公网可见' : '内部系统'}
@@ -439,7 +466,7 @@ export function AllProjects({ initialProjects }: { initialProjects: AllProjectIt
   const router = useRouter()
   const [allProjectsList, setAllProjectsList] = useState(initialProjects)
   useSyncInitialData(initialProjects, setAllProjectsList)
-  const [activeCategory, setActiveCategory] = useState<ProjectCategory | '全部'>('全部')
+  const [activeCategory, setActiveCategory] = useState<ProjectCategory | '全部' | '精选'>('全部')
   const [selectedProject, setSelectedProject] = useState<AllProjectItem | null>(null)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [editingProject, setEditingProject] = useState<AllProjectItem | null>(null)
@@ -448,11 +475,21 @@ export function AllProjects({ initialProjects }: { initialProjects: AllProjectIt
     router.refresh()
   }, [router])
 
-  const categories: Array<ProjectCategory | '全部'> = ['全部', '数字孪生', '后台与管理系统', '门户与展现', '未分类']
+  const openProject = useCallback(
+    (project: AllProjectItem) => {
+      router.push(projectRoute(project.slug))
+    },
+    [router],
+  )
 
-  const filteredProjects = activeCategory === '全部' 
-    ? allProjectsList 
-    : allProjectsList.filter(p => p.category === activeCategory)
+  const categories: Array<ProjectCategory | '全部' | '精选'> = ['全部', '精选', '数字孪生', '后台与管理系统', '门户与展现', '未分类']
+
+  const filteredProjects =
+    activeCategory === '全部'
+      ? allProjectsList
+      : activeCategory === '精选'
+        ? allProjectsList.filter((p) => p.isFeatured)
+        : allProjectsList.filter((p) => p.category === activeCategory)
 
   // 处理溢出滚动锁定
   useEffect(() => {
@@ -467,8 +504,12 @@ export function AllProjects({ initialProjects }: { initialProjects: AllProjectIt
   const publicCount = allProjectsList.filter((p) => p.isPublic).length
   const categoryCount = new Set(allProjectsList.map((p) => p.category)).size
   const showBento = activeCategory === '全部' && filteredProjects.length > 0
-  const featuredProject = showBento ? filteredProjects[0] : null
-  const gridProjects = showBento ? filteredProjects.slice(1) : filteredProjects
+  const featuredProject = showBento
+    ? (allProjectsList.find((p) => p.isFeatured) ?? filteredProjects[0])
+    : null
+  const gridProjects = showBento && featuredProject
+    ? filteredProjects.filter((p) => p.id !== featuredProject.id)
+    : filteredProjects
 
   return (
     <div className="sg-page">
@@ -510,7 +551,7 @@ export function AllProjects({ initialProjects }: { initialProjects: AllProjectIt
             >
               <span
                 className="sg-filter-chip__dot"
-                style={{ background: getArchiveAccent(cat) }}
+                style={{ background: cat === '精选' ? 'var(--sg-accent)' : getArchiveAccent(cat as ProjectCategory | '全部') }}
                 aria-hidden
               />
               {cat}
@@ -523,7 +564,8 @@ export function AllProjects({ initialProjects }: { initialProjects: AllProjectIt
         {featuredProject ? (
           <FeaturedProjectCard
             project={featuredProject}
-            onClick={() => setSelectedProject(featuredProject)}
+            onManage={setSelectedProject}
+            onOpen={openProject}
           />
         ) : null}
         {gridProjects.map((project, idx) => (
@@ -531,7 +573,8 @@ export function AllProjects({ initialProjects }: { initialProjects: AllProjectIt
             key={project.id}
             project={project}
             index={showBento ? idx + 1 : idx}
-            onClick={() => setSelectedProject(project)}
+            onManage={setSelectedProject}
+            onOpen={openProject}
           />
         ))}
         {filteredProjects.length === 0 ? (

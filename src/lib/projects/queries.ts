@@ -1,35 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
-import type { AllProjectItem, ProjectCategory } from '@/data/site/allProjects'
+import type { AllProjectItem } from '@/data/site/allProjects'
+import { mapAllProjectRow, type AllProjectRow } from '@/lib/projects/mappers'
 
 export interface AllProjectsPageData {
   projects: AllProjectItem[]
   error: Error | null
-}
-
-interface AllProjectRow {
-  id: string
-  name: string
-  url: string
-  is_public: boolean
-  category: string
-  description: string
-  role_and_contribution: string
-  tags: string[]
-  screenshots: string[]
-}
-
-function mapAllProjectRow(row: AllProjectRow): AllProjectItem {
-  return {
-    id: row.id,
-    name: row.name,
-    url: row.url,
-    isPublic: row.is_public,
-    category: row.category as ProjectCategory,
-    description: row.description,
-    roleAndContribution: row.role_and_contribution,
-    tags: row.tags,
-    screenshots: row.screenshots,
-  }
 }
 
 export async function fetchAllProjectsPageData(): Promise<AllProjectsPageData> {
@@ -47,4 +22,19 @@ export async function fetchAllProjectsPageData(): Promise<AllProjectsPageData> {
     projects: (data as AllProjectRow[]).map(mapAllProjectRow),
     error: null,
   }
+}
+
+export async function fetchProjectBySlug(slug: string): Promise<AllProjectItem | null> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('all_projects')
+    .select('*')
+    .or(`slug.eq.${slug},id.eq.${slug}`)
+    .maybeSingle()
+
+  if (error || !data) {
+    return null
+  }
+
+  return mapAllProjectRow(data as AllProjectRow)
 }

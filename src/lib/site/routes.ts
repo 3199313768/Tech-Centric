@@ -5,6 +5,12 @@ export const SITE_ROUTES = {
   vibe: '/vibe',
   resources: '/resources',
   knowledge: '/knowledge',
+  about: '/about',
+  showcase: '/showcase',
+  search: '/search',
+  changelog: '/changelog',
+  studio: '/studio',
+  stats: '/stats',
 } as const
 
 export const SITE_NAV_TABS = [
@@ -14,10 +20,16 @@ export const SITE_NAV_TABS = [
   { href: SITE_ROUTES.vibe, label: '草本集' },
   { href: SITE_ROUTES.resources, label: '资源' },
   { href: SITE_ROUTES.knowledge, label: '档案馆' },
+  { href: SITE_ROUTES.about, label: '园主' },
 ] as const
 
 export function isSiteNavActive(pathname: string, href: string): boolean {
-  if (href === SITE_ROUTES.home) return pathname === '/'
+  if (href === SITE_ROUTES.home) {
+    return pathname === '/'
+  }
+  if (href === SITE_ROUTES.about) {
+    return pathname === SITE_ROUTES.about
+  }
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
@@ -27,3 +39,15 @@ export const RESOURCE_API_ROUTES = {
   autofill: '/api/resources/autofill',
   meta: '/api/resources/meta',
 } as const
+
+export function projectRoute(slug: string): string {
+  return `${SITE_ROUTES.projects}/${encodeURIComponent(slug)}`
+}
+
+export function vibeRoute(slug: string): string {
+  return `${SITE_ROUTES.vibe}/${encodeURIComponent(slug)}`
+}
+
+export function knowledgePublicRoute(id: string): string {
+  return `${SITE_ROUTES.knowledge}/${encodeURIComponent(id)}`
+}

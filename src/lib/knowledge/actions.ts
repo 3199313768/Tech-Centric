@@ -24,6 +24,7 @@ export interface UpdateKbRecordInput {
   content: string
   tags: string[]
   type: string
+  isPublic?: boolean
 }
 
 export async function updateKbRecord(
@@ -40,6 +41,7 @@ export async function updateKbRecord(
       content: input.content,
       tags: input.tags,
       type: input.type,
+      ...(input.isPublic !== undefined ? { is_public: input.isPublic } : {}),
     })
     .eq('id', recordId)
     .eq('user_id', user.id)
@@ -53,6 +55,7 @@ export async function createKbRecord(input: {
   type: string
   content: string
   tags: string[]
+  isPublic?: boolean
 }): Promise<{ error: string | null; record?: KbRecord }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -65,6 +68,7 @@ export async function createKbRecord(input: {
       type: input.type,
       content: input.content,
       tags: input.tags,
+      is_public: input.isPublic ?? false,
     })
     .select('*')
     .single()

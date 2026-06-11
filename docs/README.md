@@ -7,6 +7,11 @@
 | [product/](./product/) | [knowledge-issues.md](./product/knowledge-issues.md) | 知识库问题审查与修复记录 |
 | [product/](./product/) | [project-status.md](./product/project-status.md) | **项目状态与未完成项审查**（全站 backlog） |
 | [product/](./product/) | [ui-creative-optimization-proposal.md](./product/ui-creative-optimization-proposal.md) | **UI 创意优化方案**（已确认） |
+| [product/](./product/) | [product-design-optimization.md](./product/product-design-optimization.md) | **产品设计优化建议**（模块与 IA，**决策已确认** §12） |
+| [product/](./product/) | [phase-a-work-items.md](./product/phase-a-work-items.md) | **Phase A 云效工作项**（信任与转化） |
+| [product/](./product/) | [phase-b-work-items.md](./product/phase-b-work-items.md) | **Phase B 云效工作项**（内容深度） |
+| [product/](./product/) | [phase-c-work-items.md](./product/phase-c-work-items.md) | **Phase C 云效工作项**（发现与运营） |
+| [product/](./product/) | [phase-d-work-items.md](./product/phase-d-work-items.md) | **Phase D 云效工作项**（探索） |
 | [superpowers/specs/](./superpowers/specs/) | [2026-06-11-ui-creative-optimization-design.md](./superpowers/specs/2026-06-11-ui-creative-optimization-design.md) | UI 创意优化设计定稿 |
 | [superpowers/plans/](./superpowers/plans/) | [2026-06-11-ui-creative-optimization.md](./superpowers/plans/2026-06-11-ui-creative-optimization.md) | UI 创意优化实施计划 |
 | [setup/](./setup/) | [SupabaseSetup.sql](./setup/SupabaseSetup.sql) | 知识库表结构、索引与 RLS 初始化脚本 |

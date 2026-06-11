@@ -3,6 +3,7 @@ export type RagSourceType =
   | 'static_project'
   | 'static_resource'
   | 'knowledge_record'
+  | 'vibe_entry'
 
 export interface RagDocumentInput {
   sourceType: RagSourceType

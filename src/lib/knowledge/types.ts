@@ -4,6 +4,7 @@ export interface KbRecord {
   type: string
   content: string
   tags?: string[]
+  is_public?: boolean
   created_at: string
   [key: string]: unknown
 }

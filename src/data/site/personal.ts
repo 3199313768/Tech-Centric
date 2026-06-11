@@ -70,10 +70,8 @@ export const personalInfo: PersonalInfo = {
     'Docker',
   ],
   socialLinks: {
-    github: 'https://github.com/yourusername',
-    linkedin: 'https://linkedin.com/in/yourusername',
+    github: 'https://github.com/3199313768/Tech-Centric',
     email: 'mailto:3199313768@qq.com',
-    twitter: 'https://twitter.com/yourusername',
   },
   cta: {
     primary: {

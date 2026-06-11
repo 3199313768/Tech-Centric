@@ -24,6 +24,10 @@
 8. [sql/setup-vibe-coding.sql](./sql/setup-vibe-coding.sql)
 9. [sql/setup-resources.sql](./sql/setup-resources.sql) — 或用下方 codegen 重新生成
 10. [sql/setup-rag.sql](./sql/setup-rag.sql) — RAG 向量表与 RPC
+11. [sql/patch-phase-a-all-projects-detail.sql](./sql/patch-phase-a-all-projects-detail.sql) — Phase A 项目详情字段
+12. [sql/patch-phase-a-kb-is-public.sql](./sql/patch-phase-a-kb-is-public.sql) — Phase A 知识库公开策略
+13. [sql/patch-phase-b-vibe-entries.sql](./sql/patch-phase-b-vibe-entries.sql) — Phase B 草本集 kind/slug/body
+14. [sql/seed-phase-b-blog-to-vibe.sql](./sql/seed-phase-b-blog-to-vibe.sql) — Phase B blogPosts 迁移（可选）
 
 ## RAG
 

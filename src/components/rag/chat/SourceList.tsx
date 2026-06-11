@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { ExternalLink } from 'lucide-react'
 import type { RagSource } from '@/lib/rag/types'
 
@@ -14,12 +15,30 @@ export function SourceList({ sources }: SourceListProps) {
       <div className="sg-rag-source-items">
         {sources.map((source) => {
           const safeUrl = getSafeUrl(source.url)
+          const isInternal = safeUrl?.startsWith('/')
+
+          if (isInternal && safeUrl) {
+            return (
+              <Link key={`${source.sourceType}-${source.title}`} href={safeUrl} className="sg-rag-source-item">
+                <span className="sg-rag-source-item__head">
+                  <span className="sg-rag-source-item__title">{source.title}</span>
+                  <ExternalLink className="sg-rag-source-item__link-icon" aria-hidden />
+                </span>
+                <span className="sg-rag-source-item__meta">
+                  <span>{formatSourceType(source.sourceType)}</span>
+                  <span className="sg-rag-source-item__dot" aria-hidden />
+                  <span>{(source.similarity * 100).toFixed(0)}%</span>
+                </span>
+              </Link>
+            )
+          }
+
           const SourceWrapper = safeUrl ? 'a' : 'div'
 
           return (
             <SourceWrapper
               key={`${source.sourceType}-${source.title}`}
-              {...(safeUrl ? { href: safeUrl } : {})}
+              {...(safeUrl ? { href: safeUrl, target: '_blank', rel: 'noopener noreferrer' } : {})}
               className="sg-rag-source-item"
             >
               <span className="sg-rag-source-item__head">

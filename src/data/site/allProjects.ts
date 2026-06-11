@@ -2,13 +2,19 @@ export type ProjectCategory = '数字孪生' | '后台与管理系统' | '门户
 
 export interface AllProjectItem {
   id: string;
+  slug: string;
   name: string;
-  url: string; // 内网或无权访问的地址
-  isPublic: boolean; // 是否可公网直接访问
+  url: string;
+  isPublic: boolean;
   category: ProjectCategory;
   description: string;
-  roleAndContribution: string; // 核心贡献与难点
+  roleAndContribution: string;
   tags: string[];
   screenshots: string[];
+  body: string;
+  highlights: string[];
+  techStack: string[];
+  period: string;
+  role: string;
+  isFeatured: boolean;
 }
-

@@ -1,7 +1,9 @@
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { SitePageFallback } from '@/components/spirit/feedback/SitePageFallback'
+import { fetchAllProjectsPageData } from '@/lib/projects/queries'
 import { fetchAiSkillsPageData } from '@/lib/skills/queries'
+import { buildSkillProjectMap } from '@/lib/skills/relatedProjects'
 
 const AiSkills = dynamic(
   () => import('@/components/home/skills/AiSkills').then((m) => ({ default: m.AiSkills })),
@@ -14,13 +16,18 @@ export const metadata = {
 }
 
 async function SkillsPageContent() {
-  const { skills, error } = await fetchAiSkillsPageData()
+  const [{ skills, error }, { projects }] = await Promise.all([
+    fetchAiSkillsPageData(),
+    fetchAllProjectsPageData(),
+  ])
 
   if (error) {
     return <div className="sg-kb-error">加载技能失败：{error.message}</div>
   }
 
-  return <AiSkills initialSkills={skills} />
+  const skillProjectMap = buildSkillProjectMap(skills, projects)
+
+  return <AiSkills initialSkills={skills} skillProjectMap={skillProjectMap} />
 }
 
 export default function SkillsPage() {

@@ -15,7 +15,7 @@ export interface AiSkillsPageData {
   error: Error | null
 }
 
-interface AiSkillRow {
+export interface AiSkillRow {
   id: string
   name: string
   icon: string
@@ -37,7 +37,7 @@ function normalizeTags(tags: AiSkillRow['tags']): string[] {
   return []
 }
 
-function mapAiSkillRow(row: AiSkillRow): AgentSkill {
+export function mapAiSkillRow(row: AiSkillRow): AgentSkill {
   return {
     id: row.id,
     name: row.name,

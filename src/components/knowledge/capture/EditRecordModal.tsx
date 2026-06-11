@@ -19,6 +19,7 @@ export function EditRecordModal({ record, onClose }: EditRecordModalProps) {
   const [type, setType] = useState<RecordTypeId>((record?.type as RecordTypeId) ?? 'text')
   const [content, setContent] = useState(record?.content ?? '')
   const [tags, setTags] = useState<string[]>(record?.tags ?? [])
+  const [isPublic, setIsPublic] = useState(record?.is_public ?? false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -40,6 +41,7 @@ export function EditRecordModal({ record, onClose }: EditRecordModalProps) {
       type,
       content: canEditContent ? content.trim() : record.content,
       tags,
+      isPublic,
     })
 
     setIsSubmitting(false)
@@ -103,6 +105,15 @@ export function EditRecordModal({ record, onClose }: EditRecordModalProps) {
         <div className="sg-kb-modal-tags">
           <TagInput tags={tags} onChange={setTags} />
         </div>
+
+        <label className="sg-kb-public-toggle">
+          <input
+            type="checkbox"
+            checked={isPublic}
+            onChange={(event) => setIsPublic(event.target.checked)}
+          />
+          <span>公开此记录（可被访客与 AI 助手引用）</span>
+        </label>
 
         {error ? <div className="sg-kb-error sg-kb-error--inline">{error}</div> : null}
       </div>

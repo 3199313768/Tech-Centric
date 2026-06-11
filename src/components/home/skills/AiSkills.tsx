@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
@@ -10,6 +11,7 @@ import { DeleteConfirmBar } from '@/components/spirit/feedback/DeleteConfirmBar'
 import { getPlatformAccent } from '@/utils/platformAccent'
 import { useToast } from '@/components/spirit/feedback/ToastProvider'
 import type { AgentSkill } from '@/lib/skills/queries'
+import type { SkillProjectLink } from '@/lib/skills/relatedProjects'
 import { ScrollReveal } from '@/components/spirit/feedback/ScrollReveal'
 import { SpiritEmptyState } from '@/components/spirit/feedback/SpiritEmptyState'
 import { useSyncInitialData } from '@/utils/useSyncInitialData'
@@ -23,6 +25,7 @@ const SKILL_REPO = 'https://github.com/3199313768/SKILL'
 interface SkillCardProps {
   skill: AgentSkill
   index: number
+  relatedProjects: SkillProjectLink[]
   hoveredId: string | null
   deletingId: string | null
   confirmDeleteId: string | null
@@ -37,6 +40,7 @@ interface SkillCardProps {
 function SkillCard({
   skill,
   index,
+  relatedProjects,
   hoveredId,
   deletingId,
   confirmDeleteId,
@@ -107,6 +111,23 @@ function SkillCard({
             </div>
           ) : null}
           <p className="sg-card__link-hint sg-workshop-card__link">打开技能仓库 ↗</p>
+          {relatedProjects.length > 0 ? (
+            <div className="sg-workshop-related">
+              <p className="sg-workshop-related__label">关联归档</p>
+              <div className="sg-workshop-related__links">
+                {relatedProjects.map((project) => (
+                  <Link
+                    key={project.projectId}
+                    href={project.href}
+                    className="sg-workshop-related__link"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    {project.projectName}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : null}
           {confirmDeleteId === skill.id ? (
             <DeleteConfirmBar
               message={`确定删除「${skill.name}」？不可撤销`}
@@ -124,22 +145,36 @@ function SkillCard({
 function SkillGrid({
   skills,
   startIndex,
+  skillProjectMap,
   cardProps,
 }: {
   skills: AgentSkill[]
   startIndex?: number
-  cardProps: Omit<SkillCardProps, 'skill' | 'index'>
+  skillProjectMap: Record<string, SkillProjectLink[]>
+  cardProps: Omit<SkillCardProps, 'skill' | 'index' | 'relatedProjects'>
 }) {
   return (
     <div className="sg-workshop-grid">
       {skills.map((skill, index) => (
-        <SkillCard key={skill.id} skill={skill} index={(startIndex ?? 0) + index} {...cardProps} />
+        <SkillCard
+          key={skill.id}
+          skill={skill}
+          index={(startIndex ?? 0) + index}
+          relatedProjects={skillProjectMap[skill.id] ?? []}
+          {...cardProps}
+        />
       ))}
     </div>
   )
 }
 
-export function AiSkills({ initialSkills }: { initialSkills: AgentSkill[] }) {
+export function AiSkills({
+  initialSkills,
+  skillProjectMap = {},
+}: {
+  initialSkills: AgentSkill[]
+  skillProjectMap?: Record<string, SkillProjectLink[]>
+}) {
   const { toast } = useToast()
   const router = useRouter()
   const [hoveredId, setHoveredId] = useState<string | null>(null)
@@ -228,7 +263,7 @@ export function AiSkills({ initialSkills }: { initialSkills: AgentSkill[] }) {
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 
-  const cardProps: Omit<SkillCardProps, 'skill' | 'index'> = {
+  const cardProps: Omit<SkillCardProps, 'skill' | 'index' | 'relatedProjects'> = {
     hoveredId,
     deletingId,
     confirmDeleteId,
@@ -371,6 +406,7 @@ export function AiSkills({ initialSkills }: { initialSkills: AgentSkill[] }) {
                   <SkillGrid
                     skills={items}
                     startIndex={sectionIndex * 3}
+                    skillProjectMap={skillProjectMap}
                     cardProps={cardProps}
                   />
                 </div>
@@ -394,7 +430,7 @@ export function AiSkills({ initialSkills }: { initialSkills: AgentSkill[] }) {
                   </div>
                   <span className="sg-workshop-section__count">{filteredSkills.length} 项</span>
                 </header>
-                <SkillGrid skills={filteredSkills} cardProps={cardProps} />
+                <SkillGrid skills={filteredSkills} skillProjectMap={skillProjectMap} cardProps={cardProps} />
               </div>
             )}
           </section>

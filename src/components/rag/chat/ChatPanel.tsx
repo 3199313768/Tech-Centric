@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
+import { usePathname } from 'next/navigation'
 import { Loader2, Send } from 'lucide-react'
 import type { ChatMessage, RagSource } from '@/lib/rag/types'
 import {
@@ -20,6 +21,7 @@ import {
 import { MessageBubble } from '@/components/rag/chat/MessageBubble'
 import { TypingIndicator } from '@/components/rag/contact/TypingIndicator'
 import { SuggestedItem, SuggestedQuestions } from '@/components/rag/chat/SuggestedQuestions'
+import { getPageRagContext } from '@/lib/rag/pageContext'
 
 interface RagChatResponse {
   answer?: string
@@ -28,6 +30,8 @@ interface RagChatResponse {
 }
 
 export function ChatPanel() {
+  const pathname = usePathname()
+  const pageContext = getPageRagContext(pathname)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -274,7 +278,7 @@ export function ChatPanel() {
             <span className="sg-rag-badge">在线</span>
             {mode === 'contact' ? <span className="sg-rag-badge">联系</span> : null}
           </p>
-          <p className="sg-rag-panel__subtitle">基于站内资料检索，也可以直接联系我。</p>
+          <p className="sg-rag-panel__subtitle">{pageContext.subtitle}</p>
         </div>
       </div>
 
@@ -293,12 +297,12 @@ export function ChatPanel() {
                   unoptimized
                 />
               </div>
-              <p className="sg-rag-welcome__title">你好，我是庭院的导引精灵。</p>
-              <p className="sg-rag-welcome__text">
-                可以问我站长的项目、技术栈、经历，也可以直接联系我。
-              </p>
+              <p className="sg-rag-welcome__title">{pageContext.welcomeTitle}</p>
+              <p className="sg-rag-welcome__text">{pageContext.welcomeText}</p>
             </div>
-            <SuggestedQuestions onSelect={(item: SuggestedItem) => {
+            <SuggestedQuestions
+              items={pageContext.suggestions}
+              onSelect={(item: SuggestedItem) => {
               if (item.type === 'action' && item.value === 'start-contact') {
                 startContactFlow()
                 return

@@ -19,6 +19,7 @@ function buildAllProjectForm(initialData?: AllProjectItem | null) {
       name: initialData.name,
       url: initialData.url,
       is_public: initialData.isPublic,
+      is_featured: initialData.isFeatured,
       category: initialData.category,
       description: initialData.description,
       role_and_contribution: initialData.roleAndContribution || '',
@@ -30,6 +31,7 @@ function buildAllProjectForm(initialData?: AllProjectItem | null) {
     name: '',
     url: '',
     is_public: true,
+    is_featured: false,
     category: '未分类' as ProjectCategory,
     description: '',
     role_and_contribution: '',
@@ -67,6 +69,7 @@ export function AddAllProjectModal({ isOpen, onClose, onSuccess, initialData }: 
       name: formData.name,
       url: formData.url,
       isPublic: formData.is_public,
+      isFeatured: formData.is_featured,
       category: formData.category,
       description: formData.description,
       roleAndContribution: formData.role_and_contribution || '',
@@ -133,6 +136,19 @@ export function AddAllProjectModal({ isOpen, onClose, onSuccess, initialData }: 
               <option value="false">内部系统 (不可见)</option>
             </select>
           </div>
+        </div>
+
+        <div className="sg-form-field">
+          <label className="sg-form-label sg-kb-public-toggle" htmlFor="ap-featured">
+            <input
+              id="ap-featured"
+              type="checkbox"
+              name="is_featured"
+              checked={formData.is_featured}
+              onChange={handleChange}
+            />
+            <span>首页精选（Featured）</span>
+          </label>
         </div>
 
         <div className="sg-form-field">

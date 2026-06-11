@@ -8,7 +8,7 @@ import type { AllProjectItem } from '@/data/site/allProjects'
 import { personalInfo } from '@/data/site/personal'
 import type { HeroSeason, SoulMeterItem } from '@/lib/site/homeStats'
 import { handleWatercolorHover } from '@/utils/watercolorHover'
-import { SITE_ROUTES } from '@/lib/site/routes'
+import { SITE_ROUTES, projectRoute } from '@/lib/site/routes'
 
 const SKILL_CHIPS = [
   { name: 'React', icon: Code2 },
@@ -58,8 +58,8 @@ function resolveFeaturedDisplay(featured?: AllProjectItem | null): FeaturedDispl
     image: featured.screenshots[0] ?? FALLBACK_FEATURED.image,
     imageAlt: `${featured.name} 预览`,
     tags: featured.tags.length > 0 ? featured.tags.slice(0, 4) : ['项目'],
-    href: featured.url || SITE_ROUTES.projects,
-    external: Boolean(featured.url),
+    href: projectRoute(featured.slug),
+    external: false,
   }
 }
 
@@ -124,15 +124,9 @@ export function SpiritGardenHome({
               <Link href={SITE_ROUTES.projects} className="sg-btn sg-btn--primary">
                 探寻作品
               </Link>
-              <button
-                type="button"
-                className="sg-btn sg-btn--ghost"
-                onClick={() => {
-                  document.getElementById('garden-content')?.scrollIntoView({ behavior: 'smooth' })
-                }}
-              >
+              <Link href={SITE_ROUTES.about} className="sg-btn sg-btn--ghost">
                 了解我
-              </button>
+              </Link>
             </div>
           </section>
         </div>
@@ -251,31 +245,6 @@ export function SpiritGardenHome({
           </article>
         </div>
       </main>
-
-      <footer className="sg-footer sg-footer--garden sg-enter sg-enter--10">
-        <div className="sg-footer-top">
-          <p className="sg-footer-copy-left">
-            © {new Date().getFullYear()} SpiritGarden - 纯手工打造于梦之境
-          </p>
-          <nav className="sg-footer-links" aria-label="页脚导航">
-            <Link href={SITE_ROUTES.projects}>工艺流程</Link>
-            <Link href={SITE_ROUTES.vibe}>灵感来源</Link>
-            <Link href={SITE_ROUTES.knowledge}>档案馆</Link>
-          </nav>
-          <div className="sg-footer-social">
-            {personalInfo.socialLinks.github ? (
-              <a href={personalInfo.socialLinks.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-                <Image src="/spirit-garden/icon-share.png" alt="" width={18} height={20} aria-hidden unoptimized />
-              </a>
-            ) : null}
-            {personalInfo.socialLinks.email ? (
-              <a href={personalInfo.socialLinks.email} aria-label="Email">
-                <Image src="/spirit-garden/icon-email.png" alt="" width={20} height={16} aria-hidden unoptimized />
-              </a>
-            ) : null}
-          </div>
-        </div>
-      </footer>
     </>
   )
 }

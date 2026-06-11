@@ -28,6 +28,7 @@ export function QuickRecordModal() {
   const [type, setType] = useState<RecordType>(EMPTY_FORM.type)
   const [content, setContent] = useState(EMPTY_FORM.content)
   const [tags, setTags] = useState<string[]>(EMPTY_FORM.tags)
+  const [isPublic, setIsPublic] = useState(false)
   const [file, setFile] = useState<File | null>(EMPTY_FORM.file)
   const [previewUrl, setPreviewUrl] = useState<string | null>(EMPTY_FORM.previewUrl)
 
@@ -40,6 +41,7 @@ export function QuickRecordModal() {
     setType(EMPTY_FORM.type)
     setContent(EMPTY_FORM.content)
     setTags(EMPTY_FORM.tags)
+    setIsPublic(false)
     setFile(EMPTY_FORM.file)
     setPreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev)
@@ -154,6 +156,7 @@ export function QuickRecordModal() {
         type,
         content: finalContent,
         tags,
+        is_public: isPublic,
       })
 
       if (insertError) throw insertError
@@ -256,6 +259,15 @@ export function QuickRecordModal() {
         <div className="sg-kb-modal-tags">
           <TagInput tags={tags} onChange={setTags} />
         </div>
+
+        <label className="sg-kb-public-toggle">
+          <input
+            type="checkbox"
+            checked={isPublic}
+            onChange={(event) => setIsPublic(event.target.checked)}
+          />
+          <span>公开此记录（可被访客与 AI 助手引用）</span>
+        </label>
 
         {error ? <div className="sg-kb-error sg-kb-error--inline">{error}</div> : null}
       </div>

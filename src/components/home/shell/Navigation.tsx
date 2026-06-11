@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X } from 'lucide-react'
+import { Menu, Search, X } from 'lucide-react'
 import { ThemeToggle } from '@/components/spirit/theme/ThemeToggle'
 import { isSiteNavActive, SITE_NAV_TABS, SITE_ROUTES } from '@/lib/site/routes'
 
@@ -70,10 +70,24 @@ export function Navigation({ transparent = false }: NavigationProps) {
         </div>
 
         <div className="sg-nav-actions sg-nav-desktop-only">
+          <Link
+            href={SITE_ROUTES.search}
+            className="sg-nav-search"
+            aria-label="搜索站点"
+          >
+            <Search size={18} aria-hidden />
+          </Link>
           <ThemeToggle />
         </div>
 
         <div className="sg-nav-actions sg-nav-actions--compact sg-nav-compact-only">
+          <Link
+            href={SITE_ROUTES.search}
+            className="sg-nav-search"
+            aria-label="搜索站点"
+          >
+            <Search size={18} aria-hidden />
+          </Link>
           <ThemeToggle />
           <button
             type="button"
