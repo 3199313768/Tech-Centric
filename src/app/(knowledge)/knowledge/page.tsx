@@ -112,7 +112,7 @@ async function KnowledgePageContent({ searchParams }: PageProps) {
 
 export default function KnowledgePage(props: PageProps) {
   return (
-    <Suspense fallback={<SitePageFallback label="知识库" />}>
+    <Suspense fallback={<SitePageFallback label="知识库" variant="knowledge" />}>
       <KnowledgePageContent {...props} />
     </Suspense>
   )

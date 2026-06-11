@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { type ResourceItem } from '@/data/resources/initialResources'
 import { ResourceFavicon } from '@/components/spirit/resource/ResourceFavicon'
 import { SearchHighlight } from '@/components/spirit/resource/SearchHighlight'
@@ -31,7 +32,7 @@ interface ResourceCardProps {
   handlers: ResourceCardHandlers
 }
 
-export function ResourceCard({
+export const ResourceCard = memo(function ResourceCard({
   item,
   searchQuery,
   nowTs,
@@ -184,4 +185,4 @@ export function ResourceCard({
       </a>
     </div>
   )
-}
+})

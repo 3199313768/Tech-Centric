@@ -323,12 +323,12 @@ const FeaturedProjectCard = ({
   const accent = getArchiveAccent(project.category)
 
   return (
-    <ScrollReveal index={0}>
+    <ScrollReveal index={0} className="sg-bento-archive__featured">
       <article
         {...bindHover}
         onMouseMove={handleWatercolorHover}
         onClick={onClick}
-        className="sg-card sg-card--watercolor sg-card--exhibit sg-archive-featured sg-bento-archive__featured"
+        className="sg-card sg-card--watercolor sg-card--exhibit sg-card--archive sg-archive-featured"
         style={{ ['--archive-accent' as string]: accent }}
       >
       <span className="sg-project-card__code">{getArchiveCode(project.category, 0)}</span>
@@ -377,7 +377,7 @@ const ProjectCard = ({
   const accent = getArchiveAccent(project.category)
 
   return (
-    <ScrollReveal index={index}>
+    <ScrollReveal index={index} className="sg-bento-archive__item">
       <div
         role="button"
         tabIndex={0}
@@ -390,7 +390,7 @@ const ProjectCard = ({
             onClick()
           }
         }}
-        className="sg-card sg-card--watercolor sg-card--exhibit sg-project-card sg-project-card--accent sg-bento-archive__item"
+        className="sg-card sg-card--watercolor sg-card--exhibit sg-card--archive sg-project-card sg-project-card--accent"
         style={{ ['--archive-accent' as string]: accent }}
       >
       <span className="sg-project-card__code">{getArchiveCode(project.category, index)}</span>
@@ -519,7 +519,7 @@ export function AllProjects({ initialProjects }: { initialProjects: AllProjectIt
         </div>
       </div>
 
-      <div className={`sg-bento-archive${showBento ? '' : ' sg-bento-archive--uniform'}`}>
+      <div className={`sg-archive-shelf sg-bento-archive${showBento ? '' : ' sg-bento-archive--uniform'}`}>
         {featuredProject ? (
           <FeaturedProjectCard
             project={featuredProject}

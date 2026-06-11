@@ -7,26 +7,37 @@ const FloatingAssistant = dynamic(
   () => import('@/components/rag/shell/FloatingAssistant').then((m) => ({ default: m.FloatingAssistant })),
   { ssr: false },
 )
+const SpiritCursorTrail = dynamic(
+  () => import('@/components/home/shell/SpiritCursorTrail').then((m) => ({ default: m.SpiritCursorTrail })),
+  { ssr: false },
+)
+const SpiritCursor = dynamic(
+  () => import('@/components/home/shell/SpiritCursor').then((m) => ({ default: m.SpiritCursor })),
+  { ssr: false },
+)
 
 interface SpiritAtmosphereShellProps {
   children: ReactNode
   nav: ReactNode
   variant?: 'home' | 'default'
-  homeEffects?: ReactNode
 }
 
 export function SpiritAtmosphereShell({
   children,
   nav,
   variant = 'default',
-  homeEffects,
 }: SpiritAtmosphereShellProps) {
   const isHome = variant === 'home'
 
   return (
     <div className={`spirit-garden-shell${isHome ? ' spirit-garden-shell--home' : ''}`}>
       {!isHome ? <div className="sg-atmosphere sg-atmosphere--animated" aria-hidden /> : null}
-      {homeEffects}
+      {isHome ? (
+        <>
+          <SpiritCursorTrail />
+          <SpiritCursor />
+        </>
+      ) : null}
       {nav}
       {children}
       <FloatingAssistant />

@@ -2,6 +2,17 @@ import type { MouseEvent } from 'react'
 
 const pendingFrame = new WeakMap<HTMLElement, number>()
 const pendingCoords = new WeakMap<HTMLElement, { x: number; y: number }>()
+let scrollLockUntil = 0
+
+if (typeof window !== 'undefined') {
+  window.addEventListener(
+    'scroll',
+    () => {
+      scrollLockUntil = performance.now() + 150
+    },
+    { passive: true, capture: true },
+  )
+}
 
 function applyHover(target: HTMLElement, x: number, y: number) {
   target.style.setProperty('--hover-x', `${x}%`)
@@ -9,6 +20,8 @@ function applyHover(target: HTMLElement, x: number, y: number) {
 }
 
 export function handleWatercolorHover(event: MouseEvent<HTMLElement>) {
+  if (performance.now() < scrollLockUntil) return
+
   const target = event.currentTarget
   const rect = target.getBoundingClientRect()
   if (!rect.width || !rect.height) return

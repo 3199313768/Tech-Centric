@@ -5,7 +5,7 @@ import { fetchAllProjectsPageData } from '@/lib/projects/queries'
 
 const AllProjects = dynamic(
   () => import('@/components/home/projects/AllProjects').then((m) => ({ default: m.AllProjects })),
-  { loading: () => <SitePageFallback label="项目归档" /> },
+  { loading: () => <SitePageFallback label="项目归档" variant="archive" /> },
 )
 
 export const metadata = {
@@ -26,7 +26,7 @@ async function ProjectsPageContent() {
 export default function ProjectsPage() {
   return (
     <div className="spirit-garden-content sg-subpage sg-subpage--archive">
-      <Suspense fallback={<SitePageFallback label="项目归档" />}>
+      <Suspense fallback={<SitePageFallback label="项目归档" variant="archive" />}>
         <ProjectsPageContent />
       </Suspense>
     </div>

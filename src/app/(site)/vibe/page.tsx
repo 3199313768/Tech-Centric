@@ -5,7 +5,7 @@ import { fetchVibePageData } from '@/lib/vibe/queries'
 
 const VibeCoding = dynamic(
   () => import('@/components/home/vibe/VibeCoding').then((m) => ({ default: m.VibeCoding })),
-  { loading: () => <SitePageFallback label="草本集" /> },
+  { loading: () => <SitePageFallback label="草本集" variant="herb" /> },
 )
 
 export const metadata = {
@@ -26,7 +26,7 @@ async function VibePageContent() {
 export default function VibePage() {
   return (
     <div className="spirit-garden-content sg-subpage sg-subpage--herb">
-      <Suspense fallback={<SitePageFallback label="草本集" />}>
+      <Suspense fallback={<SitePageFallback label="草本集" variant="herb" />}>
         <VibePageContent />
       </Suspense>
     </div>

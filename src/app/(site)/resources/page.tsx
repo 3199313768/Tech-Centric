@@ -5,7 +5,7 @@ import { fetchResourcesPageData } from '@/lib/resources/queries'
 
 const ResourceLinks = dynamic(
   () => import('@/components/home/resources/ResourceLinks').then((m) => ({ default: m.ResourceLinks })),
-  { loading: () => <SitePageFallback label="资源库" /> },
+  { loading: () => <SitePageFallback label="资源库" variant="resources" /> },
 )
 
 export const metadata = {
@@ -26,7 +26,7 @@ async function ResourcesPageContent() {
 export default function ResourcesPage() {
   return (
     <div className="spirit-garden-content sg-subpage sg-subpage--library">
-      <Suspense fallback={<SitePageFallback label="资源库" />}>
+      <Suspense fallback={<SitePageFallback label="资源库" variant="resources" />}>
         <ResourcesPageContent />
       </Suspense>
     </div>

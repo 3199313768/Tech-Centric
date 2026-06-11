@@ -5,7 +5,7 @@ import { fetchAiSkillsPageData } from '@/lib/skills/queries'
 
 const AiSkills = dynamic(
   () => import('@/components/home/skills/AiSkills').then((m) => ({ default: m.AiSkills })),
-  { loading: () => <SitePageFallback label="技能工坊" /> },
+  { loading: () => <SitePageFallback label="技能工坊" variant="workshop" /> },
 )
 
 export const metadata = {
@@ -26,7 +26,7 @@ async function SkillsPageContent() {
 export default function SkillsPage() {
   return (
     <div className="spirit-garden-content sg-subpage sg-subpage--workshop">
-      <Suspense fallback={<SitePageFallback label="技能工坊" />}>
+      <Suspense fallback={<SitePageFallback label="技能工坊" variant="workshop" />}>
         <SkillsPageContent />
       </Suspense>
     </div>

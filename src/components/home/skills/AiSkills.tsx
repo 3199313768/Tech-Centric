@@ -7,7 +7,7 @@ import { deleteAiSkill } from '@/lib/skills/actions'
 import { SpiritSubpageHero } from '@/components/spirit/shell/SpiritSubpageHero'
 import { SpiritListCard } from '@/components/spirit/shell/SpiritListCard'
 import { DeleteConfirmBar } from '@/components/spirit/feedback/DeleteConfirmBar'
-import { getPlatformClass } from '@/utils/platformAccent'
+import { getPlatformAccent } from '@/utils/platformAccent'
 import { useToast } from '@/components/spirit/feedback/ToastProvider'
 import type { AgentSkill } from '@/lib/skills/queries'
 import { ScrollReveal } from '@/components/spirit/feedback/ScrollReveal'
@@ -20,8 +20,123 @@ const AddSkillModal = dynamic(
 
 const SKILL_REPO = 'https://github.com/3199313768/SKILL'
 
-function skillInkLevel(skill: AgentSkill): number {
-  return Math.min(100, 42 + skill.tags.length * 14)
+interface SkillCardProps {
+  skill: AgentSkill
+  index: number
+  hoveredId: string | null
+  deletingId: string | null
+  confirmDeleteId: string | null
+  onHover: (id: string | null) => void
+  onOpen: (skill: AgentSkill) => void
+  onEdit: (skill: AgentSkill) => void
+  onRequestDelete: (event: React.MouseEvent, id: string) => void
+  onConfirmDelete: (id: string) => void
+  onCancelDelete: () => void
+}
+
+function SkillCard({
+  skill,
+  index,
+  hoveredId,
+  deletingId,
+  confirmDeleteId,
+  onHover,
+  onOpen,
+  onEdit,
+  onRequestDelete,
+  onConfirmDelete,
+  onCancelDelete,
+}: SkillCardProps) {
+  return (
+    <ScrollReveal index={index}>
+      <SpiritListCard
+        variant="scroll"
+        index={0}
+        actionsVisible={hoveredId === skill.id || deletingId === skill.id || confirmDeleteId === skill.id}
+        onClick={() => onOpen(skill)}
+        actions={
+          <>
+            <button
+              type="button"
+              className="sg-icon-btn"
+              onClick={(event) => {
+                event.stopPropagation()
+                onEdit(skill)
+              }}
+              title="修改此技能"
+              aria-label={`修改技能 ${skill.name}`}
+            >
+              ✎
+            </button>
+            <button
+              type="button"
+              className="sg-icon-btn sg-icon-btn--danger"
+              onClick={(event) => onRequestDelete(event, skill.id)}
+              disabled={deletingId === skill.id}
+              title="删除此技能"
+              aria-label={`删除技能 ${skill.name}`}
+            >
+              {deletingId === skill.id ? '...' : '×'}
+            </button>
+          </>
+        }
+      >
+        <div
+          onMouseEnter={() => onHover(skill.id)}
+          onMouseLeave={() => onHover(null)}
+        >
+          <div className="sg-card__head-row sg-workshop-card__head">
+            <div className="sg-card__icon-wrap">{skill.icon}</div>
+            <div className="sg-workshop-card__meta">
+              <h3 className="sg-card__title sg-workshop-card__title">{skill.name}</h3>
+              {skill.platform ? (
+                <span className="sg-workshop-card__platform">{skill.platform}</span>
+              ) : (
+                <span className="sg-workshop-card__platform sg-workshop-card__platform--muted">通用技能</span>
+              )}
+            </div>
+          </div>
+          <p className="sg-card__desc sg-workshop-card__desc">{skill.description}</p>
+          {skill.tags.length > 0 ? (
+            <div className="sg-card__tags">
+              {skill.tags.map((tag) => (
+                <span key={tag} className="sg-tag">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          ) : null}
+          <p className="sg-card__link-hint sg-workshop-card__link">打开技能仓库 ↗</p>
+          {confirmDeleteId === skill.id ? (
+            <DeleteConfirmBar
+              message={`确定删除「${skill.name}」？不可撤销`}
+              onCancel={onCancelDelete}
+              onConfirm={() => onConfirmDelete(skill.id)}
+              isLoading={deletingId === skill.id}
+            />
+          ) : null}
+        </div>
+      </SpiritListCard>
+    </ScrollReveal>
+  )
+}
+
+function SkillGrid({
+  skills,
+  startIndex,
+  cardProps,
+}: {
+  skills: AgentSkill[]
+  startIndex?: number
+  cardProps: Omit<SkillCardProps, 'skill' | 'index'>
+}) {
+  return (
+    <div className="sg-workshop-grid">
+      {skills.map((skill, index) => (
+        <SkillCard key={skill.id} skill={skill} index={(startIndex ?? 0) + index} {...cardProps} />
+      ))}
+    </div>
+  )
 }
 
 export function AiSkills({ initialSkills }: { initialSkills: AgentSkill[] }) {
@@ -43,13 +158,13 @@ export function AiSkills({ initialSkills }: { initialSkills: AgentSkill[] }) {
 
   const platforms = useMemo(() => {
     const set = new Set<string>()
-    skills.forEach((s) => {
-      if (s.platform) set.add(s.platform)
+    skills.forEach((skill) => {
+      if (skill.platform) set.add(skill.platform)
     })
     return ['全部', ...Array.from(set)]
   }, [skills])
 
-  const allTags = useMemo(() => Array.from(new Set(skills.flatMap((s) => s.tags))), [skills])
+  const allTags = useMemo(() => Array.from(new Set(skills.flatMap((skill) => skill.tags))), [skills])
 
   const filteredSkills = useMemo(() => {
     return skills.filter((skill) => {
@@ -59,7 +174,29 @@ export function AiSkills({ initialSkills }: { initialSkills: AgentSkill[] }) {
     })
   }, [skills, activePlatform, activeTag])
 
-  const scrollRailSkills = filteredSkills.slice(0, 4)
+  const useGroupedView = activePlatform === '全部' && !activeTag
+
+  const groupedByPlatform = useMemo(() => {
+    if (!useGroupedView) return []
+    const groups = new Map<string, AgentSkill[]>()
+    for (const skill of filteredSkills) {
+      const key = skill.platform || '通用技能'
+      const bucket = groups.get(key)
+      if (bucket) {
+        bucket.push(skill)
+      } else {
+        groups.set(key, [skill])
+      }
+    }
+    return Array.from(groups.entries()).sort(([a], [b]) => {
+      const aIndex = platforms.indexOf(a)
+      const bIndex = platforms.indexOf(b)
+      if (aIndex === -1 && bIndex === -1) return a.localeCompare(b, 'zh-CN')
+      if (aIndex === -1) return 1
+      if (bIndex === -1) return -1
+      return aIndex - bIndex
+    })
+  }, [filteredSkills, platforms, useGroupedView])
 
   const executeDelete = async (id: string) => {
     setDeletingId(id)
@@ -76,8 +213,8 @@ export function AiSkills({ initialSkills }: { initialSkills: AgentSkill[] }) {
     }
   }
 
-  const requestDelete = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation()
+  const requestDelete = (event: React.MouseEvent, id: string) => {
+    event.stopPropagation()
     setConfirmDeleteId(id)
   }
 
@@ -91,13 +228,30 @@ export function AiSkills({ initialSkills }: { initialSkills: AgentSkill[] }) {
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 
+  const cardProps: Omit<SkillCardProps, 'skill' | 'index'> = {
+    hoveredId,
+    deletingId,
+    confirmDeleteId,
+    onHover: setHoveredId,
+    onOpen: openSkill,
+    onEdit: (skill) => {
+      setEditingSkill(skill)
+      setIsAddModalOpen(true)
+    },
+    onRequestDelete: requestDelete,
+    onConfirmDelete: executeDelete,
+    onCancelDelete: () => setConfirmDeleteId(null),
+  }
+
+  const isFiltered = activePlatform !== '全部' || activeTag !== null
+
   return (
     <div className="sg-page">
       <SpiritSubpageHero
         theme="workshop"
         eyebrow="卷轴工房"
         title="技能工坊"
-        lead="一套提高开发效率的 Agent Skills 集合，包含代码提交、提交规范、周报生成、UI 优化、代码审计等实用技能。"
+        lead="收录可复用的 Agent Skills：按平台与标签分类，点击卷轴即可跳转仓库查看说明与安装方式。"
         stats={[
           { label: '技能卷轴', value: skills.length },
           { label: '平台覆盖', value: Math.max(platforms.length - 1, 0) },
@@ -126,65 +280,66 @@ export function AiSkills({ initialSkills }: { initialSkills: AgentSkill[] }) {
         />
       ) : (
         <>
-          {scrollRailSkills.length > 0 ? (
-            <div className="sg-scroll-rail" aria-label="精选技能卷轴">
-              {scrollRailSkills.map((skill) => {
-                const platformClass = getPlatformClass(skill.platform)
-                return (
+          <section className="sg-workshop-panel" aria-label="技能筛选">
+            <div className="sg-workshop-panel__row">
+              <span className="sg-workshop-panel__label" id="workshop-platform-label">
+                平台
+              </span>
+              <div className="sg-filter-bar" role="group" aria-labelledby="workshop-platform-label">
+                {platforms.map((platform) => (
                   <button
-                    key={`rail-${skill.id}`}
+                    key={platform}
                     type="button"
-                    className={`sg-scroll-rail__item sg-scroll-rail__item--${platformClass}`}
-                    onClick={() => openSkill(skill)}
+                    onClick={() => setActivePlatform(platform)}
+                    className={`sg-filter-chip sg-filter-chip--sign${activePlatform === platform ? ' sg-filter-chip--active' : ''}`}
                   >
-                    <div className="sg-scroll-rail__icon">{skill.icon}</div>
-                    <p className="sg-scroll-rail__name">{skill.name}</p>
-                    {skill.platform ? (
-                      <span className="sg-scroll-rail__platform">{skill.platform}</span>
+                    {platform !== '全部' ? (
+                      <span
+                        className="sg-filter-chip__dot"
+                        style={{ background: getPlatformAccent(platform) }}
+                        aria-hidden
+                      />
                     ) : null}
-                  </button>
-                )
-              })}
-            </div>
-          ) : null}
-
-          <div className="sg-workshop-toolbar">
-            <div className="sg-filter-bar">
-              {platforms.map((platform) => (
-                <button
-                  key={platform}
-                  type="button"
-                  onClick={() => setActivePlatform(platform)}
-                  className={`sg-filter-chip${activePlatform === platform ? ' sg-filter-chip--active' : ''}`}
-                >
-                  {platform}
-                </button>
-              ))}
-            </div>
-            {allTags.length > 0 ? (
-              <div className="sg-filter-bar">
-                <button
-                  type="button"
-                  onClick={() => setActiveTag(null)}
-                  className={`sg-filter-chip${activeTag === null ? ' sg-filter-chip--active' : ''}`}
-                >
-                  全部标签
-                </button>
-                {allTags.map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => setActiveTag(tag)}
-                    className={`sg-filter-chip${activeTag === tag ? ' sg-filter-chip--active' : ''}`}
-                  >
-                    #{tag}
+                    {platform}
                   </button>
                 ))}
               </div>
-            ) : null}
-          </div>
+            </div>
 
-          <div className="sg-workshop-grid">
+            {allTags.length > 0 ? (
+              <div className="sg-workshop-panel__row">
+                <span className="sg-workshop-panel__label" id="workshop-tag-label">
+                  标签
+                </span>
+                <div className="sg-filter-bar" role="group" aria-labelledby="workshop-tag-label">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTag(null)}
+                    className={`sg-filter-chip${activeTag === null ? ' sg-filter-chip--active' : ''}`}
+                  >
+                    全部标签
+                  </button>
+                  {allTags.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => setActiveTag(tag)}
+                      className={`sg-filter-chip${activeTag === tag ? ' sg-filter-chip--active' : ''}`}
+                    >
+                      #{tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            <p className="sg-workshop-panel__summary">
+              共 {filteredSkills.length} 条技能
+              {isFiltered ? ' · 已应用筛选' : ' · 按平台分区浏览'}
+            </p>
+          </section>
+
+          <section className="sg-workshop-catalog" aria-label="技能目录">
             {filteredSkills.length === 0 ? (
               <SpiritEmptyState
                 className="sg-empty-state--grid"
@@ -192,79 +347,57 @@ export function AiSkills({ initialSkills }: { initialSkills: AgentSkill[] }) {
                 title="暂无符合筛选条件的技能"
                 description="调整平台或标签筛选后重试。"
               />
-            ) : (
-              filteredSkills.map((skill, index) => (
-                <ScrollReveal key={skill.id} index={index}>
-                <SpiritListCard
-                  variant="scroll"
-                  platform={skill.platform}
-                  index={0}
-                  actionsVisible={hoveredId === skill.id || deletingId === skill.id || confirmDeleteId === skill.id}
-                  onClick={() => openSkill(skill)}
-                  actions={
-                    <>
-                      <button
-                        type="button"
-                        className="sg-icon-btn"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setEditingSkill(skill)
-                          setIsAddModalOpen(true)
-                        }}
-                        title="修改此技能"
-                      >
-                        ✎
-                      </button>
-                      <button
-                        type="button"
-                        className="sg-icon-btn sg-icon-btn--danger"
-                        onClick={(e) => requestDelete(e, skill.id)}
-                        disabled={deletingId === skill.id}
-                        title="删除此技能"
-                      >
-                        {deletingId === skill.id ? '...' : '×'}
-                      </button>
-                    </>
-                  }
-                >
-                  <div
-                    onMouseEnter={() => setHoveredId(skill.id)}
-                    onMouseLeave={() => setHoveredId(null)}
-                  >
-                    <div className="sg-card__head-row">
-                      <div className="sg-card__icon-wrap">{skill.icon}</div>
+            ) : useGroupedView ? (
+              groupedByPlatform.map(([platform, items], sectionIndex) => (
+                <div key={platform} className="sg-workshop-section">
+                  <header className="sg-workshop-section__head">
+                    <span
+                      className="sg-workshop-section__dot"
+                      style={{ background: getPlatformAccent(platform === '通用技能' ? undefined : platform) }}
+                      aria-hidden
+                    />
+                    <div className="sg-workshop-section__copy">
+                      <h2 className="sg-workshop-section__title">{platform}</h2>
+                      <p className="sg-workshop-section__hint">
+                        {platform === 'Shell' && '终端脚本与自动化命令'}
+                        {platform === 'Git Hook' && '提交钩子与规范校验'}
+                        {platform === 'Python' && 'Python 脚本与 AI 辅助流程'}
+                        {platform === '通用技能' && '跨平台通用能力'}
+                        {!['Shell', 'Git Hook', 'Python', '通用技能'].includes(platform) && '该平台下的 Agent Skills'}
+                      </p>
                     </div>
-                    <h3 className="sg-card__title">{skill.name}</h3>
-                    <p className="sg-card__desc">{skill.description}</p>
-                    <div className="sg-skill-ink-meter" aria-hidden>
-                      <div className="sg-meter-track">
-                        <div
-                          className="sg-meter-fill sg-meter-fill--ink"
-                          style={{ width: `${skillInkLevel(skill)}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div className="sg-card__tags">
-                      {skill.tags.map((tag) => (
-                        <span key={tag} className="sg-tag">
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                    {confirmDeleteId === skill.id ? (
-                      <DeleteConfirmBar
-                        message={`确定删除「${skill.name}」？不可撤销`}
-                        onCancel={() => setConfirmDeleteId(null)}
-                        onConfirm={() => executeDelete(skill.id)}
-                        isLoading={deletingId === skill.id}
-                      />
-                    ) : null}
-                  </div>
-                </SpiritListCard>
-                </ScrollReveal>
+                    <span className="sg-workshop-section__count">{items.length} 项</span>
+                  </header>
+                  <SkillGrid
+                    skills={items}
+                    startIndex={sectionIndex * 3}
+                    cardProps={cardProps}
+                  />
+                </div>
               ))
+            ) : (
+              <div className="sg-workshop-section">
+                <header className="sg-workshop-section__head">
+                  <span
+                    className="sg-workshop-section__dot"
+                    style={{
+                      background: getPlatformAccent(activePlatform === '全部' ? undefined : activePlatform),
+                    }}
+                    aria-hidden
+                  />
+                  <div className="sg-workshop-section__copy">
+                    <h2 className="sg-workshop-section__title">筛选结果</h2>
+                    <p className="sg-workshop-section__hint">
+                      {activePlatform !== '全部' ? `平台：${activePlatform}` : '全部平台'}
+                      {activeTag ? ` · 标签：#${activeTag}` : ''}
+                    </p>
+                  </div>
+                  <span className="sg-workshop-section__count">{filteredSkills.length} 项</span>
+                </header>
+                <SkillGrid skills={filteredSkills} cardProps={cardProps} />
+              </div>
             )}
-          </div>
+          </section>
         </>
       )}
 
