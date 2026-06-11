@@ -19,3 +19,10 @@ export function isSiteNavActive(pathname: string, href: string): boolean {
   if (href === SITE_ROUTES.home) return pathname === '/'
   return pathname === href || pathname.startsWith(`${href}/`)
 }
+
+/** 资源页 AI 辅助 API（Route Handler 路径） */
+export const RESOURCE_API_ROUTES = {
+  explore: '/api/resources/explore',
+  autofill: '/api/resources/autofill',
+  meta: '/api/resources/meta',
+} as const

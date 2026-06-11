@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, JetBrains_Mono, Space_Mono, Quicksand, Plus_Jakarta_Sans, Noto_Sans_SC } from "next/font/google";
 import "./globals.css";
-import { personalInfo } from "@/data/personal";
-import { ThemeProvider } from '@/components/home/ThemeProvider'
-import { QuickRecordModal } from '@/components/knowledge/QuickRecordModal'
-import { ToastProvider } from '@/components/spirit/ToastProvider'
+import { personalInfo } from "@/data/site/personal";
+import { ThemeProvider } from '@/components/spirit/theme/ThemeProvider'
+import { QuickRecordModal } from '@/components/knowledge/capture/QuickRecordModal'
+import { ToastProvider } from '@/components/spirit/feedback/ToastProvider'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,6 +47,10 @@ export const metadata: Metadata = {
   title: `${personalInfo.name} - ${personalInfo.title}`,
   description: personalInfo.bio.join(' '),
   keywords: [...personalInfo.skills, personalInfo.title, '个人网站', '作品集'].join(', '),
+  icons: {
+    icon: '/spirit-garden/logo.png',
+    apple: '/spirit-garden/logo.png',
+  },
 };
 
 export const viewport = {

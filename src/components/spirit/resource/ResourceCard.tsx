@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { type ResourceItem } from '@/data/initialResources'
+import { type ResourceItem } from '@/data/resources/initialResources'
 import { ResourceFavicon } from '@/components/spirit/resource/ResourceFavicon'
 import { SearchHighlight } from '@/components/spirit/resource/SearchHighlight'
 import { getResourceAccent, getResourceCategoryLabel } from '@/utils/resourceCategory'

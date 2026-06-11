@@ -1,0 +1,220 @@
+'use client'
+
+import Image from 'next/image'
+import Link from 'next/link'
+import { Code2, ExternalLink, FlaskConical, Paintbrush, Paperclip, Sparkles, Terminal } from 'lucide-react'
+import { SpiritDustCanvas } from '@/components/home/landing/SpiritDustCanvas'
+import { personalInfo, skillsDetail } from '@/data/site/personal'
+import { handleWatercolorHover } from '@/utils/watercolorHover'
+import { SITE_ROUTES } from '@/lib/site/routes'
+
+const SKILL_CHIPS = [
+  { name: 'React', icon: Code2 },
+  { name: 'Tailwind', icon: Paintbrush },
+  { name: 'Framer', icon: Paperclip },
+  { name: 'Next.js', icon: Terminal },
+] as const
+
+const SOUL_METERS = [
+  { label: '创造力能量', value: 94 },
+  { label: '咖啡因法力值', value: 62 },
+  { label: '内心宁静度', value: 100 },
+] as const
+
+function avgFrontend() {
+  const items = skillsDetail.filter((s) => s.category === 'frontend')
+  if (!items.length) return 94
+  return Math.round(items.reduce((sum, s) => sum + s.proficiency, 0) / items.length)
+}
+
+export function SpiritGardenHome() {
+  const creativity = avgFrontend()
+
+  const meters = SOUL_METERS.map((item) =>
+    item.label === '创造力能量' ? { ...item, value: creativity } : item,
+  )
+
+  return (
+    <>
+      <div className="sg-hero-stage sg-hero-stage--garden">
+        <div className="sg-hero-backdrop sg-hero-backdrop--natural sg-hero-backdrop--blend" aria-hidden>
+          <Image
+            src="/spirit-garden/hero-landscape.png"
+            alt=""
+            width={1024}
+            height={571}
+            priority
+            sizes="100vw"
+            className="sg-hero-backdrop-img sg-hero-backdrop-img--blend"
+          />
+          <SpiritDustCanvas className="sg-spirit-dust-canvas" />
+          <div className="sg-hero-backdrop-overlay sg-hero-backdrop-overlay--garden" />
+        </div>
+
+        <div className="sg-hero-inner-wrap sg-hero-inner-wrap--garden sg-hero-enter">
+          <section id="hero" className="sg-hero-intro">
+            <div className="sg-hero-profile-row sg-enter sg-enter--1">
+              <div className="sg-hero-avatar-sm">
+                <Image
+                  src="/spirit-garden/avatar.png"
+                  alt={personalInfo.name}
+                  fill
+                  sizes="40px"
+                  className="sg-hero-avatar-img"
+                />
+              </div>
+              <div className="sg-hero-profile-meta">
+                <span className="sg-hero-name">{personalInfo.name}</span>
+                <span className="sg-hero-badge">高级前端工程师</span>
+              </div>
+            </div>
+
+            <h1 className="sg-hero-garden-title sg-enter sg-enter--2">欢迎来到我的数字庭院</h1>
+
+            <p className="sg-hero-garden-lead sg-enter sg-enter--3">
+              在这里，代码与吉卜力的美学温柔交织。我是一名追求极致情感体验的高级前端工程师，在逻辑的经纬间，编织充满生命力的数字交互。
+            </p>
+
+            <div className="sg-hero-actions sg-enter sg-enter--4">
+              <Link href={SITE_ROUTES.projects} className="sg-btn sg-btn--primary">
+                探寻作品
+              </Link>
+              <button
+                type="button"
+                className="sg-btn sg-btn--ghost"
+                onClick={() => {
+                  document.getElementById('garden-content')?.scrollIntoView({ behavior: 'smooth' })
+                }}
+              >
+                了解我
+              </button>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <main id="garden-content" className="sg-main sg-main--garden sg-enter sg-enter--5">
+        <div className="sg-garden-grid">
+          <article
+            className="sg-card sg-card--featured sg-card--watercolor sg-enter sg-enter--6"
+            onMouseMove={handleWatercolorHover}
+          >
+            <div className="sg-card-featured-head">
+              <div>
+                <p className="sg-card-eyebrow">最新案例 | 项目回顾</p>
+                <h2>幻梦之森 3D</h2>
+                <p className="sg-card-desc">
+                  基于 Three.js 构建的沉浸式森林场景，灵感源自《幽灵公主》中的精灵之森，
+                  探索 WebGL 光影与程序化动画的边界。
+                </p>
+              </div>
+              <ExternalLink size={18} className="sg-card-link-icon" aria-hidden />
+            </div>
+            <div className="sg-card-featured-media">
+              <Image
+                src="/spirit-garden/project-forest.png"
+                alt="幻梦之森 3D 预览"
+                fill
+                sizes="(max-width: 768px) 100vw, 720px"
+                className="sg-card-featured-img"
+              />
+            </div>
+            <div className="sg-card-tags">
+              <span>WebGL</span>
+              <span>GSAP</span>
+            </div>
+          </article>
+
+          <article
+            className="sg-card sg-card--meter sg-card--watercolor sg-enter sg-enter--7"
+            onMouseMove={handleWatercolorHover}
+          >
+            <header className="sg-card-meter-head">
+              <Sparkles size={18} aria-hidden />
+              <div>
+                <h2>灵魂度量仪</h2>
+                <p>实时灵感监测</p>
+              </div>
+            </header>
+            <div className="sg-meter-list">
+              {meters.map((item) => (
+                <div key={item.label} className="sg-meter-item">
+                  <div className="sg-meter-label">
+                    <span>{item.label}</span>
+                    <span>{item.value}%</span>
+                  </div>
+                  <div className="sg-meter-track">
+                    <div
+                      className={`sg-meter-fill${
+                        item.label === '咖啡因法力值' ? ' sg-meter-fill--muted' : ''
+                      }`}
+                      style={{ width: `${item.value}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <blockquote className="sg-meter-quote">
+              「设计是连接冰冷逻辑与人类温度的桥梁。」
+            </blockquote>
+          </article>
+
+          <article
+            className="sg-card sg-card--lab sg-card--watercolor sg-enter sg-enter--8"
+            onMouseMove={handleWatercolorHover}
+          >
+            <FlaskConical size={22} className="sg-card-lab-icon" aria-hidden />
+            <h2>感官实验室</h2>
+            <p>
+              正在尝试将水彩纹理、微交互与界面动效结合，
+              探索「温润之界」——技术应有温度、有呼吸感。
+            </p>
+            <Link href={SITE_ROUTES.vibe} className="sg-text-link">
+              查阅笔记 →
+            </Link>
+          </article>
+
+          <article
+            className="sg-card sg-card--skills sg-card--watercolor sg-enter sg-enter--9"
+            onMouseMove={handleWatercolorHover}
+          >
+            <h2>技能卷轴</h2>
+            <div className="sg-skill-chip-grid">
+              {SKILL_CHIPS.map(({ name, icon: Icon }) => (
+                <div key={name} className="sg-skill-chip">
+                  <Icon size={16} aria-hidden />
+                  <span>{name}</span>
+                </div>
+              ))}
+            </div>
+          </article>
+        </div>
+      </main>
+
+      <footer className="sg-footer sg-footer--garden sg-enter sg-enter--10">
+        <div className="sg-footer-top">
+          <p className="sg-footer-copy-left">
+            © {new Date().getFullYear()} SpiritGarden - 纯手工打造于梦之境
+          </p>
+          <nav className="sg-footer-links" aria-label="页脚导航">
+            <Link href={SITE_ROUTES.projects}>工艺流程</Link>
+            <Link href={SITE_ROUTES.vibe}>灵感来源</Link>
+            <Link href={SITE_ROUTES.knowledge}>档案馆</Link>
+          </nav>
+          <div className="sg-footer-social">
+            {personalInfo.socialLinks.github ? (
+              <a href={personalInfo.socialLinks.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                <Image src="/spirit-garden/icon-share.png" alt="" width={18} height={20} aria-hidden unoptimized />
+              </a>
+            ) : null}
+            {personalInfo.socialLinks.email ? (
+              <a href={personalInfo.socialLinks.email} aria-label="Email">
+                <Image src="/spirit-garden/icon-email.png" alt="" width={20} height={16} aria-hidden unoptimized />
+              </a>
+            ) : null}
+          </div>
+        </div>
+      </footer>
+    </>
+  )
+}

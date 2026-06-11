@@ -1,6 +1,6 @@
 # Tech-Centric Agent Guide
 
-完整规范见 [docs/前端代码规范.md](docs/前端代码规范.md)，分三档：
+完整规范见 [docs/engineering/前端代码规范.md](docs/engineering/前端代码规范.md)，分三档：
 
 | 档位 | 内容 | 强制 |
 |------|------|------|
@@ -22,15 +22,19 @@
 ## 目录约定
 
 ```
-src/app/              → 路由（(site)/ 首页与子页、knowledge、api）
-src/app/(site)/       → /、/projects、/skills、/vibe、/resources
-src/components/knowledge/ → 知识库 UI
-src/components/rag/       → AI 助手 UI
-src/components/spirit/    → 设计系统复用组件
+src/app/                    → 路由（见 src/app/README.md）
+src/app/(site)/             → /、/projects、/skills、/vibe、/resources
+src/app/(knowledge)/        → /knowledge
+src/app/api/resources/      → 资源页 AI 辅助 API
+src/app/api/rag/            → RAG chat / reindex
+src/components/home/        → `(site)` 页面 UI（见 components/home/README.md）
+src/components/knowledge/ → 知识库 UI（见 components/knowledge/README.md）
+src/components/rag/       → AI 助手 UI（见 components/rag/README.md）
+src/components/spirit/    → 设计系统（见 components/spirit/README.md）
 src/lib/knowledge/        → types.ts、queries.ts
 src/lib/rag/              → RAG 逻辑 + contactFlow.ts
 src/lib/supabase/         → server / client
-src/data/                 → 静态种子数据
+src/data/                 → 静态种子（见 data/README.md：site/、resources/）
 src/utils/                → 纯函数 + hooks
 ```
 
@@ -80,14 +84,14 @@ import { createClient } from '@/lib/supabase/client'   // Client
 
 - 新代码：Part A + Part C 必守；触发场景加 Part B
 - 改旧文件：仅修正触达区域
-- 历史偏离：[Part C4 已知偏离项](docs/前端代码规范.md#c4-已知偏离项历史债)
+- 历史偏离：[Part C4 已知偏离项](docs/engineering/前端代码规范.md#c4-已知偏离项历史债)
 
 ## 本地验证
 
 ```bash
-yarn lint && yarn typecheck && yarn build
+pnpm lint && pnpm typecheck && pnpm build
 ```
 
 ## 完整规范
 
-→ [docs/前端代码规范.md](docs/前端代码规范.md) · Cursor 规则：`.cursor/rules/`
+→ [docs/engineering/前端代码规范.md](docs/engineering/前端代码规范.md) · 文档索引：[docs/README.md](docs/README.md) · Cursor 规则：`.cursor/rules/`

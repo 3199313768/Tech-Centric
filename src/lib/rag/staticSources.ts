@@ -1,5 +1,5 @@
-import { personalInfo, workExperience, skillsDetail, blogPosts } from '../../data/personal'
-import { getInitialResources } from '../../data/initialResources'
+import { personalInfo, workExperience, skillsDetail, blogPosts } from '../../data/site/personal'
+import { getInitialResources } from '../../data/resources/initialResources'
 import type { RagDocumentInput } from './types'
 
 function joinLines(lines: Array<string | undefined | null | false>) {

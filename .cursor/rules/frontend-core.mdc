@@ -12,7 +12,7 @@ alwaysApply: true
 - **禁止** `alert()` / `confirm()` 作用户反馈
 - 错误用 state + `sg-*-error` 或区块 fallback
 - 规范三档：Part A 基线 + Part C 项目定制必守；Part B 高级专题按场景（缓存/Suspense/乐观更新/API 安全）
-- 详见 [docs/前端代码规范.md](docs/前端代码规范.md)；改旧文件仅修正触达区域
+- 详见 [docs/engineering/前端代码规范.md](docs/engineering/前端代码规范.md)；改旧文件仅修正触达区域
 
 ```tsx
 // ❌ BAD

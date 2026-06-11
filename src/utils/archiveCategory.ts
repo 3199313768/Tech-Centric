@@ -1,4 +1,4 @@
-import { type ProjectCategory } from '@/data/allProjects'
+import { type ProjectCategory } from '@/data/site/allProjects'
 
 export const ARCHIVE_CATEGORY_ACCENTS: Record<ProjectCategory | '全部', string> = {
   全部: 'var(--sg-archive-all)',

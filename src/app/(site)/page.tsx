@@ -1,4 +1,4 @@
-import { SpiritGardenHome } from '@/components/home/SpiritGardenHome'
+import { SpiritGardenHome } from '@/components/home/landing/SpiritGardenHome'
 
 export const metadata = {
   title: 'SpiritGarden · 数字庭院',

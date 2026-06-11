@@ -1,33 +1,16 @@
 import { NextResponse } from 'next/server'
 import { createEmbedding } from '@/lib/rag/embedding'
 import { generateRagAnswer } from '@/lib/rag/deepseek'
+import { isRagChatRateLimited } from '@/lib/rag/rateLimit'
 import { matchRagChunks, toPublicSources } from '@/lib/rag/retrieval'
 
 const MAX_MESSAGE_LENGTH = 500
 const MAX_BODY_BYTES = 4_096
-const RATE_LIMIT_WINDOW_MS = 60_000
-const RATE_LIMIT_MAX_REQUESTS = 10
-
-const rateLimitBuckets = new Map<string, { count: number; resetAt: number }>()
 
 function getClientIp(req: Request) {
   const forwardedFor = req.headers.get('x-forwarded-for')
   if (forwardedFor) return forwardedFor.split(',')[0].trim()
   return req.headers.get('x-real-ip') || 'anonymous'
-}
-
-function isRateLimited(req: Request) {
-  const now = Date.now()
-  const key = getClientIp(req)
-  const bucket = rateLimitBuckets.get(key)
-
-  if (!bucket || bucket.resetAt <= now) {
-    rateLimitBuckets.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS })
-    return false
-  }
-
-  bucket.count += 1
-  return bucket.count > RATE_LIMIT_MAX_REQUESTS
 }
 
 function isUnsafePrompt(message: string) {
@@ -58,7 +41,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: '请输入问题' }, { status: 400 })
     }
 
-    if (isRateLimited(req)) {
+    if (await isRagChatRateLimited(getClientIp(req))) {
       return NextResponse.json({ error: '请求过于频繁，请稍后再试' }, { status: 429 })
     }
 

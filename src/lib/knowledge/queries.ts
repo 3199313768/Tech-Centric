@@ -2,7 +2,17 @@ import { createClient } from '@/lib/supabase/server'
 import { KB_RECORDS_PAGE_SIZE, KB_TAGS_PAGE_SIZE } from '@/lib/knowledge/constants'
 import type { KnowledgePageData, KnowledgeSearchParams, KbRecord } from '@/lib/knowledge/types'
 
-async function fetchAllUserTags(userId: string): Promise<string[]> {
+async function fetchAllUserTagsViaRpc(userId: string): Promise<string[] | null> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('get_kb_user_tags', { p_user_id: userId })
+
+  if (error) return null
+
+  const tags = (data as string[] | null) ?? []
+  return tags.sort((a, b) => a.localeCompare(b, 'zh-CN'))
+}
+
+async function fetchAllUserTagsFallback(userId: string): Promise<string[]> {
   const supabase = await createClient()
   const tagSet = new Set<string>()
   let offset = 0
@@ -29,6 +39,12 @@ async function fetchAllUserTags(userId: string): Promise<string[]> {
   }
 
   return Array.from(tagSet).sort((a, b) => a.localeCompare(b, 'zh-CN'))
+}
+
+async function fetchAllUserTags(userId: string): Promise<string[]> {
+  const rpcTags = await fetchAllUserTagsViaRpc(userId)
+  if (rpcTags) return rpcTags
+  return fetchAllUserTagsFallback(userId)
 }
 
 export async function fetchKnowledgePageData(

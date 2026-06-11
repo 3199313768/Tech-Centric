@@ -1,6 +1,6 @@
 'use client'
 
-import { type ResourceItem } from '@/data/initialResources'
+import { type ResourceItem } from '@/data/resources/initialResources'
 import { ResourceFavicon } from '@/components/spirit/resource/ResourceFavicon'
 import {
   getResourceAccent,
