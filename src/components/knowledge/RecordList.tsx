@@ -2,39 +2,37 @@
 
 import { useState } from 'react'
 import { RecordCard } from './RecordCard'
+import { HighlightThemeLoader } from './HighlightThemeLoader'
 import { createClient } from '@/lib/supabase/client'
 import { Loader2 } from 'lucide-react'
+import { useToast } from '@/components/spirit/ToastProvider'
+import { KB_RECORDS_PAGE_SIZE } from '@/lib/knowledge/constants'
+import type { KbRecord } from '@/lib/knowledge/types'
 
-// Basic interface to replace `any`
-interface IRecord {
-  id: string;
-  user_id: string;
-  type: string;
-  content: string;
-  tags?: string[];
-  created_at: string;
-  [key: string]: any; // Catch-all for other fields
-}
-
-export function RecordList({ 
-  initialRecords, 
-  initialQuery, 
-  initialTags, 
-  initialType 
-}: { 
-  initialRecords: IRecord[],
-  initialQuery?: string,
-  initialTags?: string[],
+export function RecordList({
+  initialRecords,
+  initialHasMore,
+  initialQuery,
+  initialTags,
+  initialType,
+}: {
+  initialRecords: KbRecord[]
+  initialHasMore: boolean
+  initialQuery?: string
+  initialTags?: string[]
   initialType?: string
 }) {
   const [records, setRecords] = useState(initialRecords)
   const [loading, setLoading] = useState(false)
-  const [hasMore, setHasMore] = useState(initialRecords.length === 50)
+  const [hasMore, setHasMore] = useState(initialHasMore)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const supabase = createClient()
+  const { toast } = useToast()
 
   const loadMore = async () => {
     if (loading || !hasMore) return
     setLoading(true)
+    setLoadError(null)
 
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -56,18 +54,22 @@ export function RecordList({
         dbQuery = dbQuery.eq('type', initialType)
       }
 
-      // Fetch the next 50 records using the current records length as offset
-      const currentLength = records.length
-      const { data: newRecords, error } = await dbQuery.range(currentLength, currentLength + 49)
+      const offset = records.length
+      const { data: newRecords, error } = await dbQuery.range(
+        offset,
+        offset + KB_RECORDS_PAGE_SIZE - 1,
+      )
 
       if (error) throw error
 
       if (newRecords) {
-        setRecords(prev => [...prev, ...newRecords])
-        setHasMore(newRecords.length === 50)
+        setRecords((prev) => [...prev, ...newRecords])
+        setHasMore(newRecords.length === KB_RECORDS_PAGE_SIZE)
       }
     } catch (e) {
-      console.error('Failed to load more records:', e)
+      const message = e instanceof Error ? e.message : '加载失败'
+      setLoadError(message)
+      toast(message, 'error')
     } finally {
       setLoading(false)
     }
@@ -75,33 +77,38 @@ export function RecordList({
 
   if (records.length === 0) {
     return (
-      <div className="py-24 text-center text-zinc-500 flex flex-col items-center justify-center border border-dashed border-zinc-800 rounded-2xl">
-        <span className="text-4xl mb-4">📭</span>
-        <p>没有找到相关记录</p>
+      <div className="sg-state sg-state--empty">
+        没有找到相关记录
       </div>
     )
   }
 
   return (
-    <div className="space-y-8">
-      <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
-        {records.map((record) => (
-          <RecordCard key={record.id} record={record} />
+    <div className="sg-kb-list">
+      <HighlightThemeLoader />
+      <div className="sg-kb-masonry">
+        {records.map((record, index) => (
+          <RecordCard key={record.id} record={record} index={index} />
         ))}
       </div>
-      
-      {hasMore && (
-        <div className="flex justify-center pt-8 pb-12">
+
+      {loadError ? (
+        <div className="sg-kb-error sg-kb-error--inline">{loadError}</div>
+      ) : null}
+
+      {hasMore ? (
+        <div className="sg-kb-load-more">
           <button
+            type="button"
             onClick={loadMore}
             disabled={loading}
-            className="flex items-center gap-2 px-6 py-2.5 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 rounded-full transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="sg-btn sg-btn--ghost"
           >
-            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+            {loading ? <Loader2 className="sg-kb-spinner" aria-hidden /> : null}
             {loading ? '加载中...' : '加载更多'}
           </button>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

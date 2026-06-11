@@ -1,0 +1,23 @@
+---
+description: Supabase 分端、查询 error 处理与分页
+globs: src/{app,lib,components}/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Supabase & Data
+
+- Server：`@/lib/supabase/server`；Client：`@/lib/supabase/client`
+- 禁止 Client 组件 import server 版
+- 必须处理 `{ data, error }`；Server 页渲染 fallback，不静默忽略
+- `service role` 仅 Route Handler / scripts
+- 上传前校验 `file.size`、MIME；Signed URL 考虑过期刷新
+
+```tsx
+// ❌ BAD
+const { data } = await supabase.from('kb_records').select('*')
+
+// ✅ GOOD
+const { data, error } = await supabase.from('kb_records').select('*')
+if (error) return <ErrorFallback message="加载失败" />
+const records = data ?? []
+```

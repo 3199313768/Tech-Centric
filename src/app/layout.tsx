@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Geist, JetBrains_Mono, Space_Mono, Quicksand, Plus_Jakarta_Sans, Noto_Sans_SC } from "next/font/google";
 import "./globals.css";
 import { personalInfo } from "@/data/personal";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { QuickRecordModal } from "@/components/knowledge/QuickRecordModal";
+import { ThemeProvider } from '@/components/home/ThemeProvider'
+import { QuickRecordModal } from '@/components/knowledge/QuickRecordModal'
+import { ToastProvider } from '@/components/spirit/ToastProvider'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -70,8 +71,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <QuickRecordModal />
+          <ToastProvider>
+            {children}
+            <QuickRecordModal />
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>

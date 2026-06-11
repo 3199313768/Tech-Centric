@@ -99,7 +99,7 @@ export function Blog() {
           gap: '24px',
         }}
       >
-        {filteredPosts.map((post, index) => (
+        {filteredPosts.map((post) => (
           <article
             key={post.id}
             style={{

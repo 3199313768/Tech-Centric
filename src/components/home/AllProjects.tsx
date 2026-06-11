@@ -9,6 +9,8 @@ import { AddAllProjectModal } from './AddAllProjectModal'
 import { SpiritSubpageHero } from '@/components/spirit/SpiritSubpageHero'
 import { getArchiveAccent, getArchiveCode } from '@/utils/archiveCategory'
 import { handleWatercolorHover } from '@/utils/watercolorHover'
+import { useToast } from '@/components/spirit/ToastProvider'
+import { DeleteConfirmBar } from '@/components/spirit/DeleteConfirmBar'
 
 // ==========================================
 // 详情弹窗 Modal 组件
@@ -26,27 +28,26 @@ function ProjectModal({
   onDeleteSuccess?: () => void
   onEdit?: () => void
 }) {
+  const { toast } = useToast()
   const [isDeleting, setIsDeleting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   if (!isOpen || !project) return null
 
   const handleDelete = async () => {
-    if (!window.confirm(`确定要删除项目 "${project.name}" 吗？此操作不可逆。`)) {
-      return
-    }
     setIsDeleting(true)
     const supabase = createClient()
     const { error } = await supabase.from('all_projects').delete().eq('id', project.id)
     setIsDeleting(false)
+    setShowDeleteConfirm(false)
 
     if (error) {
       console.error('Delete error:', error)
-      alert('删除失败：' + error.message)
+      toast('删除失败：' + error.message, 'error')
     } else {
+      toast('项目已删除', 'success')
       onClose()
-      if (onDeleteSuccess) {
-        onDeleteSuccess()
-      }
+      onDeleteSuccess?.()
     }
   }
 
@@ -122,15 +123,24 @@ function ProjectModal({
             </div>
 
             <div className="sg-modal-detail-actions">
-              <button
-                type="button"
-                className="sg-btn sg-btn--ghost sg-icon-btn--danger"
-                onClick={handleDelete}
-                disabled={isDeleting}
-                style={{ width: 'auto', height: 'auto', borderRadius: '8px', padding: '10px 16px' }}
-              >
-                {isDeleting ? '删除中...' : '删除项目'}
-              </button>
+              {showDeleteConfirm ? (
+                <DeleteConfirmBar
+                  message={`确定删除「${project.name}」？不可撤销`}
+                  onCancel={() => setShowDeleteConfirm(false)}
+                  onConfirm={handleDelete}
+                  isLoading={isDeleting}
+                />
+              ) : (
+                <button
+                  type="button"
+                  className="sg-btn sg-btn--ghost sg-icon-btn--danger"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={isDeleting}
+                  style={{ width: 'auto', height: 'auto', borderRadius: '8px', padding: '10px 16px' }}
+                >
+                  删除项目
+                </button>
+              )}
 
               <button
                 type="button"
@@ -572,6 +582,7 @@ export function AllProjects() {
       </AnimatePresence>
 
       <AddAllProjectModal
+        key={editingProject?.id ?? 'new-all-project'}
         isOpen={isAddModalOpen}
         onClose={() => {
           setIsAddModalOpen(false)

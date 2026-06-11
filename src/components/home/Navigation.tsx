@@ -2,25 +2,19 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 import { useBreakpoint } from '@/utils/useBreakpoint'
+import { isSiteNavActive, SITE_NAV_TABS, SITE_ROUTES } from '@/lib/site/routes'
 
 interface NavigationProps {
-  activeTab: string
-  onTabChange: (tab: string) => void
   transparent?: boolean
 }
 
-const tabs = [
-  { id: 'home', label: '庭院' },
-  { id: 'all-projects', label: '归档' },
-  { id: 'ai-skills', label: '技能工坊' },
-  { id: 'vibe-coding', label: '草本集' },
-  { id: 'resources', label: '资源' },
-] as const
-
-export function Navigation({ activeTab, onTabChange, transparent = false }: NavigationProps) {
+export function Navigation({ transparent = false }: NavigationProps) {
+  const pathname = usePathname()
   const { isMobile, isTablet } = useBreakpoint()
   const [menuOpen, setMenuOpen] = useState(false)
   const showCompactNav = isMobile || isTablet
@@ -32,23 +26,20 @@ export function Navigation({ activeTab, onTabChange, transparent = false }: Navi
     }
   }, [showCompactNav, menuOpen])
 
-  const handleTabChange = (tab: string) => {
-    onTabChange(tab)
-    setMenuOpen(false)
-  }
+  const closeMenu = () => setMenuOpen(false)
 
   return (
     <nav className={`sg-nav ${transparent ? 'sg-nav--transparent' : ''} ${transparent ? 'sg-enter sg-enter--0' : ''}`}>
       <div className="sg-nav-inner">
-        <button
-          type="button"
+        <Link
+          href={SITE_ROUTES.home}
           className="sg-nav-brand"
-          onClick={() => handleTabChange('home')}
           aria-label="返回首页"
+          onClick={closeMenu}
         >
           <Image src="/spirit-garden/logo.png" alt="" width={40} height={40} />
           {!isMobile ? <span>SpiritGarden</span> : null}
-        </button>
+        </Link>
 
         {showCompactNav ? (
           <div className="sg-nav-actions sg-nav-actions--compact">
@@ -67,15 +58,14 @@ export function Navigation({ activeTab, onTabChange, transparent = false }: Navi
         ) : (
           <>
             <div className="sg-nav-links">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  className={`sg-nav-link ${activeTab === tab.id ? 'sg-nav-link--active' : ''}`}
-                  onClick={() => handleTabChange(tab.id)}
+              {SITE_NAV_TABS.map((tab) => (
+                <Link
+                  key={tab.href}
+                  href={tab.href}
+                  className={`sg-nav-link${isSiteNavActive(pathname, tab.href) ? ' sg-nav-link--active' : ''}`}
                 >
                   {tab.label}
-                </button>
+                </Link>
               ))}
             </div>
             <div className="sg-nav-actions">
@@ -89,7 +79,7 @@ export function Navigation({ activeTab, onTabChange, transparent = false }: Navi
         <>
           <div
             className={`sg-nav-overlay${menuOpen ? ' sg-nav-overlay--open' : ''}`}
-            onClick={() => setMenuOpen(false)}
+            onClick={closeMenu}
             aria-hidden={!menuOpen}
           />
           <div
@@ -101,15 +91,15 @@ export function Navigation({ activeTab, onTabChange, transparent = false }: Navi
             aria-hidden={!menuOpen}
           >
             <div className="sg-nav-drawer-links">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  className={`sg-nav-drawer-link ${activeTab === tab.id ? 'sg-nav-drawer-link--active' : ''}`}
-                  onClick={() => handleTabChange(tab.id)}
+              {SITE_NAV_TABS.map((tab) => (
+                <Link
+                  key={tab.href}
+                  href={tab.href}
+                  className={`sg-nav-drawer-link${isSiteNavActive(pathname, tab.href) ? ' sg-nav-drawer-link--active' : ''}`}
+                  onClick={closeMenu}
                 >
                   {tab.label}
-                </button>
+                </Link>
               ))}
             </div>
           </div>

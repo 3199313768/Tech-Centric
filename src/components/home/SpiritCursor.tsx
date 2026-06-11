@@ -7,16 +7,18 @@ export function SpiritCursor() {
   const posRef = useRef({ x: -100, y: -100 })
   const targetRef = useRef({ x: -100, y: -100 })
   const visibleRef = useRef(false)
-  const [active, setActive] = useState(false)
+  const [active] = useState(() => {
+    if (typeof window === 'undefined') return false
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const coarsePointer = window.matchMedia('(pointer: coarse)').matches
+    return !reducedMotion && !coarsePointer
+  })
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
-
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const coarsePointer = window.matchMedia('(pointer: coarse)').matches
     if (reducedMotion || coarsePointer) return
 
-    setActive(true)
     document.documentElement.classList.add('sg-spirit-cursor-active')
 
     const onMove = (event: MouseEvent) => {

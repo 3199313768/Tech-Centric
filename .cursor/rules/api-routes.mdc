@@ -1,0 +1,28 @@
+---
+description: Route Handler 结构、安全与 JSON 错误响应
+globs: src/app/api/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# API Routes
+
+- 业务逻辑放 `src/lib/`，route 只做校验、编排、响应
+- 输入限长、rate limit；不记录/回显密钥
+- 错误返回 `NextResponse.json({ error: '...' }, { status: 4xx })`
+- 密钥仅用服务端 env，不进 `NEXT_PUBLIC_*`
+
+```typescript
+// ❌ BAD
+export async function POST(req: Request) {
+  const body = await req.json()
+  return NextResponse.json(await doEverything(body))
+}
+
+// ✅ GOOD
+export async function POST(req: Request) {
+  if (req.headers.get('content-length') > MAX_BYTES) {
+    return NextResponse.json({ error: 'Payload too large' }, { status: 413 })
+  }
+  // validate → lib → structured response
+}
+```

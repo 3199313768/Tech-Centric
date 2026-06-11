@@ -1,0 +1,26 @@
+---
+description: React 19 / Next.js 16 App Router 组件约定
+globs: **/*.tsx
+alwaysApply: false
+---
+
+# React & Next.js
+
+- 默认 Server Component；hooks/事件/浏览器 API 才 `'use client'`
+- 页面 `export default`；可复用组件 **named export**
+- Next 15+：`searchParams: Promise<...>` 必须 `await`
+- 数据拉取优先服务端；`useEffect` 仅浏览器侧副作用
+- 列表禁止无 UI 的 `.limit(N)`；需分页 + 加载更多
+
+```tsx
+// ❌ BAD — 整页 client 拉数
+'use client'
+useEffect(() => { fetch('/api/x') }, [])
+
+// ✅ GOOD
+export default async function Page({ searchParams }: PageProps) {
+  const params = await searchParams
+  const supabase = await createClient()
+  // await query...
+}
+```

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { ProjectType } from '@/data/projects'
 import { SpiritModalShell } from '@/components/spirit/SpiritModalShell'
+import { useToast } from '@/components/spirit/ToastProvider'
 
 interface AddProjectModalProps {
   isOpen: boolean
@@ -12,6 +13,7 @@ interface AddProjectModalProps {
 }
 
 export function AddProjectModal({ isOpen, onClose, onSuccess }: AddProjectModalProps) {
+  const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
@@ -62,8 +64,9 @@ export function AddProjectModal({ isOpen, onClose, onSuccess }: AddProjectModalP
 
     if (error) {
       console.error('Error inserting project:', error)
-      alert('新增项目失败：' + error.message)
+      toast('新增项目失败：' + error.message, 'error')
     } else {
+      toast('项目已新增', 'success')
       onSuccess()
       onClose()
       setFormData({

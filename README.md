@@ -24,11 +24,34 @@ yarn dev
 
 ```
 src/
-├── app/           # 页面与布局
-├── components/    # 组件
-├── data/          # 个人数据（personal.ts、projects.ts）
-├── utils/         # 工具函数
-docs/              # 文档
+├── app/
+│   ├── (site)/           # 首页与子页（/、/projects、/skills…）
+│   ├── knowledge/        # 知识库 /knowledge
+│   └── api/
+├── components/
+│   ├── home/             # 首页与子页 UI
+│   ├── knowledge/        # 知识库 UI
+│   ├── rag/              # AI 助手 UI
+│   └── spirit/           # 设计系统复用组件
+├── lib/
+│   ├── knowledge/        # 知识库 types、queries
+│   ├── rag/              # RAG 逻辑
+│   ├── site/             # 站点路由常量
+│   └── supabase/
+├── data/                 # 个人数据（personal.ts、projects.ts）
+└── utils/                # 工具函数与 hooks
+docs/                     # 文档
+```
+
+## 前端代码规范
+
+人类开发者与 AI 编码均遵循 [docs/前端代码规范.md](docs/前端代码规范.md)（中级基线 / 高级专题 / 项目定制三档）。AI 入口见 [AGENTS.md](AGENTS.md)，Cursor 自动规则见 [.cursor/rules/](.cursor/rules/)。
+
+本地验证：
+
+```bash
+yarn lint
+yarn typecheck
 ```
 
 ## 部署

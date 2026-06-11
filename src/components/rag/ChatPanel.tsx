@@ -15,7 +15,7 @@ import {
   detectContactIntent,
   isDirectContactInfoRequest,
   validateContactEmail,
-} from './contactFlow'
+} from '@/lib/rag/contactFlow'
 import { MessageBubble } from './MessageBubble'
 import { SuggestedItem, SuggestedQuestions } from './SuggestedQuestions'
 

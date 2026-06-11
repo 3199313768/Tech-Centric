@@ -26,7 +26,6 @@ export function Projects({ compact = false }: ProjectsProps) {
   const px = isMobile ? '20px' : isTablet ? '24px' : '40px'
 
   const fetchProjects = async () => {
-    setIsLoading(true)
     const supabase = createClient()
     const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false })
     if (!error && data) {
@@ -50,7 +49,8 @@ export function Projects({ compact = false }: ProjectsProps) {
   }
 
   useEffect(() => {
-    fetchProjects()
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- mount data fetch
+    void fetchProjects()
   }, [])
 
   const projectTypes = ['all', ...Array.from(new Set(projectsList.map(p => p.type)))]

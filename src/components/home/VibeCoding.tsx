@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import { AddVibeModal } from './AddVibeModal'
 import { SpiritSubpageHero } from '@/components/spirit/SpiritSubpageHero'
 import { SpiritListCard } from '@/components/spirit/SpiritListCard'
+import { DeleteConfirmBar } from '@/components/spirit/DeleteConfirmBar'
+import { useToast } from '@/components/spirit/ToastProvider'
 
 interface VibeProject {
   id: string
@@ -21,11 +23,13 @@ function formatHerbDate(index: number): string {
 }
 
 export function VibeCoding() {
+  const { toast } = useToast()
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [projects, setProjects] = useState<VibeProject[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [editingProject, setEditingProject] = useState<VibeProject | null>(null)
 
   const fetchProjects = useCallback(async () => {
@@ -49,22 +53,25 @@ export function VibeCoding() {
     fetchProjects()
   }, [fetchProjects])
 
-  const handleDelete = async (e: React.MouseEvent, id: string, name: string) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (!window.confirm(`确定要删除 Vibe 编程项目 "${name}" 吗？此操作不可逆。`)) {
-      return
-    }
+  const executeDelete = async (id: string) => {
     setDeletingId(id)
+    setConfirmDeleteId(null)
     const supabase = createClient()
     const { error } = await supabase.from('vibe_coding').delete().eq('id', id)
     setDeletingId(null)
 
     if (error) {
-      alert('删除失败：' + error.message)
+      toast('删除失败：' + error.message, 'error')
     } else {
+      toast('项目已删除', 'success')
       fetchProjects()
     }
+  }
+
+  const requestDelete = (e: React.MouseEvent, id: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setConfirmDeleteId(id)
   }
 
   const openAddModal = () => {
@@ -115,7 +122,7 @@ export function VibeCoding() {
                 variant="herb"
                 index={index}
                 href={project.url}
-                actionsVisible={hoveredId === project.id || deletingId === project.id}
+                actionsVisible={hoveredId === project.id || deletingId === project.id || confirmDeleteId === project.id}
                 actions={
                   <>
                     <button
@@ -134,7 +141,7 @@ export function VibeCoding() {
                     <button
                       type="button"
                       className="sg-icon-btn sg-icon-btn--danger"
-                      onClick={(e) => handleDelete(e, project.id, project.name)}
+                      onClick={(e) => requestDelete(e, project.id)}
                       disabled={deletingId === project.id}
                       title="删除此项目"
                     >
@@ -152,6 +159,14 @@ export function VibeCoding() {
                   <h3 className="sg-card__title">{project.name}</h3>
                   <p className="sg-card__desc">{project.description}</p>
                   <span className="sg-herb-link">访问实验</span>
+                  {confirmDeleteId === project.id ? (
+                    <DeleteConfirmBar
+                      message={`确定删除「${project.name}」？不可撤销`}
+                      onCancel={() => setConfirmDeleteId(null)}
+                      onConfirm={() => executeDelete(project.id)}
+                      isLoading={deletingId === project.id}
+                    />
+                  ) : null}
                 </div>
               </SpiritListCard>
             </div>
@@ -160,6 +175,7 @@ export function VibeCoding() {
       )}
 
       <AddVibeModal
+        key={editingProject?.id ?? 'new-vibe'}
         isOpen={isAddModalOpen}
         onClose={() => {
           setIsAddModalOpen(false)

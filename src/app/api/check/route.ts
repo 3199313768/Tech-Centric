@@ -42,7 +42,7 @@ export async function POST(req: Request) {
         status: response.status,
         statusText: response.statusText
       })
-    } catch (e) {
+    } catch {
       clearTimeout(timeout)
       // 如果 HEAD 失败，尝试 GET（有些服务器禁止 HEAD）
       const getResponse = await fetch(normalizedUrl, { 

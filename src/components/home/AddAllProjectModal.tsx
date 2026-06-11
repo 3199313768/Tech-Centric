@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { type AllProjectItem, type ProjectCategory } from '@/data/allProjects'
 import { SpiritModalShell } from '@/components/spirit/SpiritModalShell'
+import { useToast } from '@/components/spirit/ToastProvider'
 
 interface AddAllProjectModalProps {
   isOpen: boolean
@@ -12,9 +13,20 @@ interface AddAllProjectModalProps {
   initialData?: AllProjectItem | null
 }
 
-export function AddAllProjectModal({ isOpen, onClose, onSuccess, initialData }: AddAllProjectModalProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formData, setFormData] = useState({
+function buildAllProjectForm(initialData?: AllProjectItem | null) {
+  if (initialData) {
+    return {
+      name: initialData.name,
+      url: initialData.url,
+      is_public: initialData.isPublic,
+      category: initialData.category,
+      description: initialData.description,
+      role_and_contribution: initialData.roleAndContribution || '',
+      tags: Array.isArray(initialData.tags) ? initialData.tags.join(', ') : '',
+      screenshots: Array.isArray(initialData.screenshots) ? initialData.screenshots.join(', ') : '',
+    }
+  }
+  return {
     name: '',
     url: '',
     is_public: true,
@@ -23,33 +35,13 @@ export function AddAllProjectModal({ isOpen, onClose, onSuccess, initialData }: 
     role_and_contribution: '',
     tags: '',
     screenshots: '',
-  })
+  }
+}
 
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        name: initialData.name,
-        url: initialData.url,
-        is_public: initialData.isPublic,
-        category: initialData.category,
-        description: initialData.description,
-        role_and_contribution: initialData.roleAndContribution || '',
-        tags: Array.isArray(initialData.tags) ? initialData.tags.join(', ') : '',
-        screenshots: Array.isArray(initialData.screenshots) ? initialData.screenshots.join(', ') : '',
-      })
-    } else {
-      setFormData({
-        name: '',
-        url: '',
-        is_public: true,
-        category: '未分类',
-        description: '',
-        role_and_contribution: '',
-        tags: '',
-        screenshots: '',
-      })
-    }
-  }, [initialData, isOpen])
+export function AddAllProjectModal({ isOpen, onClose, onSuccess, initialData }: AddAllProjectModalProps) {
+  const { toast } = useToast()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formData, setFormData] = useState(() => buildAllProjectForm(initialData))
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
@@ -97,20 +89,11 @@ export function AddAllProjectModal({ isOpen, onClose, onSuccess, initialData }: 
 
     if (error) {
       console.error('Error saving project:', error)
-      alert((initialData ? '修改' : '新增') + '项目失败：' + error.message)
+      toast((initialData ? '修改' : '新增') + '项目失败：' + error.message, 'error')
     } else {
+      toast(initialData ? '项目已更新' : '项目已新增', 'success')
       onSuccess()
       onClose()
-      setFormData({
-        name: '',
-        url: '',
-        is_public: true,
-        category: '未分类',
-        description: '',
-        role_and_contribution: '',
-        tags: '',
-        screenshots: '',
-      })
     }
   }
 

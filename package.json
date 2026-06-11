@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
     "rag:index": "ts-node --project tsconfig.json --compiler-options '{\"module\":\"CommonJS\",\"moduleResolution\":\"node\"}' scripts/index-rag.ts",
     "rag:check": "ts-node --project tsconfig.json --compiler-options '{\"module\":\"CommonJS\",\"moduleResolution\":\"node\"}' scripts/check-rag-env.ts"
   },

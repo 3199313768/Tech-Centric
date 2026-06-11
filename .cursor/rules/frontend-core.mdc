@@ -1,0 +1,25 @@
+---
+description: Tech-Centric 核心前端约束（最小改动、类型、a11y、导入）
+alwaysApply: true
+---
+
+# Frontend Core
+
+- 只改任务相关文件，不做无关重构
+- `strict` 下禁止 `any`、无说明 `@ts-ignore`
+- 导入用 `@/`，禁止 `../../../` 深层相对路径
+- 交互控件需 `aria-label` / `htmlFor` / 可见文本
+- **禁止** `alert()` / `confirm()` 作用户反馈
+- 错误用 state + `sg-*-error` 或区块 fallback
+- 规范三档：Part A 基线 + Part C 项目定制必守；Part B 高级专题按场景（缓存/Suspense/乐观更新/API 安全）
+- 详见 [docs/前端代码规范.md](docs/前端代码规范.md)；改旧文件仅修正触达区域
+
+```tsx
+// ❌ BAD
+catch (e) { alert('失败') }
+
+// ✅ GOOD
+catch (e: unknown) {
+  setError(e instanceof Error ? e.message : '操作失败')
+}
+```

@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { SpiritModalShell } from '@/components/spirit/SpiritModalShell'
+import { useToast } from '@/components/spirit/ToastProvider'
 
 interface AgentSkill {
   id: string
@@ -21,38 +22,31 @@ interface AddSkillModalProps {
   initialData?: AgentSkill | null
 }
 
-export function AddSkillModal({ isOpen, onClose, onSuccess, initialData }: AddSkillModalProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formData, setFormData] = useState({
+function buildSkillForm(initialData?: AgentSkill | null) {
+  if (initialData) {
+    return {
+      name: initialData.name,
+      icon: initialData.icon,
+      description: initialData.description,
+      tags: Array.isArray(initialData.tags) ? initialData.tags.join(', ') : '',
+      platform: initialData.platform || '',
+      link: initialData.link || '',
+    }
+  }
+  return {
     name: '',
     icon: '💡',
     description: '',
     tags: '',
     platform: '',
     link: '',
-  })
+  }
+}
 
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        name: initialData.name,
-        icon: initialData.icon,
-        description: initialData.description,
-        tags: Array.isArray(initialData.tags) ? initialData.tags.join(', ') : '',
-        platform: initialData.platform || '',
-        link: initialData.link || '',
-      })
-    } else {
-      setFormData({
-        name: '',
-        icon: '💡',
-        description: '',
-        tags: '',
-        platform: '',
-        link: '',
-      })
-    }
-  }, [initialData, isOpen])
+export function AddSkillModal({ isOpen, onClose, onSuccess, initialData }: AddSkillModalProps) {
+  const { toast } = useToast()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formData, setFormData] = useState(() => buildSkillForm(initialData))
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -89,18 +83,11 @@ export function AddSkillModal({ isOpen, onClose, onSuccess, initialData }: AddSk
 
     if (error) {
       console.error('Error saving skill:', error)
-      alert((initialData ? '修改' : '新增') + '技能失败：' + error.message)
+      toast((initialData ? '修改' : '新增') + '技能失败：' + error.message, 'error')
     } else {
+      toast(initialData ? '技能已更新' : '技能已新增', 'success')
       onSuccess()
       onClose()
-      setFormData({
-        name: '',
-        icon: '💡',
-        description: '',
-        tags: '',
-        platform: '',
-        link: '',
-      })
     }
   }
 

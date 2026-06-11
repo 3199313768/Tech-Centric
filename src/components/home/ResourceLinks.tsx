@@ -121,7 +121,7 @@ export function ResourceLinks() {
   const [isExploring, setIsExploring] = useState(false);
   const [discoveredItems, setDiscoveredItems] = useState<ResourceItem[]>([]);
   const [showDiscoveryModal, setShowDiscoveryModal] = useState(false);
-  const [candidateItems, setCandidateItems] = useState<ResourceItem[]>([]);
+  const [candidateItems, setCandidateItems] = useState<ResourceItem[]>(() => loadCandidates());
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [confirmConfig, setConfirmConfig] = useState<{
     isOpen: boolean;
@@ -162,9 +162,14 @@ export function ResourceLinks() {
     }
   }, []);
 
+  const showToast = useCallback((message: string) => {
+    setToastMessage(message);
+    window.setTimeout(() => setToastMessage(null), 3000);
+  }, []);
+
   useEffect(() => {
-    fetchResources();
-    setCandidateItems(loadCandidates());
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- mount data fetch
+    void fetchResources();
   }, [fetchResources]);
 
   // AI 发现结果弹窗
@@ -412,7 +417,7 @@ export function ResourceLinks() {
       setShowDiscoveryModal(true);
     } catch (err) {
       console.error("Exploration error detail:", err);
-      alert(
+      showToast(
         `AI 探测失败: ${err instanceof Error ? err.message : "未知错误"}。可能原因：API Key 无额度或网络策略限制。`,
       );
     } finally {
@@ -422,7 +427,7 @@ export function ResourceLinks() {
 
   const addToLibrary = async (item: ResourceItem) => {
     if (items.find((i) => i.url === item.url)) {
-      alert("资源已存在于库中");
+      showToast("资源已存在于库中");
       return;
     }
     const newItem = { ...item, createdAt: Date.now(), isPinned: false, clickCount: 0 };
@@ -451,7 +456,10 @@ export function ResourceLinks() {
 
   const handleAutoFill = async () => {
     const url = formData.url.trim();
-    if (!url) return alert("请先输入 URL");
+    if (!url) {
+      showToast("请先输入 URL");
+      return;
+    }
     setIsFetchingMeta(true);
     try {
       const res = await fetch("/api/autofill", {
@@ -469,7 +477,7 @@ export function ResourceLinks() {
         tags: Array.from(new Set([...prev.tags, ...(data.tags || [])])),
       }));
     } catch {
-      alert("AI 填充失败，请手动填写");
+      showToast("AI 填充失败，请手动填写");
     } finally {
       setIsFetchingMeta(false);
     }
@@ -733,12 +741,12 @@ export function ResourceLinks() {
         }));
         await supabase.from('resources').upsert(upsertData, { onConflict: 'id' });
 
-        alert(
-          `导入完成！\n✅ 新增: ${addedCount} 条\n🔄 更新: ${updatedCount} 条\n❌ 无效跳过: ${invalidCount} 条`,
+        showToast(
+          `导入完成！新增 ${addedCount} 条，更新 ${updatedCount} 条，无效跳过 ${invalidCount} 条`,
         );
       } catch (err) {
         console.error("Import error:", err);
-        alert("导入失败：文件格式不正确或已损坏");
+        showToast("导入失败：文件格式不正确或已损坏");
       }
     };
     reader.readAsText(file);

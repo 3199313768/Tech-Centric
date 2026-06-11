@@ -3,9 +3,10 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Code2, ExternalLink, FlaskConical, Paintbrush, Paperclip, Sparkles, Terminal } from 'lucide-react'
-import { SpiritDustCanvas } from '@/components/SpiritDustCanvas'
+import { SpiritDustCanvas } from '@/components/home/SpiritDustCanvas'
 import { personalInfo, skillsDetail } from '@/data/personal'
 import { handleWatercolorHover } from '@/utils/watercolorHover'
+import { SITE_ROUTES } from '@/lib/site/routes'
 
 const SKILL_CHIPS = [
   { name: 'React', icon: Code2 },
@@ -26,11 +27,7 @@ function avgFrontend() {
   return Math.round(items.reduce((sum, s) => sum + s.proficiency, 0) / items.length)
 }
 
-interface SpiritGardenHomeProps {
-  onNavigate?: (tab: string) => void
-}
-
-export function SpiritGardenHome({ onNavigate }: SpiritGardenHomeProps) {
+export function SpiritGardenHome() {
   const creativity = avgFrontend()
 
   const meters = SOUL_METERS.map((item) =>
@@ -79,13 +76,9 @@ export function SpiritGardenHome({ onNavigate }: SpiritGardenHomeProps) {
             </p>
 
             <div className="sg-hero-actions sg-enter sg-enter--4">
-              <button
-                type="button"
-                className="sg-btn sg-btn--primary"
-                onClick={() => onNavigate?.('all-projects')}
-              >
+              <Link href={SITE_ROUTES.projects} className="sg-btn sg-btn--primary">
                 探寻作品
-              </button>
+              </Link>
               <button
                 type="button"
                 className="sg-btn sg-btn--ghost"
@@ -176,13 +169,9 @@ export function SpiritGardenHome({ onNavigate }: SpiritGardenHomeProps) {
               正在尝试将水彩纹理、微交互与界面动效结合，
               探索「温润之界」——技术应有温度、有呼吸感。
             </p>
-            <button
-              type="button"
-              className="sg-text-link"
-              onClick={() => onNavigate?.('vibe-coding')}
-            >
+            <Link href={SITE_ROUTES.vibe} className="sg-text-link">
               查阅笔记 →
-            </button>
+            </Link>
           </article>
 
           <article
@@ -208,13 +197,9 @@ export function SpiritGardenHome({ onNavigate }: SpiritGardenHomeProps) {
             © {new Date().getFullYear()} SpiritGarden - 纯手工打造于梦之境
           </p>
           <nav className="sg-footer-links" aria-label="页脚导航">
-            <button type="button" onClick={() => onNavigate?.('all-projects')}>
-              工艺流程
-            </button>
-            <button type="button" onClick={() => onNavigate?.('vibe-coding')}>
-              灵感来源
-            </button>
-            <Link href="/knowledge">档案馆</Link>
+            <Link href={SITE_ROUTES.projects}>工艺流程</Link>
+            <Link href={SITE_ROUTES.vibe}>灵感来源</Link>
+            <Link href={SITE_ROUTES.knowledge}>档案馆</Link>
           </nav>
           <div className="sg-footer-social">
             {personalInfo.socialLinks.github ? (

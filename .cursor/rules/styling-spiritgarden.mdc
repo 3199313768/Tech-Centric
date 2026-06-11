@@ -1,0 +1,22 @@
+---
+description: SpiritGarden sg-* 与 Tailwind 4 样式约定
+globs: **/*.{tsx,css}
+alwaysApply: false
+---
+
+# Styling (SpiritGarden)
+
+- 优先 `sg-*` 语义类（表单、按钮、卡片、子页）
+- Tailwind 用于间距/布局；颜色用 `var(--sg-*)` 或 `@theme` token
+- **禁止** 组件内硬编码 hex（token 定义处除外）
+- 新类名：`sg-<模块>-<元素>[--修饰符]`（BEM）
+- 暗色模式靠 CSS 变量，不写 `.dark:bg-[#xxx]`
+
+```tsx
+// ❌ BAD
+<button style={{ background: '#154212' }}>保存</button>
+
+// ✅ GOOD
+<button className="sg-btn sg-btn--primary">保存</button>
+<div className="mt-4 text-[var(--sg-ink)]">...</div>
+```

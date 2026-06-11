@@ -29,36 +29,34 @@ export function TagInput({ tags, onChange }: TagInputProps) {
   }
 
   const removeTag = (tagToRemove: string) => {
-    onChange(tags.filter(tag => tag !== tagToRemove))
+    onChange(tags.filter((tag) => tag !== tagToRemove))
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      {tags.map(tag => (
-        <span 
-          key={tag}
-          className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-indigo-500/10 text-indigo-400 rounded-md border border-indigo-500/20"
-        >
-          <TagIcon className="w-3 h-3" />
+    <div className="sg-kb-tag-input">
+      {tags.map((tag) => (
+        <span key={tag} className="sg-tag sg-kb-tag-input-chip">
+          <TagIcon className="sg-kb-tag-input-icon" aria-hidden />
           {tag}
-          <button 
+          <button
             type="button"
             onClick={() => removeTag(tag)}
-            className="hover:text-indigo-300 hover:bg-indigo-500/20 rounded-sm p-0.5 ml-0.5"
+            className="sg-kb-tag-input-remove"
+            aria-label={`移除标签 ${tag}`}
           >
-            <X className="w-3 h-3" />
+            <X className="sg-kb-tag-input-remove-icon" aria-hidden />
           </button>
         </span>
       ))}
-      <div className="flex-1 min-w-[120px]">
+      <div className="sg-kb-tag-input-field">
         <input
           type="text"
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           onBlur={addTag}
-          placeholder={tags.length === 0 ? "输入 # 标签并按回车..." : "添加更多标签..."}
-          className="w-full bg-transparent border-none text-sm text-zinc-300 placeholder-zinc-600 focus:ring-0 px-0 py-1"
+          placeholder={tags.length === 0 ? '输入 # 标签并按回车...' : '添加更多标签...'}
+          className="sg-kb-tag-input-text"
         />
       </div>
     </div>

@@ -1,104 +1,146 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { useKeyPressEvent } from 'react-use'
-import { X, Image as ImageIcon, FileText, Code2, Link as LinkIcon, Loader2 } from 'lucide-react'
+import { X, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { SpiritModalShell } from '@/components/spirit/SpiritModalShell'
+import { useToast } from '@/components/spirit/ToastProvider'
+import { KB_MAX_FILE_SIZE } from '@/lib/knowledge/constants'
 import { TagInput } from './TagInput'
+import { RecordTypeTabs, type RecordTypeId } from './RecordTypeTabs'
 
-type RecordType = 'text' | 'code' | 'image' | 'file'
+type RecordType = RecordTypeId
+
+const EMPTY_FORM = {
+  type: 'text' as RecordType,
+  content: '',
+  tags: [] as string[],
+  file: null as File | null,
+  previewUrl: null as string | null,
+}
 
 export function QuickRecordModal() {
   const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [type, setType] = useState<RecordType>('text')
-  const [content, setContent] = useState('')
-  const [tags, setTags] = useState<string[]>([])
-  const [file, setFile] = useState<File | null>(null)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [type, setType] = useState<RecordType>(EMPTY_FORM.type)
+  const [content, setContent] = useState(EMPTY_FORM.content)
+  const [tags, setTags] = useState<string[]>(EMPTY_FORM.tags)
+  const [file, setFile] = useState<File | null>(EMPTY_FORM.file)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(EMPTY_FORM.previewUrl)
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const supabase = createClient()
+  const router = useRouter()
+  const { toast } = useToast()
 
-  // Cmd+K or Ctrl+Space to toggle
-  useKeyPressEvent((e) => (e.metaKey && e.key === 'k') || (e.ctrlKey && e.code === 'Space'), (e) => {
-    e.preventDefault()
-    setIsOpen((prev) => !prev)
-  })
+  const resetForm = useCallback(() => {
+    setType(EMPTY_FORM.type)
+    setContent(EMPTY_FORM.content)
+    setTags(EMPTY_FORM.tags)
+    setFile(EMPTY_FORM.file)
+    setPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev)
+      return EMPTY_FORM.previewUrl
+    })
+    setError(null)
+    setIsSubmitting(false)
+  }, [])
 
-  // Escape to close
+  const closeModal = useCallback(() => {
+    if (isSubmitting) return
+    setIsOpen(false)
+    resetForm()
+  }, [isSubmitting, resetForm])
+
+  useKeyPressEvent(
+    (e) => (e.metaKey && e.key === 'k') || (e.ctrlKey && e.code === 'Space'),
+    (e) => {
+      e.preventDefault()
+      setIsOpen((prev) => !prev)
+    },
+  )
+
   useKeyPressEvent('Escape', () => {
-    if (isOpen) setIsOpen(false)
+    if (isOpen) closeModal()
   })
 
-  // Auto focus and logic resets when opened
   useEffect(() => {
-    // Listen for custom event from other components (like mobile FAB)
-    const handleOpenModal = () => setIsOpen(true)
+    const handleOpenModal = () => {
+      resetForm()
+      setIsOpen(true)
+    }
     window.addEventListener('open-quick-record', handleOpenModal)
+    return () => window.removeEventListener('open-quick-record', handleOpenModal)
+  }, [resetForm])
 
-    if (isOpen) {
-      setTimeout(() => textareaRef.current?.focus(), 100)
-    } else {
-      // Reset state on close after animation finishes
-      setTimeout(() => {
-        setType('text')
-        setContent('')
-        setTags([])
-        setFile(null)
-        if (previewUrl) URL.revokeObjectURL(previewUrl)
-        setPreviewUrl(null)
-        setIsSubmitting(false)
-      }, 300)
-    }
-    
-    return () => {
-      window.removeEventListener('open-quick-record', handleOpenModal)
-    }
+  useEffect(() => {
+    if (!isOpen) return
+    const timer = window.setTimeout(() => textareaRef.current?.focus(), 100)
+    return () => window.clearTimeout(timer)
   }, [isOpen])
 
-  // Handle paste events (e.g. for images)
+  const validateFile = (nextFile: File): string | null => {
+    if (nextFile.size > KB_MAX_FILE_SIZE) {
+      return '文件体积过大，请上传小于 5MB 的资源'
+    }
+    return null
+  }
+
   const handlePaste = (e: React.ClipboardEvent) => {
     const items = e.clipboardData.items
     for (const item of Array.from(items)) {
       if (item.type.indexOf('image') !== -1) {
         e.preventDefault()
         const pastedFile = item.getAsFile()
-        if (pastedFile) {
-          setType('image')
-          setFile(pastedFile)
-          setPreviewUrl(URL.createObjectURL(pastedFile))
+        if (!pastedFile) break
+
+        const fileError = validateFile(pastedFile)
+        if (fileError) {
+          setError(fileError)
+          toast(fileError, 'error')
+          break
         }
+
+        setError(null)
+        setType('image')
+        setFile(pastedFile)
+        setPreviewUrl((prev) => {
+          if (prev) URL.revokeObjectURL(prev)
+          return URL.createObjectURL(pastedFile)
+        })
         break
       }
     }
   }
 
   const handleSubmit = async () => {
+    if (isSubmitting) return
     if ((type === 'text' || type === 'code') && !content.trim()) return
     if ((type === 'image' || type === 'file') && !file) return
 
     setIsSubmitting(true)
+    setError(null)
+
     try {
-      // 1. Get current user
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
+      if (!user) throw new Error('未登录')
 
       let finalContent = content
 
-      // 2. Upload file if necessary
       if ((type === 'image' || type === 'file') && file) {
-        // Validation: Limit file size to 5MB (5 * 1024 * 1024 bytes)
-        const MAX_FILE_SIZE = 5 * 1024 * 1024
-        if (file.size > MAX_FILE_SIZE) {
-          alert('文件体积过大，请上传小于 5MB 的资源')
+        const fileError = validateFile(file)
+        if (fileError) {
+          setError(fileError)
+          toast(fileError, 'error')
           return
         }
-        
+
         const fileExt = file.name.split('.').pop()
         const fileName = `${user.id}/${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}/${crypto.randomUUID()}.${fileExt}`
-        
+
         const { error: uploadError, data } = await supabase.storage
           .from('kb_assets')
           .upload(fileName, file)
@@ -107,160 +149,116 @@ export function QuickRecordModal() {
         finalContent = data.path
       }
 
-      // 3. Insert record
-      const { error: insertError } = await supabase
-        .from('kb_records')
-        .insert({
-          user_id: user.id,
-          type,
-          content: finalContent,
-          tags,
-        })
+      const { error: insertError } = await supabase.from('kb_records').insert({
+        user_id: user.id,
+        type,
+        content: finalContent,
+        tags,
+      })
 
       if (insertError) throw insertError
 
-      // Success
+      toast('记录已保存', 'success')
       setIsOpen(false)
-    } catch (error) {
-      console.error('Failed to save record:', error)
-      alert('保存失败，请查看控制台')
+      resetForm()
+      router.refresh()
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '保存失败'
+      console.error('Failed to save record:', err)
+      setError(message)
+      toast(message, 'error')
     } finally {
       setIsSubmitting(false)
     }
   }
 
+  const canSubmit =
+    !isSubmitting &&
+    ((type === 'text' || type === 'code') ? content.trim().length > 0 : !!file)
+
   return (
-    <AnimatePresence>
-      {isOpen && (
+    <SpiritModalShell
+      isOpen={isOpen}
+      onClose={closeModal}
+      title="快速归档"
+      subtitle="按 Cmd+K 随时唤起；支持粘贴截图与 # 标签分类"
+      maxWidth={672}
+      panelClassName="sg-modal-panel sg-kb-modal-panel"
+      footer={
         <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsOpen(false)}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
-          />
-
-          {/* Modal Overlay */}
-          <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] sm:pt-[20vh] px-4 pointer-events-none">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -20 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="w-full max-w-2xl bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden pointer-events-auto flex flex-col"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800 bg-zinc-900/50">
-                <div className="flex items-center gap-2">
-                  <span className="text-zinc-400 text-sm font-medium">✨ 快速归档</span>
-                  <div className="hidden sm:flex items-center gap-1">
-                    <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-zinc-800 text-zinc-400 rounded border border-zinc-700">Cmd</kbd>
-                    <span className="text-zinc-500 text-xs">+</span>
-                    <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-zinc-800 text-zinc-400 rounded border border-zinc-700">K</kbd>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => setIsOpen(false)}
-                  className="p-1 round-full hover:bg-zinc-800 text-zinc-400 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Main Input Area */}
-              <div className="p-4 flex flex-col gap-4">
-                {/* Type Selector */}
-                <div className="flex bg-zinc-800/50 p-1 rounded-lg w-fit">
-                  {(
-                    [
-                      { id: 'text', icon: FileText, label: '笔记' },
-                      { id: 'code', icon: Code2, label: '片段' },
-                      { id: 'image', icon: ImageIcon, label: '图片' },
-                      { id: 'file', icon: LinkIcon, label: '文件' },
-                    ] as const
-                  ).map((t) => (
-                    <button
-                      key={t.id}
-                      onClick={() => setType(t.id)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-all ${
-                        type === t.id
-                          ? 'bg-zinc-700 text-white shadow-sm'
-                          : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
-                      }`}
-                    >
-                      <t.icon className="w-3.5 h-3.5" />
-                      {t.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Content Input Area */}
-                <div className="min-h-[120px]">
-                  {type === 'image' && previewUrl ? (
-                    <div className="relative group rounded-md overflow-hidden bg-zinc-950 flex items-center justify-center min-h-[120px] max-h-[300px]">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={previewUrl} alt="Preview" className="max-h-[300px] object-contain" />
-                      <button
-                        onClick={() => {
-                          setFile(null)
-                          setPreviewUrl(null)
-                          setType('text')
-                        }}
-                        className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-black/80 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <textarea
-                      ref={textareaRef}
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      onPaste={handlePaste}
-                      placeholder={
-                        type === 'code' ? '粘贴你的代码片段...' : 
-                        type === 'image' ? '支持直接粘贴截图（Ctrl+V）' :
-                        '记录些什么...'
-                      }
-                      className={`w-full bg-transparent border-none resize-none focus:ring-0 text-white placeholder-zinc-500  min-h-[120px] max-h-[40vh] ${type === 'code' ? 'font-mono text-sm' : ''}`}
-                    />
-                  )}
-                </div>
-
-                {/* Tags and Footer */}
-                <div className="flex items-end justify-between gap-4 pt-2 border-t border-zinc-800/50">
-                   <div className="flex-1">
-                      <TagInput tags={tags} onChange={setTags} />
-                   </div>
-                   
-                   <button
-                    onClick={handleSubmit}
-                    disabled={isSubmitting || ((type === 'text' || type === 'code') && !content.trim()) || ((type === 'image' || type === 'file') && !file)}
-                    className="flex items-center gap-2 px-4 py-2 bg-white text-black font-medium rounded-md hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                   >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        保存中
-                      </>
-                    ) : (
-                      <>
-                        保存
-                        <div className="hidden sm:flex items-center gap-0.5 ml-1 opacity-60">
-                          <kbd className="text-[10px] font-mono">⌘</kbd>
-                          <kbd className="text-[10px] font-mono">↵</kbd>
-                        </div>
-                      </>
-                    )}
-                   </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
+          <button type="button" className="sg-btn sg-btn--ghost" onClick={closeModal} disabled={isSubmitting}>
+            取消
+          </button>
+          <button
+            type="button"
+            className="sg-btn sg-btn--primary"
+            onClick={handleSubmit}
+            disabled={!canSubmit}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="sg-kb-spinner" aria-hidden />
+                保存中
+              </>
+            ) : (
+              '保存'
+            )}
+          </button>
         </>
-      )}
-    </AnimatePresence>
+      }
+    >
+      <div className="sg-kb-modal-body">
+        <RecordTypeTabs
+          value={type}
+          onChange={(next) => setType(next as RecordType)}
+          mode="select"
+        />
+
+        <div className="sg-form-field sg-kb-modal-content">
+          {type === 'image' && previewUrl ? (
+            <div className="sg-kb-modal-preview">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={previewUrl} alt="预览" className="sg-kb-modal-preview-img" />
+              <button
+                type="button"
+                onClick={() => {
+                  setFile(null)
+                  setPreviewUrl((prev) => {
+                    if (prev) URL.revokeObjectURL(prev)
+                    return null
+                  })
+                  setType('text')
+                }}
+                className="sg-kb-modal-preview-remove"
+                aria-label="移除图片"
+              >
+                <X className="sg-kb-modal-preview-remove-icon" aria-hidden />
+              </button>
+            </div>
+          ) : (
+            <textarea
+              ref={textareaRef}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              onPaste={handlePaste}
+              placeholder={
+                type === 'code'
+                  ? '粘贴你的代码片段...'
+                  : type === 'image'
+                    ? '支持直接粘贴截图（Ctrl+V）'
+                    : '记录些什么...'
+              }
+              className={`sg-form-textarea sg-kb-modal-textarea${type === 'code' ? ' sg-kb-modal-textarea--code' : ''}`}
+            />
+          )}
+        </div>
+
+        <div className="sg-kb-modal-tags">
+          <TagInput tags={tags} onChange={setTags} />
+        </div>
+
+        {error ? <div className="sg-kb-error sg-kb-error--inline">{error}</div> : null}
+      </div>
+    </SpiritModalShell>
   )
 }

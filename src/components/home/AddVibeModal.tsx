@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { SpiritModalShell } from '@/components/spirit/SpiritModalShell'
+import { useToast } from '@/components/spirit/ToastProvider'
 
 interface VibeProject {
   id: string
@@ -19,32 +20,27 @@ interface AddVibeModalProps {
   initialData?: VibeProject | null
 }
 
-export function AddVibeModal({ isOpen, onClose, onSuccess, initialData }: AddVibeModalProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formData, setFormData] = useState({
+function buildVibeForm(initialData?: VibeProject | null) {
+  if (initialData) {
+    return {
+      name: initialData.name,
+      icon: initialData.icon,
+      description: initialData.description,
+      url: initialData.url,
+    }
+  }
+  return {
     name: '',
     icon: '✨',
     description: '',
     url: '',
-  })
+  }
+}
 
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        name: initialData.name,
-        icon: initialData.icon,
-        description: initialData.description,
-        url: initialData.url,
-      })
-    } else {
-      setFormData({
-        name: '',
-        icon: '✨',
-        description: '',
-        url: '',
-      })
-    }
-  }, [initialData, isOpen])
+export function AddVibeModal({ isOpen, onClose, onSuccess, initialData }: AddVibeModalProps) {
+  const { toast } = useToast()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formData, setFormData] = useState(() => buildVibeForm(initialData))
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -78,16 +74,11 @@ export function AddVibeModal({ isOpen, onClose, onSuccess, initialData }: AddVib
 
     if (error) {
       console.error('Error saving vibe project:', error)
-      alert((initialData ? '修改' : '新增') + '项目失败：' + error.message)
+      toast((initialData ? '修改' : '新增') + '项目失败：' + error.message, 'error')
     } else {
+      toast(initialData ? '项目已更新' : '项目已新增', 'success')
       onSuccess()
       onClose()
-      setFormData({
-        name: '',
-        icon: '✨',
-        description: '',
-        url: '',
-      })
     }
   }
 

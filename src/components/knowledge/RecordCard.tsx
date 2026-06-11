@@ -1,55 +1,80 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { FileText, Code2, Image as ImageIcon, Link as LinkIcon, ExternalLink, Calendar, Copy, Check, MoreVertical, Trash2, Edit2, Loader2 } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import {
+  FileText,
+  Code2,
+  Image as ImageIcon,
+  Link as LinkIcon,
+  ExternalLink,
+  Calendar,
+  Copy,
+  Check,
+  Loader2,
+} from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import ReactMarkdown from 'react-markdown'
 import rehypeHighlight from 'rehype-highlight'
-
-// minimal css for highlight js integration
-import 'highlight.js/styles/github-dark.css'
-
-interface IRecord {
-  id: string;
-  user_id: string;
-  type: string;
-  content: string;
-  tags?: string[];
-  created_at: string;
-  [key: string]: any;
-}
+import { SpiritListCard } from '@/components/spirit/SpiritListCard'
+import { useToast } from '@/components/spirit/ToastProvider'
+import { deleteKbRecord } from '@/lib/knowledge/actions'
+import { KB_SIGNED_URL_TTL_SEC } from '@/lib/knowledge/constants'
+import { EditRecordModal } from './EditRecordModal'
+import { DeleteConfirmBar } from '@/components/spirit/DeleteConfirmBar'
+import type { KbRecord } from '@/lib/knowledge/types'
 
 interface RecordCardProps {
-  record: IRecord 
+  record: KbRecord
+  index?: number
 }
 
-export function RecordCard({ record }: RecordCardProps) {
-  const [imageUrl, setImageUrl] = useState<string | null>(null)
+const TYPE_LABELS: Record<string, string> = {
+  text: '笔记',
+  code: '代码',
+  image: '图片',
+  file: '附件',
+}
+
+export function RecordCard({ record, index = 0 }: RecordCardProps) {
+  const isMediaType = record.type === 'image' || record.type === 'file'
+  const [assetUrl, setAssetUrl] = useState<string | null>(null)
+  const [assetLoading, setAssetLoading] = useState(isMediaType)
+  const [urlRefreshKey, setUrlRefreshKey] = useState(0)
   const [copied, setCopied] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [showOptions, setShowOptions] = useState(false)
-  
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [editingRecord, setEditingRecord] = useState<KbRecord | null>(null)
+  const [actionsVisible, setActionsVisible] = useState(false)
   const supabase = createClient()
-  const router = useRouter()
+  const { toast } = useToast()
 
-  // For image/file types we stored the path in 'content'. Let's fetch the signed URL.
+  const loadAssetUrl = useCallback(() => {
+    setUrlRefreshKey((key) => key + 1)
+  }, [])
+
   useEffect(() => {
-    async function loadAssetUrl() {
-      if (record.type === 'image' || record.type === 'file') {
-        const { data, error } = await supabase.storage
-          .from('kb_assets')
-          .createSignedUrl(record.content, 60 * 60 * 24 * 7) // valid for 7 days
-        
+    if (!isMediaType) return
+
+    let cancelled = false
+
+    supabase.storage
+      .from('kb_assets')
+      .createSignedUrl(record.content, KB_SIGNED_URL_TTL_SEC)
+      .then(({ data, error }) => {
+        if (cancelled) return
         if (!error && data) {
-          setImageUrl(data.signedUrl)
+          setAssetUrl(data.signedUrl)
         } else {
-          console.error("Failed to load asset URL: ", error)
+          console.error('Failed to load asset URL:', error)
+          setAssetUrl(null)
         }
-      }
+        setAssetLoading(false)
+      })
+
+    return () => {
+      cancelled = true
     }
-    loadAssetUrl()
-  }, [record.content, record.type, supabase.storage])
+  }, [isMediaType, record.content, supabase.storage, urlRefreshKey])
 
   const copyToClipboard = async () => {
     try {
@@ -58,6 +83,7 @@ export function RecordCard({ record }: RecordCardProps) {
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
       console.error('Failed to copy', err)
+      toast('复制失败', 'error')
     }
   }
 
@@ -65,173 +91,192 @@ export function RecordCard({ record }: RecordCardProps) {
     text: FileText,
     code: Code2,
     image: ImageIcon,
-    file: LinkIcon
+    file: LinkIcon,
   }[record.type as string] || FileText
 
   const handleDelete = async () => {
-    if (confirm('确定要删除这条记录吗？这不可撤销。')) {
-      setIsDeleting(true)
-      try {
-        const { error } = await supabase.from('kb_records').delete().eq('id', record.id)
-        if (error) throw error
-        router.refresh()
-      } catch (e) {
-        console.error("Failed to delete record: ", e)
-        alert('删除失败，请重试')
-      } finally {
-        setIsDeleting(false)
-      }
+    setIsDeleting(true)
+    const { error } = await deleteKbRecord(record.id)
+    setIsDeleting(false)
+    setShowDeleteConfirm(false)
+
+    if (error) {
+      toast(error, 'error')
+      return
     }
+
+    toast('记录已删除', 'success')
   }
 
-  const handleEdit = () => {
-    // We dispatch a custom event because QuickRecordModal is global
-    // To implement a minimal MVP edit behavior we just populate the global modal although it usually creates.
-    // For a real app, you would pass an `editId` in the event payload to let the modal switch to UPDATE mode.
-    // E.g. window.dispatchEvent(new CustomEvent('open-quick-record', { detail: { mode: 'edit', record } }))
-    alert('编辑功能待弹窗组件改造后支持 (WIP)')
-    setShowOptions(false)
+  const handleImageError = () => {
+    setAssetLoading(true)
+    loadAssetUrl()
   }
 
   return (
-    <div className={`group break-inside-avoid relative flex flex-col gap-3 p-5 bg-zinc-900 border border-zinc-800 rounded-2xl hover:border-zinc-700 transition-colors shadow-sm overflow-visible ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}>
-      
-      {/* Header Info */}
-      <div className="flex items-center justify-between opacity-60 text-xs text-zinc-400 font-mono tracking-wider uppercase">
-        <div className="flex items-center gap-1.5">
-          <TypeIcon className="w-3.5 h-3.5" />
-          <span>{record.type}</span>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1">
-            <Calendar className="w-3 h-3" />
-            <span>{new Date(record.created_at).toLocaleDateString()}</span>
-          </div>
-          
-          <div className="relative">
-            <button 
-              onClick={() => setShowOptions(!showOptions)}
-              className="p-1 hover:bg-zinc-800 rounded-md transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+    <>
+      <SpiritListCard
+        variant="list"
+        index={index}
+        className={`sg-kb-card break-inside-avoid${isDeleting ? ' sg-kb-card--deleting' : ''}`}
+        actionsVisible={actionsVisible || isDeleting || showDeleteConfirm}
+        actions={
+          <>
+            <button
+              type="button"
+              className="sg-icon-btn"
+              onClick={(e) => {
+                e.stopPropagation()
+                setEditingRecord(record)
+              }}
+              title="编辑"
             >
-              <MoreVertical className="w-3.5 h-3.5" />
+              ✎
             </button>
-            
-            {showOptions && (
-              <>
-                <div 
-                  className="fixed inset-0 z-10" 
-                  onClick={() => setShowOptions(false)}
-                />
-                <div className="absolute right-0 top-full mt-1 w-32 bg-zinc-800 border border-zinc-700 rounded-lg shadow-xl overflow-hidden z-20 py-1">
-                  <button
-                    onClick={handleEdit}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-700/50 hover:text-white transition-colors"
-                  >
-                    <Edit2 className="w-3.5 h-3.5" />
-                    编辑
-                  </button>
-                  <button
-                    onClick={handleDelete}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
-                  >
-                    {isDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-                    删除
-                  </button>
-                </div>
-              </>
-            )}
+            <button
+              type="button"
+              className="sg-icon-btn sg-icon-btn--danger"
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowDeleteConfirm(true)
+              }}
+              disabled={isDeleting}
+              title="删除"
+            >
+              {isDeleting ? <Loader2 className="sg-kb-spinner" aria-hidden /> : '×'}
+            </button>
+          </>
+        }
+      >
+        <div
+          onMouseEnter={() => setActionsVisible(true)}
+          onMouseLeave={() => setActionsVisible(false)}
+        >
+          <div className="sg-kb-card-meta">
+            <div className="sg-kb-card-type">
+              <TypeIcon className="sg-kb-card-type-icon" aria-hidden />
+              <span>{TYPE_LABELS[record.type] || record.type}</span>
+            </div>
+            <div className="sg-kb-card-date">
+              <Calendar className="sg-kb-card-date-icon" aria-hidden />
+              <span>{new Date(record.created_at).toLocaleDateString()}</span>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Main Content Area */}
-      <div className="mt-2 grow overflow-hidden">
-        {record.type === 'text' && (
-          <div className="prose prose-invert prose-sm prose-zinc max-w-none text-zinc-300">
-            <ReactMarkdown>
-              {record.content}
-            </ReactMarkdown>
-          </div>
-        )}
+          <div className="sg-kb-card-body">
+            {record.type === 'text' ? (
+              <div className="sg-prose">
+                <ReactMarkdown>{record.content}</ReactMarkdown>
+              </div>
+            ) : null}
 
-        {record.type === 'code' && (
-          <div className="relative group/code rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950">
-             <button
-               onClick={copyToClipboard}
-               className="absolute top-2 right-2 p-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-md opacity-0 group-hover/code:opacity-100 transition-all z-10"
-             >
-               {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
-             </button>
-             <div className="p-3 overflow-x-auto text-sm">
-                <ReactMarkdown
-                   rehypePlugins={[rehypeHighlight]}
+            {record.type === 'code' ? (
+              <div className="sg-kb-code-block">
+                <button
+                  type="button"
+                  onClick={copyToClipboard}
+                  className="sg-kb-code-copy"
+                  title="复制代码"
                 >
-                  {/* Wrap in markdown code block to trigger rehype */}
-                  {`\`\`\`\n${record.content}\n\`\`\``}
-                </ReactMarkdown>
-             </div>
-          </div>
-        )}
+                  {copied ? (
+                    <Check className="sg-kb-code-copy-icon sg-kb-code-copy-icon--ok" aria-hidden />
+                  ) : (
+                    <Copy className="sg-kb-code-copy-icon" aria-hidden />
+                  )}
+                </button>
+                <div className="sg-kb-code-content">
+                  <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
+                    {`\`\`\`\n${record.content}\n\`\`\``}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            ) : null}
 
-        {record.type === 'image' && (
-          <div className="relative rounded-xl overflow-hidden bg-zinc-950/50 border border-zinc-800/50 group/img flex items-center justify-center min-h-25">
-            {imageUrl ? (
-               // eslint-disable-next-line @next/next/no-img-element
-               <img src={imageUrl} alt="Knowledge base asset" className="w-full h-auto object-cover max-h-100" loading="lazy" />
-            ) : (
-               <div className="py-8 text-zinc-600 animate-pulse text-xs text-center border border-dashed border-zinc-800/10 rounded-xl w-full">
-                 加载加密图像中...
-               </div>
-            )}
-             
-            {/* View Full Screen Option (Simulated link for MVP) */}
-            {imageUrl && (
-              <a 
-                href={imageUrl} 
-                target="_blank" 
+            {record.type === 'image' ? (
+              <div className="sg-kb-image-wrap">
+                {assetUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={assetUrl}
+                    alt="知识库图片"
+                    className="sg-kb-image"
+                    loading="lazy"
+                    onError={handleImageError}
+                  />
+                ) : (
+                  <div className="sg-kb-image-placeholder">
+                    {assetLoading ? '加载加密图像中...' : '图像加载失败，正在重试…'}
+                  </div>
+                )}
+                {assetUrl ? (
+                  <a
+                    href={assetUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="sg-kb-image-overlay"
+                  >
+                    <span className="sg-kb-image-overlay-label">
+                      <ExternalLink className="sg-kb-image-overlay-icon" aria-hidden />
+                      查看原图
+                    </span>
+                  </a>
+                ) : null}
+              </div>
+            ) : null}
+
+            {record.type === 'file' ? (
+              <a
+                href={assetUrl || '#'}
+                target="_blank"
                 rel="noreferrer"
-                className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center"
+                className="sg-kb-file-link"
+                onClick={(e) => {
+                  if (!assetUrl) e.preventDefault()
+                }}
               >
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/90 rounded-full text-xs text-zinc-200 border border-zinc-700 font-medium tracking-wide">
-                   <ExternalLink className="w-3 h-3" />
-                   查看原图
+                <div className="sg-kb-file-icon">
+                  <FileText className="sg-kb-file-icon-svg" aria-hidden />
+                </div>
+                <div className="sg-kb-file-info">
+                  <h4 className="sg-kb-file-name">
+                    {record.content.split('/').pop() || '加密附件'}
+                  </h4>
+                  <p className="sg-kb-file-hint">
+                    {assetUrl ? '点击下载 / 预览' : '加载链接中…'}
+                  </p>
                 </div>
               </a>
-            )}
+            ) : null}
           </div>
-        )}
 
-        {record.type === 'file' && (
-           <a 
-              href={imageUrl || '#'}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-3 p-4 rounded-xl border border-zinc-800 bg-zinc-950/50 hover:bg-zinc-800 transition-colors"
-           >
-              <div className="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg shrink-0">
-                 <FileText className="w-5 h-5" />
-              </div>
-              <div className="overflow-hidden">
-                <h4 className="text-sm font-medium text-zinc-200 truncate">
-                   {record.content.split('/').pop() || '加密附件'}
-                </h4>
-                <p className="text-xs text-zinc-500 mt-0.5">点击下载 / 预览</p>
-              </div>
-           </a>
-        )}
-      </div>
+          {record.tags && record.tags.length > 0 ? (
+            <div className="sg-card__tags sg-kb-card-tags">
+              {record.tags.map((tag: string) => (
+                <span key={tag} className="sg-tag">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          ) : null}
 
-      {/* Tags Trays */}
-      {record.tags && record.tags.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-1.5 border-t border-zinc-800/50 pt-4">
-          {record.tags.map((tag: string) => (
-             <span key={tag} className="px-2 py-0.5 rounded-md text-[10px] font-mono tracking-wider bg-zinc-800 text-zinc-400 border border-zinc-700/50">
-               #{tag}
-             </span>
-          ))}
+          {showDeleteConfirm ? (
+            <DeleteConfirmBar
+              message="确定删除？不可撤销"
+              onCancel={() => setShowDeleteConfirm(false)}
+              onConfirm={handleDelete}
+              isLoading={isDeleting}
+            />
+          ) : null}
         </div>
-      )}
-    </div>
+      </SpiritListCard>
+
+      {editingRecord ? (
+        <EditRecordModal
+          key={editingRecord.id}
+          record={editingRecord}
+          onClose={() => setEditingRecord(null)}
+        />
+      ) : null}
+    </>
   )
 }

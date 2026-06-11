@@ -5,7 +5,9 @@ import { createClient } from '@/lib/supabase/client'
 import { AddSkillModal } from './AddSkillModal'
 import { SpiritSubpageHero } from '@/components/spirit/SpiritSubpageHero'
 import { SpiritListCard } from '@/components/spirit/SpiritListCard'
+import { DeleteConfirmBar } from '@/components/spirit/DeleteConfirmBar'
 import { getPlatformClass } from '@/utils/platformAccent'
+import { useToast } from '@/components/spirit/ToastProvider'
 
 interface AgentSkill {
   id: string
@@ -20,11 +22,13 @@ interface AgentSkill {
 const SKILL_REPO = 'https://github.com/3199313768/SKILL'
 
 export function AiSkills() {
+  const { toast } = useToast()
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [skills, setSkills] = useState<AgentSkill[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [editingSkill, setEditingSkill] = useState<AgentSkill | null>(null)
   const [activePlatform, setActivePlatform] = useState<string>('全部')
   const [activeTag, setActiveTag] = useState<string | null>(null)
@@ -72,21 +76,24 @@ export function AiSkills() {
 
   const scrollRailSkills = filteredSkills.slice(0, 4)
 
-  const handleDelete = async (e: React.MouseEvent, id: string, name: string) => {
-    e.stopPropagation()
-    if (!window.confirm(`确定要删除技能 "${name}" 吗？此操作不可逆。`)) {
-      return
-    }
+  const executeDelete = async (id: string) => {
     setDeletingId(id)
+    setConfirmDeleteId(null)
     const supabase = createClient()
     const { error } = await supabase.from('ai_skills').delete().eq('id', id)
     setDeletingId(null)
 
     if (error) {
-      alert('删除失败：' + error.message)
+      toast('删除失败：' + error.message, 'error')
     } else {
+      toast('技能已删除', 'success')
       fetchSkills()
     }
+  }
+
+  const requestDelete = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation()
+    setConfirmDeleteId(id)
   }
 
   const openAddModal = () => {
@@ -202,7 +209,7 @@ export function AiSkills() {
                   variant="scroll"
                   platform={skill.platform}
                   index={index}
-                  actionsVisible={hoveredId === skill.id || deletingId === skill.id}
+                  actionsVisible={hoveredId === skill.id || deletingId === skill.id || confirmDeleteId === skill.id}
                   onClick={() => openSkill(skill)}
                   actions={
                     <>
@@ -221,7 +228,7 @@ export function AiSkills() {
                       <button
                         type="button"
                         className="sg-icon-btn sg-icon-btn--danger"
-                        onClick={(e) => handleDelete(e, skill.id, skill.name)}
+                        onClick={(e) => requestDelete(e, skill.id)}
                         disabled={deletingId === skill.id}
                         title="删除此技能"
                       >
@@ -246,6 +253,14 @@ export function AiSkills() {
                         </span>
                       ))}
                     </div>
+                    {confirmDeleteId === skill.id ? (
+                      <DeleteConfirmBar
+                        message={`确定删除「${skill.name}」？不可撤销`}
+                        onCancel={() => setConfirmDeleteId(null)}
+                        onConfirm={() => executeDelete(skill.id)}
+                        isLoading={deletingId === skill.id}
+                      />
+                    ) : null}
                   </div>
                 </SpiritListCard>
               ))
@@ -255,6 +270,7 @@ export function AiSkills() {
       )}
 
       <AddSkillModal
+        key={editingSkill?.id ?? 'new-skill'}
         isOpen={isAddModalOpen}
         onClose={() => {
           setIsAddModalOpen(false)
