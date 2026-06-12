@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import type { KbRecord } from '@/lib/knowledge/types'
+import { scheduleRagReindex } from '@/lib/rag/reindexTrigger'
+import { knowledgePublicRoute } from '@/lib/site/routes'
 
 export async function deleteKbRecord(recordId: string): Promise<{ error: string | null }> {
   const supabase = await createClient()
@@ -17,6 +19,7 @@ export async function deleteKbRecord(recordId: string): Promise<{ error: string 
 
   if (error) return { error: error.message }
   revalidatePath('/knowledge')
+  scheduleRagReindex('kb_delete')
   return { error: null }
 }
 
@@ -48,6 +51,10 @@ export async function updateKbRecord(
 
   if (error) return { error: error.message }
   revalidatePath('/knowledge')
+  revalidatePath(knowledgePublicRoute(recordId))
+  if (input.isPublic !== false) {
+    scheduleRagReindex('kb_update')
+  }
   return { error: null }
 }
 
@@ -75,5 +82,8 @@ export async function createKbRecord(input: {
 
   if (error) return { error: error.message }
   revalidatePath('/knowledge')
+  if (input.isPublic) {
+    scheduleRagReindex('kb_create')
+  }
   return { error: null, record: data as KbRecord }
 }

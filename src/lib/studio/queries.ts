@@ -9,6 +9,12 @@ export interface StudioStats {
   resources: number
 }
 
+export interface PublicContentStats {
+  publicProjects: number
+  publicVibeEntries: number
+  publicKbRecords: number
+}
+
 export async function fetchStudioStats(userId: string): Promise<StudioStats> {
   const supabase = await createClient()
 
@@ -26,6 +32,22 @@ export async function fetchStudioStats(userId: string): Promise<StudioStats> {
     vibeEntries: vibe.count ?? 0,
     kbRecords: kb.count ?? 0,
     resources: resources.count ?? 0,
+  }
+}
+
+export async function fetchPublicContentStats(userId: string): Promise<PublicContentStats> {
+  const supabase = await createClient()
+
+  const [projects, vibe, kb] = await Promise.all([
+    supabase.from('all_projects').select('id', { count: 'exact', head: true }).eq('is_public', true),
+    supabase.from('vibe_coding').select('id', { count: 'exact', head: true }).eq('is_public', true),
+    supabase.from('kb_records').select('id', { count: 'exact', head: true }).eq('user_id', userId).eq('is_public', true),
+  ])
+
+  return {
+    publicProjects: projects.count ?? 0,
+    publicVibeEntries: vibe.count ?? 0,
+    publicKbRecords: kb.count ?? 0,
   }
 }
 

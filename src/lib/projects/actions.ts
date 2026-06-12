@@ -1,9 +1,11 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { requireAuthenticatedUser } from '@/lib/auth/requireUser'
 import { createClient } from '@/lib/supabase/server'
 import type { ProjectCategory } from '@/data/site/allProjects'
 import { buildProjectSlug } from '@/lib/projects/slug'
+import { scheduleRagReindex } from '@/lib/rag/reindexTrigger'
 import { SITE_ROUTES, projectRoute } from '@/lib/site/routes'
 
 export interface SaveAllProjectInput {
@@ -26,6 +28,9 @@ export interface SaveAllProjectInput {
 }
 
 export async function saveAllProject(input: SaveAllProjectInput): Promise<{ error: string | null }> {
+  const { error: authError } = await requireAuthenticatedUser()
+  if (authError) return { error: authError }
+
   const supabase = await createClient()
   const projectId = input.id ?? crypto.randomUUID()
   const slug = input.slug?.trim() || buildProjectSlug(input.name, projectId)
@@ -55,14 +60,21 @@ export async function saveAllProject(input: SaveAllProjectInput): Promise<{ erro
   if (error) return { error: error.message }
   revalidatePath(SITE_ROUTES.projects)
   revalidatePath(projectRoute(slug))
+  if (input.isPublic) {
+    scheduleRagReindex('project_save')
+  }
   return { error: null }
 }
 
 export async function deleteAllProject(projectId: string): Promise<{ error: string | null }> {
+  const { error: authError } = await requireAuthenticatedUser()
+  if (authError) return { error: authError }
+
   const supabase = await createClient()
   const { error } = await supabase.from('all_projects').delete().eq('id', projectId)
 
   if (error) return { error: error.message }
   revalidatePath(SITE_ROUTES.projects)
+  scheduleRagReindex('project_delete')
   return { error: null }
 }

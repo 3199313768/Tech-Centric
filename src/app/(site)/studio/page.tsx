@@ -1,6 +1,6 @@
 import { LoginForm } from '@/components/knowledge/auth/LoginForm'
 import { StudioDashboard } from '@/components/home/studio/StudioDashboard'
-import { fetchStudioStats } from '@/lib/studio/queries'
+import { fetchPublicContentStats, fetchStudioStats } from '@/lib/studio/queries'
 import { createClient } from '@/lib/supabase/server'
 
 export const metadata = {
@@ -20,11 +20,14 @@ export default async function StudioPage() {
     )
   }
 
-  const stats = await fetchStudioStats(user.id)
+  const [stats, publicStats] = await Promise.all([
+    fetchStudioStats(user.id),
+    fetchPublicContentStats(user.id),
+  ])
 
   return (
     <div className="spirit-garden-content sg-subpage sg-subpage--workshop">
-      <StudioDashboard stats={stats} />
+      <StudioDashboard stats={stats} publicStats={publicStats} />
     </div>
   )
 }

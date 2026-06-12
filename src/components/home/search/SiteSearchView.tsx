@@ -75,7 +75,7 @@ export function SiteSearchView({ query, results }: SiteSearchViewProps) {
           className="sg-empty-state--grid"
           imageSrc="/spirit-garden/icon-book.png"
           title={`未找到与「${query}」相关的内容`}
-          description="换个关键词，或通过导航浏览各分区。"
+          description="换个关键词，或通过导航浏览各分区；也可点击右下角「庭院导引」向 AI 提问。"
         />
       ) : (
         <ul className="sg-search-results">

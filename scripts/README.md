@@ -28,6 +28,9 @@
 12. [sql/patch-phase-a-kb-is-public.sql](./sql/patch-phase-a-kb-is-public.sql) — Phase A 知识库公开策略
 13. [sql/patch-phase-b-vibe-entries.sql](./sql/patch-phase-b-vibe-entries.sql) — Phase B 草本集 kind/slug/body
 14. [sql/seed-phase-b-blog-to-vibe.sql](./sql/seed-phase-b-blog-to-vibe.sql) — Phase B blogPosts 迁移（可选）
+15. [sql/patch-owner-auth-write.sql](./sql/patch-owner-auth-write.sql) — **生产推荐**：仅 authenticated 可写（替换匿名写）
+
+> **RAG 索引策略**：`indexer.ts` 使用 `SUPABASE_SERVICE_ROLE_KEY` 读取公开 `kb_records` / `vibe_coding` / `all_projects`，应用层过滤 `is_public`；访客侧仍依赖 `patch-phase-a-kb-is-public.sql` 的匿名读公开行策略。
 
 ## RAG
 

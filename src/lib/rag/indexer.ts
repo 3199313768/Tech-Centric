@@ -62,24 +62,9 @@ function createServiceClient() {
   })
 }
 
-function createPublicReadClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!url || !anonKey) {
-    throw new Error('NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are required for public source reads')
-  }
-
-  return createClient(url, anonKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  })
-}
-
 async function loadKnowledgeDocuments(): Promise<RagDocumentInput[]> {
-  const supabase = createPublicReadClient()
+  // Service role：索引侧绕过 RLS，应用层仅收录 is_public 记录（见 patch-phase-a-kb-is-public.sql）
+  const supabase = createServiceClient()
   const { data, error } = await supabase
     .from('kb_records')
     .select('id,type,content,tags,is_public,created_at,updated_at')
@@ -123,7 +108,7 @@ interface VibeEntryRecord {
 }
 
 async function loadVibeDocuments(): Promise<RagDocumentInput[]> {
-  const supabase = createPublicReadClient()
+  const supabase = createServiceClient()
   const { data, error } = await supabase
     .from('vibe_coding')
     .select('id,name,slug,description,kind,body,is_public,tags')
@@ -160,7 +145,7 @@ async function loadVibeDocuments(): Promise<RagDocumentInput[]> {
 }
 
 async function loadProjectDocuments(): Promise<RagDocumentInput[]> {
-  const supabase = createPublicReadClient()
+  const supabase = createServiceClient()
   const documents: RagDocumentInput[] = []
 
   const { data: allProjects, error: allProjectsError } = await supabase

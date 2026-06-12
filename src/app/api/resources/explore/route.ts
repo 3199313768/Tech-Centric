@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server'
+import { requireApiUser } from '@/lib/auth/apiRequireUser'
 
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1'
 
 export async function POST(req: Request) {
+  const auth = await requireApiUser()
+  if (auth.response) return auth.response
+
   try {
     const { currentResources } = await req.json()
     
@@ -87,10 +91,11 @@ export async function POST(req: Request) {
   }
 }
 
-// 兼容 GET 请求用于演示或回退
 export async function GET() {
-   // 暂时返回 Mock 数据，直到 POST 被正确调用
-   return NextResponse.json([
+  const auth = await requireApiUser()
+  if (auth.response) return auth.response
+
+  return NextResponse.json([
      {
        id: `disco-mock-${Date.now()}`,
        name: 'DeepSeek API',

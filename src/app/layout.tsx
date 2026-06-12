@@ -43,10 +43,27 @@ const notoSansSc = Noto_Sans_SC({
   weight: ["400", "500", "700"],
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: `${personalInfo.name} - ${personalInfo.title}`,
   description: personalInfo.bio.join(' '),
   keywords: [...personalInfo.skills, personalInfo.title, '个人网站', '作品集'].join(', '),
+  openGraph: {
+    type: 'website',
+    locale: 'zh_CN',
+    siteName: 'SpiritGarden',
+    title: `${personalInfo.name} - ${personalInfo.title}`,
+    description: personalInfo.bio[0],
+    images: [{ url: '/spirit-garden/hero-landscape.png' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${personalInfo.name} - ${personalInfo.title}`,
+    description: personalInfo.bio[0],
+    images: ['/spirit-garden/hero-landscape.png'],
+  },
   icons: {
     icon: '/spirit-garden/logo.png',
     apple: '/spirit-garden/logo.png',

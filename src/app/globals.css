@@ -9212,3 +9212,68 @@ svg {
   color: var(--sg-accent);
   text-decoration: none;
 }
+
+.sg-social-proof {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1.25rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px dashed var(--sg-border-subtle);
+  background: color-mix(in srgb, var(--sg-surface) 88%, transparent);
+}
+
+.sg-social-proof__item {
+  font-size: 0.8125rem;
+  color: var(--sg-text-secondary);
+}
+
+.sg-social-proof__item::before {
+  content: '✦ ';
+  color: var(--sg-accent);
+}
+
+.sg-nav-drawer-divider {
+  height: 1px;
+  margin: 0.5rem 0;
+  background: var(--sg-border-subtle);
+}
+
+.sg-nav-drawer-link--secondary {
+  font-size: 0.9375rem;
+  opacity: 0.9;
+}
+
+.sg-project-detail__contact {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px dashed var(--sg-border-subtle);
+}
+
+.sg-project-detail__contact h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+}
+
+.sg-project-detail__contact p {
+  margin: 0 0 1rem;
+  color: var(--sg-text-secondary);
+  line-height: 1.6;
+}
+
+.sg-studio-reindex {
+  margin-bottom: 1.5rem;
+}
+
+.sg-studio-reindex__lead {
+  margin: 0 0 1rem;
+  color: var(--sg-text-secondary);
+  line-height: 1.6;
+}
+
+.sg-studio-reindex__ok {
+  margin: 0.75rem 0 0;
+  color: var(--sg-text-secondary);
+  font-size: 0.875rem;
+}

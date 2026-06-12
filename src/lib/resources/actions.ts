@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { requireAuthenticatedUser } from '@/lib/auth/requireUser'
 import { createClient } from '@/lib/supabase/server'
 import type { ResourceItem } from '@/data/resources/initialResources'
 import { mapResourceRow, type ResourceRow } from '@/lib/resources/mappers'
@@ -8,6 +9,11 @@ import { SITE_ROUTES } from '@/lib/site/routes'
 
 function revalidateResourcesPath() {
   revalidatePath(SITE_ROUTES.resources)
+}
+
+async function requireOwner(): Promise<{ error: string | null }> {
+  const { error } = await requireAuthenticatedUser()
+  return { error }
 }
 
 function toDbRow(item: ResourceItem) {
@@ -25,6 +31,9 @@ function toDbRow(item: ResourceItem) {
 }
 
 export async function saveResourceItem(item: ResourceItem): Promise<{ error: string | null }> {
+  const { error: authError } = await requireOwner()
+  if (authError) return { error: authError }
+
   const supabase = await createClient()
   const { error } = await supabase.from('resources').upsert([toDbRow(item)], { onConflict: 'id' })
 
@@ -34,6 +43,9 @@ export async function saveResourceItem(item: ResourceItem): Promise<{ error: str
 }
 
 export async function insertResourceItem(item: ResourceItem): Promise<{ error: string | null }> {
+  const { error: authError } = await requireOwner()
+  if (authError) return { error: authError }
+
   const supabase = await createClient()
   const { error } = await supabase.from('resources').insert([toDbRow(item)])
 
@@ -46,6 +58,9 @@ export async function updateResourceItem(
   id: string,
   patch: Partial<Pick<ResourceItem, 'name' | 'url' | 'description' | 'category' | 'tags' | 'isPinned' | 'clickCount'>>,
 ): Promise<{ error: string | null }> {
+  const { error: authError } = await requireOwner()
+  if (authError) return { error: authError }
+
   const supabase = await createClient()
   const row: Record<string, unknown> = {}
 
@@ -65,6 +80,9 @@ export async function updateResourceItem(
 }
 
 export async function deleteResourceItem(id: string): Promise<{ error: string | null }> {
+  const { error: authError } = await requireOwner()
+  if (authError) return { error: authError }
+
   const supabase = await createClient()
   const { error } = await supabase.from('resources').delete().eq('id', id)
 
@@ -76,6 +94,9 @@ export async function deleteResourceItem(id: string): Promise<{ error: string | 
 export async function deleteResourceItems(ids: string[]): Promise<{ error: string | null }> {
   if (ids.length === 0) return { error: null }
 
+  const { error: authError } = await requireOwner()
+  if (authError) return { error: authError }
+
   const supabase = await createClient()
   const { error } = await supabase.from('resources').delete().in('id', ids)
 
@@ -85,6 +106,9 @@ export async function deleteResourceItems(ids: string[]): Promise<{ error: strin
 }
 
 export async function upsertResourceItems(items: ResourceItem[]): Promise<{ error: string | null }> {
+  const { error: authError } = await requireOwner()
+  if (authError) return { error: authError }
+
   const supabase = await createClient()
   const { error } = await supabase.from('resources').upsert(items.map(toDbRow), { onConflict: 'id' })
 

@@ -41,19 +41,9 @@ export interface SkillDetail {
   projects?: string[]
 }
 
-export interface BlogPost {
-  id: string
-  title: string
-  date: string
-  category: string
-  excerpt: string
-  link: string
-  tags?: string[]
-}
-
 export const personalInfo: PersonalInfo = {
   name: '杨倩 - Oxygen',
-  title: 'Frontend Developer',
+  title: '高级前端工程师 · 水利孪生 · 效能驱动',
   bio: [
     '专注于 React/Next.js 和交互设计，用代码创造流畅的用户体验',
     '热爱动画与性能优化，追求技术与美学的平衡',
@@ -132,32 +122,3 @@ export const skillsDetail: SkillDetail[] = [
   { name: 'AWS', category: 'tools', proficiency: 65, yearsOfExperience: 2 },
 ]
 
-export const blogPosts: BlogPost[] = [
-  {
-    id: '1',
-    title: 'React性能优化最佳实践',
-    date: '2024-01-15',
-    category: '前端开发',
-    excerpt: '深入探讨React应用性能优化的各种技巧和策略...',
-    link: '#',
-    tags: ['React', '性能优化', '前端'],
-  },
-  {
-    id: '2',
-    title: 'TypeScript高级类型系统',
-    date: '2024-01-10',
-    category: 'TypeScript',
-    excerpt: '学习TypeScript的高级类型特性，提升代码质量...',
-    link: '#',
-    tags: ['TypeScript', '类型系统'],
-  },
-  {
-    id: '3',
-    title: '微服务架构设计思考',
-    date: '2024-01-05',
-    category: '架构设计',
-    excerpt: '分享微服务架构设计中的经验和教训...',
-    link: '#',
-    tags: ['微服务', '架构', '后端'],
-  },
-]

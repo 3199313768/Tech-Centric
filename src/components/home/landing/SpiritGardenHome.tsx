@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Code2, ExternalLink, FlaskConical, Paintbrush, Paperclip, Sparkles, Terminal } from 'lucide-react'
 import { SpiritDustCanvas } from '@/components/home/landing/SpiritDustCanvas'
 import type { AllProjectItem } from '@/data/site/allProjects'
-import { personalInfo } from '@/data/site/personal'
+import { personalInfo, workExperience } from '@/data/site/personal'
 import type { HeroSeason, SoulMeterItem } from '@/lib/site/homeStats'
 import { handleWatercolorHover } from '@/utils/watercolorHover'
 import { SITE_ROUTES, projectRoute } from '@/lib/site/routes'
@@ -15,6 +15,12 @@ const SKILL_CHIPS = [
   { name: 'Tailwind', icon: Paintbrush },
   { name: 'Framer', icon: Paperclip },
   { name: 'Next.js', icon: Terminal },
+] as const
+
+const SOCIAL_PROOF_ITEMS = [
+  '13 个水利项目准时交付',
+  '公司月度之星',
+  '年度绩效 B+（Top 5%）',
 ] as const
 
 const FALLBACK_SOUL_METERS: SoulMeterItem[] = [
@@ -110,14 +116,17 @@ export function SpiritGardenHome({
               </div>
               <div className="sg-hero-profile-meta">
                 <span className="sg-hero-name">{personalInfo.name}</span>
-                <span className="sg-hero-badge">高级前端工程师</span>
+                <span className="sg-hero-badge">{personalInfo.title}</span>
               </div>
             </div>
 
             <h1 className="sg-hero-garden-title sg-enter sg-enter--2">欢迎来到我的数字庭院</h1>
 
             <p className="sg-hero-garden-lead sg-enter sg-enter--3">
-              在这里，代码与吉卜力的美学温柔交织。我是一名追求极致情感体验的高级前端工程师，在逻辑的经纬间，编织充满生命力的数字交互。
+              {personalInfo.bio[0]}
+              {workExperience[0]?.company
+                ? ` 目前在 ${workExperience[0].company} 深耕水利数字孪生与前端效能。`
+                : ''}
             </p>
 
             <div className="sg-hero-actions sg-enter sg-enter--4">
@@ -133,6 +142,14 @@ export function SpiritGardenHome({
       </div>
 
       <main id="garden-content" className="sg-main sg-main--garden sg-enter sg-enter--5">
+        <section className="sg-social-proof" aria-label="社会证明">
+          {SOCIAL_PROOF_ITEMS.map((item) => (
+            <span key={item} className="sg-social-proof__item">
+              {item}
+            </span>
+          ))}
+        </section>
+
         <div className="sg-garden-grid">
           <article
             className="sg-card sg-card--featured sg-card--watercolor sg-enter sg-enter--6"

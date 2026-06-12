@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { Menu, Search, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { ThemeToggle } from '@/components/spirit/theme/ThemeToggle'
-import { isSiteNavActive, SITE_NAV_TABS, SITE_ROUTES } from '@/lib/site/routes'
+import { isSiteNavActive, SITE_NAV_SECONDARY, SITE_NAV_TABS, SITE_ROUTES } from '@/lib/site/routes'
 
 const COMPACT_NAV_MAX = 1024
 
@@ -110,6 +110,17 @@ export function KnowledgeNav() {
               key={tab.href}
               href={tab.href}
               className={`sg-nav-drawer-link${isSiteNavActive(pathname, tab.href) ? ' sg-nav-drawer-link--active' : ''}`}
+              onClick={closeMenu}
+            >
+              {tab.label}
+            </Link>
+          ))}
+          <div className="sg-nav-drawer-divider" aria-hidden />
+          {SITE_NAV_SECONDARY.map((tab) => (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              className={`sg-nav-drawer-link sg-nav-drawer-link--secondary${isSiteNavActive(pathname, tab.href) ? ' sg-nav-drawer-link--active' : ''}`}
               onClick={closeMenu}
             >
               {tab.label}

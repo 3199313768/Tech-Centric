@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { requireAuthenticatedUser } from '@/lib/auth/requireUser'
 import { createClient } from '@/lib/supabase/server'
 import { SITE_ROUTES } from '@/lib/site/routes'
 
@@ -15,6 +16,9 @@ export interface SaveAiSkillInput {
 }
 
 export async function saveAiSkill(input: SaveAiSkillInput): Promise<{ error: string | null }> {
+  const { error: authError } = await requireAuthenticatedUser()
+  if (authError) return { error: authError }
+
   const supabase = await createClient()
   const row = {
     name: input.name,
@@ -35,6 +39,9 @@ export async function saveAiSkill(input: SaveAiSkillInput): Promise<{ error: str
 }
 
 export async function deleteAiSkill(skillId: string): Promise<{ error: string | null }> {
+  const { error: authError } = await requireAuthenticatedUser()
+  if (authError) return { error: authError }
+
   const supabase = await createClient()
   const { error } = await supabase.from('ai_skills').delete().eq('id', skillId)
 

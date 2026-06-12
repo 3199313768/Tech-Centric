@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server'
+import { requireApiUser } from '@/lib/auth/apiRequireUser'
 
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1'
 
 export async function POST(req: Request) {
+  const auth = await requireApiUser()
+  if (auth.response) return auth.response
+
   try {
     const { url } = await req.json()
     if (!url) return NextResponse.json({ error: 'URL required' }, { status: 400 })

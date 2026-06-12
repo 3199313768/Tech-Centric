@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { personalInfo } from '@/data/site/personal'
-import { SITE_NAV_TABS, SITE_ROUTES } from '@/lib/site/routes'
+import { SITE_NAV_SECONDARY, SITE_NAV_TABS, SITE_ROUTES } from '@/lib/site/routes'
 
 export function SiteFooter() {
   const email = personalInfo.socialLinks.email?.replace(/^mailto:/, '') ?? ''
@@ -13,12 +13,16 @@ export function SiteFooter() {
           © {new Date().getFullYear()} SpiritGarden
         </p>
         <nav className="sg-footer-links" aria-label="页脚导航">
-          {SITE_NAV_TABS.slice(0, 4).map((tab) => (
+          {SITE_NAV_TABS.map((tab) => (
             <Link key={tab.href} href={tab.href}>
               {tab.label}
             </Link>
           ))}
-          <Link href={SITE_ROUTES.about}>园主</Link>
+          {SITE_NAV_SECONDARY.map((tab) => (
+            <Link key={tab.href} href={tab.href}>
+              {tab.label}
+            </Link>
+          ))}
           <Link href={SITE_ROUTES.showcase}>展柜</Link>
           <Link href={SITE_ROUTES.changelog}>庭园志</Link>
           <Link href={SITE_ROUTES.stats}>庭园度量</Link>

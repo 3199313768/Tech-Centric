@@ -1,4 +1,4 @@
-import { personalInfo, workExperience, skillsDetail, blogPosts } from '../../data/site/personal'
+import { personalInfo, workExperience, skillsDetail } from '../../data/site/personal'
 import { getInitialResources } from '../../data/resources/initialResources'
 import type { RagDocumentInput } from './types'
 
@@ -87,25 +87,6 @@ export function getStaticRagDocuments(): RagDocumentInput[] {
         `分类：${resource.category}`,
         resource.description ? `描述：${resource.description}` : undefined,
         resource.tags?.length ? `标签：${resource.tags.join('、')}` : undefined,
-      ]),
-    })
-  }
-
-  for (const post of blogPosts) {
-    documents.push({
-      sourceType: 'static_resource',
-      sourceId: `blog-${post.id}`,
-      title: post.title,
-      url: post.link,
-      summary: post.excerpt,
-      tags: uniqueTags(['博客', post.category, ...(post.tags || [])]),
-      isPublic: true,
-      content: joinLines([
-        `文章：${post.title}`,
-        `日期：${post.date}`,
-        `分类：${post.category}`,
-        `摘要：${post.excerpt}`,
-        post.tags?.length ? `标签：${post.tags.join('、')}` : undefined,
       ]),
     })
   }

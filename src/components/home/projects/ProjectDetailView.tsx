@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import type { AllProjectItem } from '@/data/site/allProjects'
+import { personalInfo } from '@/data/site/personal'
 import { getArchiveAccent } from '@/utils/archiveCategory'
 import { SITE_ROUTES } from '@/lib/site/routes'
 
@@ -10,6 +11,7 @@ interface ProjectDetailViewProps {
 
 export function ProjectDetailView({ project }: ProjectDetailViewProps) {
   const accent = getArchiveAccent(project.category)
+  const email = personalInfo.socialLinks.email?.replace(/^mailto:/, '') ?? ''
 
   return (
     <article className="sg-page sg-project-detail">
@@ -105,6 +107,16 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
             </span>
           )}
         </div>
+
+        {email ? (
+          <section className="sg-project-detail__contact" aria-labelledby="project-contact-heading">
+            <h2 id="project-contact-heading">合作或内推</h2>
+            <p>对这个项目感兴趣？欢迎邮件联系，或通过右下角「庭院导引」发起对话。</p>
+            <a href={`mailto:${email}`} className="sg-btn sg-btn--ghost" aria-label={`发送邮件至 ${email}`}>
+              联系我 · {email}
+            </a>
+          </section>
+        ) : null}
       </div>
     </article>
   )
