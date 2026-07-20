@@ -180,4 +180,18 @@ describe('fuseRagCandidates', () => {
     expect(result.candidates[0].chunkId).toBe('weak-top')
     expect(result.evidenceMode).toBe('insufficient')
   })
+
+  it('does not let a strong second-place vector override weak leading evidence', () => {
+    const result = fuseRagCandidates({
+      vector: [
+        candidate('weak-leading', { similarity: 0.3 }),
+        candidate('strong-second', { similarity: 0.95 }),
+      ],
+      lexical: [],
+      pageContext: null,
+    })
+
+    expect(result.candidates[0].chunkId).toBe('weak-leading')
+    expect(result.evidenceMode).toBe('insufficient')
+  })
 })

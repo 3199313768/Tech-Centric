@@ -59,17 +59,24 @@ function hasComparableStrength(
 function determineEvidenceMode(
   candidates: FusedRagCandidate[],
 ): RagEvidenceMode {
-  if (candidates.length === 0) return 'insufficient'
+  const [leading, second] = candidates
+  if (!leading) return 'insufficient'
 
-  const hasSiteEvidence = candidates.slice(0, 2).some(
-    (candidate) =>
-      candidate.matchedChannels.length === 2 ||
-      (candidate.similarity !== null &&
-        candidate.similarity >= STRONG_VECTOR_SIMILARITY) ||
-      candidate.exactMatch,
+  const leadingHasSiteEvidence =
+    leading.matchedChannels.length === 2 ||
+    (leading.similarity !== null &&
+      leading.similarity >= STRONG_VECTOR_SIMILARITY) ||
+    leading.exactMatch
+
+  const secondSupportsSiteEvidence = Boolean(
+    second &&
+      leading.fusedScore - second.fusedScore <= PAGE_CONTEXT_BOOST &&
+      (second.matchedChannels.length === 2 || second.exactMatch),
   )
 
-  return hasSiteEvidence ? 'site' : 'insufficient'
+  return leadingHasSiteEvidence || secondSupportsSiteEvidence
+    ? 'site'
+    : 'insufficient'
 }
 
 export function fuseRagCandidates({
