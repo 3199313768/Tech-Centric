@@ -73,7 +73,33 @@ describe('finalizeCitations', () => {
     ])
   })
 
-  it('removes unknown citation IDs without leaving doubled spaces', () => {
+  it('deduplicates different contexts from the same source ID', () => {
+    const sharedSourceContexts = assignContextIds([
+      candidate('first-chunk', {
+        sourceId: 'shared-source',
+        excerpt: 'first excerpt',
+      }),
+      candidate('second-chunk', {
+        sourceId: 'shared-source',
+        excerpt: 'second excerpt',
+      }),
+    ])
+
+    const result = finalizeCitations(
+      'Second chunk [S2], then first chunk [S1].',
+      sharedSourceContexts,
+    )
+
+    expect(result.answer).toBe('Second chunk [1], then first chunk [1].')
+    expect(result.sources).toHaveLength(1)
+    expect(result.sources[0]).toMatchObject({
+      citation: 1,
+      sourceId: 'shared-source',
+      excerpt: 'second excerpt',
+    })
+  })
+
+  it('removes unknown citation IDs without adding whitespace artifacts', () => {
     const result = finalizeCitations(
       'Known [S1] and unknown [S99] marker.',
       contexts,
@@ -81,6 +107,14 @@ describe('finalizeCitations', () => {
 
     expect(result.answer).toBe('Known [1] and unknown marker.')
     expect(result.answer).not.toContain('  ')
+  })
+
+  it('preserves whitespace outside citation markers exactly', () => {
+    const answer = 'Alpha  beta\tgamma\nline [S1]. Unknown [S99],  tail'
+
+    expect(finalizeCitations(answer, contexts).answer).toBe(
+      'Alpha  beta\tgamma\nline [1]. Unknown,  tail',
+    )
   })
 
   it('converts an internal S2 marker to visitor-facing citation 1', () => {

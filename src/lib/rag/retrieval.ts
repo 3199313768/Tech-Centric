@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
-import type { RagSearchResult } from './types'
+import type { RagSearchResult, RagSource } from './types'
+
+const SOURCE_EXCERPT_LENGTH = 160
 
 function createServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -32,18 +34,22 @@ export async function matchRagChunks(queryEmbedding: number[], matchCount = 8, m
   return (data || []) as RagSearchResult[]
 }
 
-export function toPublicSources(results: RagSearchResult[]) {
+export function toPublicSources(results: RagSearchResult[]): RagSource[] {
   const seen = new Set<string>()
-  return results.filter(result => {
-    if (seen.has(result.document_id)) return false
-    seen.add(result.document_id)
-    return true
-  }).map(result => ({
-    title: result.title,
-    url: sanitizeSourceUrl(result.url),
-    sourceType: result.source_type,
-    similarity: result.similarity,
-  }))
+  return results
+    .filter((result) => {
+      if (seen.has(result.document_id)) return false
+      seen.add(result.document_id)
+      return true
+    })
+    .map((result, index) => ({
+      citation: index + 1,
+      sourceId: result.document_id,
+      title: result.title,
+      url: sanitizeSourceUrl(result.url),
+      sourceType: result.source_type,
+      excerpt: result.content.slice(0, SOURCE_EXCERPT_LENGTH),
+    }))
 }
 
 function sanitizeSourceUrl(url: string | null) {

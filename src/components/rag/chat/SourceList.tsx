@@ -19,15 +19,22 @@ export function SourceList({ sources }: SourceListProps) {
 
           if (isInternal && safeUrl) {
             return (
-              <Link key={`${source.sourceType}-${source.title}`} href={safeUrl} className="sg-rag-source-item">
+              <Link
+                key={source.sourceId}
+                href={safeUrl}
+                className="sg-rag-source-item"
+              >
                 <span className="sg-rag-source-item__head">
-                  <span className="sg-rag-source-item__title">{source.title}</span>
-                  <ExternalLink className="sg-rag-source-item__link-icon" aria-hidden />
+                  <span className="sg-rag-source-item__title">
+                    [{source.citation}] {source.title}
+                  </span>
+                  <ExternalLink
+                    className="sg-rag-source-item__link-icon"
+                    aria-hidden
+                  />
                 </span>
                 <span className="sg-rag-source-item__meta">
-                  <span>{formatSourceType(source.sourceType)}</span>
-                  <span className="sg-rag-source-item__dot" aria-hidden />
-                  <span>{(source.similarity * 100).toFixed(0)}%</span>
+                  {source.excerpt}
                 </span>
               </Link>
             )
@@ -37,18 +44,29 @@ export function SourceList({ sources }: SourceListProps) {
 
           return (
             <SourceWrapper
-              key={`${source.sourceType}-${source.title}`}
-              {...(safeUrl ? { href: safeUrl, target: '_blank', rel: 'noopener noreferrer' } : {})}
+              key={source.sourceId}
+              {...(safeUrl
+                ? {
+                    href: safeUrl,
+                    target: '_blank',
+                    rel: 'noopener noreferrer',
+                  }
+                : {})}
               className="sg-rag-source-item"
             >
               <span className="sg-rag-source-item__head">
-                <span className="sg-rag-source-item__title">{source.title}</span>
-                {safeUrl ? <ExternalLink className="sg-rag-source-item__link-icon" aria-hidden /> : null}
+                <span className="sg-rag-source-item__title">
+                  [{source.citation}] {source.title}
+                </span>
+                {safeUrl ? (
+                  <ExternalLink
+                    className="sg-rag-source-item__link-icon"
+                    aria-hidden
+                  />
+                ) : null}
               </span>
               <span className="sg-rag-source-item__meta">
-                <span>{formatSourceType(source.sourceType)}</span>
-                <span className="sg-rag-source-item__dot" aria-hidden />
-                <span>{(source.similarity * 100).toFixed(0)}%</span>
+                {source.excerpt}
               </span>
             </SourceWrapper>
           )
@@ -56,10 +74,6 @@ export function SourceList({ sources }: SourceListProps) {
       </div>
     </div>
   )
-}
-
-function formatSourceType(sourceType: string) {
-  return sourceType.replace(/_/g, ' ')
 }
 
 function getSafeUrl(url: string | null) {
