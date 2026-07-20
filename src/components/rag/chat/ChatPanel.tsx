@@ -29,6 +29,63 @@ interface RagChatResponse {
   error?: string
 }
 
+type RagSseEvent =
+  | { type: 'meta'; sources: RagSource[] }
+  | { type: 'delta'; text: string }
+  | { type: 'done' }
+  | { type: 'error'; error: string }
+
+async function consumeRagChatStream(
+  response: Response,
+  onMeta: (sources: RagSource[]) => void,
+  onDelta: (text: string) => void,
+) {
+  if (!response.body) {
+    throw new Error('AI 助手暂时不可用')
+  }
+
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  let sawError: string | null = null
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split('\n')
+    buffer = lines.pop() ?? ''
+
+    for (const line of lines) {
+      const trimmed = line.trim()
+      if (!trimmed.startsWith('data:')) continue
+
+      const payload = trimmed.slice(5).trim()
+      if (!payload) continue
+
+      let event: RagSseEvent
+      try {
+        event = JSON.parse(payload) as RagSseEvent
+      } catch {
+        continue
+      }
+
+      if (event.type === 'meta') {
+        onMeta(event.sources)
+      } else if (event.type === 'delta') {
+        onDelta(event.text)
+      } else if (event.type === 'error') {
+        sawError = event.error
+      }
+    }
+  }
+
+  if (sawError) {
+    throw new Error(sawError)
+  }
+}
+
 export function ChatPanel() {
   const pathname = usePathname()
   const pageContext = getPageRagContext(pathname)
@@ -230,23 +287,85 @@ export function ChatPanel() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: content }),
       })
-      const result = await response.json() as RagChatResponse
 
-      if (!response.ok || result.error) {
+      const contentType = response.headers.get('content-type') || ''
+
+      if (!response.ok) {
+        const result = await response.json() as RagChatResponse
         throw new Error(result.error || 'AI 助手暂时不可用')
+      }
+
+      // 安全拒绝等仍返回 JSON；正常回答走 SSE 流式
+      if (!contentType.includes('text/event-stream')) {
+        const result = await response.json() as RagChatResponse
+        if (result.error) {
+          throw new Error(result.error)
+        }
+        setMessages((prev) => [...prev, {
+          role: 'assistant',
+          content: result.answer || '我暂时没有生成有效回答。',
+          sources: result.sources || [],
+        }])
+        return
       }
 
       setMessages((prev) => [...prev, {
         role: 'assistant',
-        content: result.answer || '我暂时没有生成有效回答。',
-        sources: result.sources || [],
-      }])
-    } catch (error) {
-      setMessages((prev) => [...prev, {
-        role: 'assistant',
-        content: error instanceof Error ? error.message : 'AI 助手暂时不可用，请稍后再试。',
+        content: '',
         sources: [],
       }])
+
+      await consumeRagChatStream(
+        response,
+        (sources) => {
+          setMessages((prev) => {
+            const next = [...prev]
+            const last = next[next.length - 1]
+            if (!last || last.role !== 'assistant') return prev
+            next[next.length - 1] = { ...last, sources }
+            return next
+          })
+        },
+        (text) => {
+          setMessages((prev) => {
+            const next = [...prev]
+            const last = next[next.length - 1]
+            if (!last || last.role !== 'assistant') return prev
+            next[next.length - 1] = { ...last, content: last.content + text }
+            return next
+          })
+        },
+      )
+
+      setMessages((prev) => {
+        const next = [...prev]
+        const last = next[next.length - 1]
+        if (!last || last.role !== 'assistant') return prev
+        if (!last.content.trim()) {
+          next[next.length - 1] = { ...last, content: '我暂时没有生成有效回答。' }
+        }
+        return next
+      })
+    } catch (error) {
+      setMessages((prev) => {
+        const next = [...prev]
+        const last = next[next.length - 1]
+        const errorText = error instanceof Error ? error.message : 'AI 助手暂时不可用，请稍后再试。'
+
+        // 流式已插入助手气泡：空内容则写入错误；已有部分内容则保留
+        if (last?.role === 'assistant') {
+          if (!last.content.trim()) {
+            next[next.length - 1] = { ...last, content: errorText, sources: [] }
+          }
+          return next
+        }
+
+        return [...prev, {
+          role: 'assistant',
+          content: errorText,
+          sources: [],
+        }]
+      })
     } finally {
       setIsLoading(false)
       inputRef.current?.focus()
@@ -263,13 +382,12 @@ export function ChatPanel() {
       <div className="sg-rag-panel__header">
         <div className="sg-rag-panel__avatar sg-rag-panel__avatar--sprite">
           <Image
-            src="/spirit-garden/icon-sparkle.png"
+            src="/spirit-garden/rag-guide-sprite.webp"
             alt=""
-            width={22}
-            height={22}
+            width={36}
+            height={36}
             className="sg-rag-panel__avatar-sprite"
             aria-hidden
-            unoptimized
           />
         </div>
         <div className="sg-rag-panel__meta">
@@ -286,6 +404,16 @@ export function ChatPanel() {
         {messages.length === 0 ? (
           <div className="sg-rag-welcome-stack sg-rag-welcome-stack--garden">
             <div className="sg-rag-welcome">
+              <div className="sg-rag-welcome__illustration" data-testid="rag-welcome-illustration">
+                <Image
+                  src="/spirit-garden/rag-guide-welcome.webp"
+                  alt=""
+                  fill
+                  sizes="(max-width: 640px) calc(100vw - 48px), 336px"
+                  className="sg-rag-welcome__illustration-img"
+                  aria-hidden
+                />
+              </div>
               <div className="sg-rag-welcome__icon">
                 <Image
                   src="/spirit-garden/icon-sparkle.png"

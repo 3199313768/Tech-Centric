@@ -37,6 +37,17 @@ test.describe('核心访客路径', () => {
     await expect(footer.getByRole('link', { name: '资源' })).toBeVisible()
   })
 
+  test('RAG 欢迎插画只在初始状态展示', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: '打开庭院导引' }).click()
+
+    const illustration = page.getByTestId('rag-welcome-illustration')
+    await expect(illustration).toBeVisible()
+
+    await page.getByRole('button', { name: '问项目' }).click()
+    await expect(illustration).toHaveCount(0)
+  })
+
   test('sitemap 与 robots 可访问', async ({ request }) => {
     const sitemap = await request.get('/sitemap.xml')
     expect(sitemap.ok()).toBeTruthy()

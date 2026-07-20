@@ -13,6 +13,7 @@
     "rag:check": "ts-node --project tsconfig.json --compiler-options '{\"module\":\"CommonJS\",\"moduleResolution\":\"node\"}' scripts/rag/check-rag-env.ts",
     "sql:resources": "ts-node --project tsconfig.json --compiler-options '{\"module\":\"CommonJS\",\"moduleResolution\":\"node\"}' scripts/codegen/generate-resources-sql.ts",
     "test:e2e": "playwright test",
+    "test:e2e:headed": "PLAYWRIGHT_HEADED=1 PLAYWRIGHT_SLOW_MO=600 playwright test",
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {

@@ -1,22 +1,7 @@
+import { deepseekChatCompletion, deepseekChatCompletionStream, type DeepSeekMessage } from '@/lib/deepseek/client'
 import type { RagSearchResult } from './types'
 
-const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions'
-const DEEPSEEK_TIMEOUT_MS = 30_000
-
-interface DeepSeekResponse {
-  choices?: Array<{
-    message?: {
-      content?: string
-    }
-  }>
-}
-
-export async function generateRagAnswer(message: string, results: RagSearchResult[]) {
-  const apiKey = process.env.DEEPSEEK_API_KEY
-  if (!apiKey) {
-    throw new Error('DEEPSEEK_API_KEY is not configured')
-  }
-
+function buildRagMessages(message: string, results: RagSearchResult[]): DeepSeekMessage[] {
   const context = results.map((result, index) => {
     return [
       `来源 ${index + 1}: ${result.title}`,
@@ -46,36 +31,22 @@ export async function generateRagAnswer(message: string, results: RagSearchResul
     message,
   ].join('\n\n')
 
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), DEEPSEEK_TIMEOUT_MS)
+  return [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userPrompt },
+  ]
+}
 
-  const response = await fetch(DEEPSEEK_API_URL, {
-    method: 'POST',
-    signal: controller.signal,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: 'deepseek-chat',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
-      temperature: 0.3,
-    }),
-  }).finally(() => clearTimeout(timeout))
+export async function generateRagAnswer(message: string, results: RagSearchResult[]) {
+  return deepseekChatCompletion({
+    messages: buildRagMessages(message, results),
+    temperature: 0.3,
+  })
+}
 
-  if (!response.ok) {
-    const detail = await response.text()
-    throw new Error(`DeepSeek request failed: ${response.status} ${detail.slice(0, 200)}`)
-  }
-
-  const result = await response.json() as DeepSeekResponse
-  const content = result.choices?.[0]?.message?.content?.trim()
-  if (!content) {
-    throw new Error('DeepSeek response did not include answer content')
-  }
-
-  return content
+export function streamRagAnswer(message: string, results: RagSearchResult[]) {
+  return deepseekChatCompletionStream({
+    messages: buildRagMessages(message, results),
+    temperature: 0.3,
+  })
 }

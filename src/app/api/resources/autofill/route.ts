@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireApiUser } from '@/lib/auth/apiRequireUser'
-
-const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY
-const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1'
+import { deepseekChatCompletion } from '@/lib/deepseek/client'
 
 export async function POST(req: Request) {
   const auth = await requireApiUser()
@@ -21,21 +19,11 @@ export async function POST(req: Request) {
     4. 标签 (tags)：3-5 个相关关键词。
     请以精简的 JSON 格式返回。`
 
-    const response = await fetch(`${DEEPSEEK_API_URL}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages: [{ role: 'system', content: systemPrompt }],
-        response_format: { type: 'json_object' }
-      })
+    const raw = await deepseekChatCompletion({
+      messages: [{ role: 'system', content: systemPrompt }],
+      responseFormat: { type: 'json_object' },
     })
-
-    const result = await response.json()
-    const content = JSON.parse(result.choices[0].message.content)
+    const content = JSON.parse(raw) as Record<string, unknown>
 
     return NextResponse.json(content)
   } catch (error) {

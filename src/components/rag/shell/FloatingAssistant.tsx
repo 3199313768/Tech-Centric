@@ -28,13 +28,12 @@ export function FloatingAssistant() {
             <X className="sg-rag-trigger__icon-svg" aria-hidden />
           ) : (
             <Image
-              src="/spirit-garden/icon-sparkle.png"
+              src="/spirit-garden/rag-guide-sprite.webp"
               alt=""
-              width={24}
-              height={24}
+              width={36}
+              height={36}
               className="sg-rag-trigger__sprite-img"
               aria-hidden
-              unoptimized
             />
           )}
         </span>
