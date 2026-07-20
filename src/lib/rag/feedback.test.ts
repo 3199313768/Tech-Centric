@@ -12,7 +12,11 @@ import {
   saveRagResponseSnapshot,
   upsertRagFeedback,
 } from './feedback'
-import { isRagChatRateLimited, isRagFeedbackRateLimited } from './rateLimit'
+import {
+  createRagRateLimitBucketKey,
+  isRagChatRateLimited,
+  isRagFeedbackRateLimited,
+} from './rateLimit'
 
 const responseId = '11111111-1111-4111-8111-111111111111'
 const sessionId = '22222222-2222-4222-8222-222222222222'
@@ -136,6 +140,16 @@ describe('feedback persistence', () => {
 describe('RAG rate-limit namespaces', () => {
   beforeEach(() => vi.clearAllMocks())
 
+  it('replaces the raw client identifier with a stable namespace-specific hash', () => {
+    const rawIp = '203.0.113.42'
+    const chatKey = createRagRateLimitBucketKey('chat', rawIp)
+
+    expect(chatKey).toMatch(/^rag:chat:[a-f0-9]{64}$/)
+    expect(chatKey).not.toContain(rawIp)
+    expect(createRagRateLimitBucketKey('chat', rawIp)).toBe(chatKey)
+    expect(createRagRateLimitBucketKey('feedback', rawIp)).not.toBe(chatKey)
+  })
+
   it('isolates chat and feedback buckets and gives feedback 30 requests per minute', async () => {
     const rpc = vi.fn().mockResolvedValue({ data: false, error: null })
     createAdminClient.mockReturnValue({ rpc })
@@ -144,12 +158,12 @@ describe('RAG rate-limit namespaces', () => {
     await isRagFeedbackRateLimited('127.0.0.1')
 
     expect(rpc).toHaveBeenNthCalledWith(1, 'check_rag_rate_limit', {
-      p_bucket_key: 'rag:chat:127.0.0.1',
+      p_bucket_key: createRagRateLimitBucketKey('chat', '127.0.0.1'),
       p_window_ms: 60_000,
       p_max_requests: 10,
     })
     expect(rpc).toHaveBeenNthCalledWith(2, 'check_rag_rate_limit', {
-      p_bucket_key: 'rag:feedback:127.0.0.1',
+      p_bucket_key: createRagRateLimitBucketKey('feedback', '127.0.0.1'),
       p_window_ms: 60_000,
       p_max_requests: 30,
     })

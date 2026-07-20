@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto'
+
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export const RAG_RATE_LIMIT_WINDOW_MS = 60_000
@@ -7,6 +9,16 @@ export const RAG_FEEDBACK_RATE_LIMIT_MAX_REQUESTS = 30
 type RagRateLimitNamespace = 'chat' | 'feedback'
 
 const memoryBuckets = new Map<string, { count: number; resetAt: number }>()
+
+export function createRagRateLimitBucketKey(
+  namespace: RagRateLimitNamespace,
+  rawBucketKey: string,
+): string {
+  const hash = createHash('sha256')
+    .update(`${namespace}:${rawBucketKey}`)
+    .digest('hex')
+  return `rag:${namespace}:${hash}`
+}
 
 function isMemoryRateLimited(bucketKey: string, maxRequests: number): boolean {
   const now = Date.now()
@@ -26,7 +38,7 @@ async function isRagRateLimited(
   bucketKey: string,
   maxRequests: number,
 ): Promise<boolean> {
-  const namespacedBucketKey = `rag:${namespace}:${bucketKey}`
+  const namespacedBucketKey = createRagRateLimitBucketKey(namespace, bucketKey)
   const admin = createAdminClient()
   if (!admin) return isMemoryRateLimited(namespacedBucketKey, maxRequests)
 
