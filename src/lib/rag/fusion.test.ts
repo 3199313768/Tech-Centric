@@ -18,7 +18,8 @@ function candidate(
     sourceType: 'static_personal',
     tags: [],
     similarity: null,
-    lexicalRank: null,
+    lexicalScore: null,
+    exactMatch: false,
     ...overrides,
   }
 }
@@ -43,8 +44,8 @@ describe('fuseRagCandidates', () => {
     const result = fuseRagCandidates({
       vector: [candidate('vector-only', { similarity: 0.9 }), shared],
       lexical: [
-        candidate('lexical-only', { lexicalRank: 1 }),
-        candidate('shared', { lexicalRank: 2 }),
+        candidate('lexical-only', { lexicalScore: 0.9 }),
+        candidate('shared', { lexicalScore: 0.8 }),
       ],
       pageContext: null,
     })
@@ -102,6 +103,47 @@ describe('fuseRagCandidates', () => {
     expect(weakResult.candidates[0].chunkId).toBe('strong-generic')
   })
 
+  it('does not boost a weak lexical-only page candidate above strong vector evidence', () => {
+    const result = fuseRagCandidates({
+      vector: [candidate('strong-vector', { similarity: 0.95 })],
+      lexical: [
+        candidate('weak-page', {
+          lexicalScore: 0.01,
+          sourceType: 'static_project',
+        }),
+      ],
+      pageContext: 'projects',
+    })
+
+    expect(result.candidates[0].chunkId).toBe('strong-vector')
+  })
+
+  it('does not use tags alone for page context boosting', () => {
+    const result = fuseRagCandidates({
+      vector: [
+        candidate('generic', { similarity: 0.8 }),
+        candidate('tagged', { similarity: 0.79, tags: ['projects'] }),
+      ],
+      lexical: [],
+      pageContext: 'projects',
+    })
+
+    expect(result.candidates[0].chunkId).toBe('generic')
+  })
+
+  it('deduplicates repeated chunks within one retrieval channel', () => {
+    const duplicate = candidate('duplicate', { similarity: 0.8 })
+    const result = fuseRagCandidates({
+      vector: [duplicate, duplicate],
+      lexical: [],
+      pageContext: null,
+    })
+
+    expect(result.candidates).toHaveLength(1)
+    expect(result.candidates[0].matchedChannels).toEqual(['vector'])
+    expect(result.candidates[0].fusedScore).toBeCloseTo(1 / 61)
+  })
+
   it('marks weak single-channel evidence as insufficient', () => {
     const result = fuseRagCandidates({
       vector: [candidate('weak', { similarity: 0.25 })],
@@ -112,13 +154,30 @@ describe('fuseRagCandidates', () => {
     expect(result.evidenceMode).toBe('insufficient')
   })
 
-  it('marks explicit lexical evidence as site evidence', () => {
+  it('marks an exact lexical match as site evidence', () => {
     const result = fuseRagCandidates({
       vector: [],
-      lexical: [candidate('lexical', { lexicalRank: 1 })],
+      lexical: [
+        candidate('lexical', { lexicalScore: 0.9, exactMatch: true }),
+      ],
       pageContext: null,
     })
 
     expect(result.evidenceMode).toBe('site')
+  })
+
+  it('does not treat a buried strong candidate as leading site evidence', () => {
+    const result = fuseRagCandidates({
+      vector: [
+        candidate('weak-top', { similarity: 0.3 }),
+        candidate('weak-second', { similarity: 0.29 }),
+        candidate('strong-buried', { similarity: 0.95 }),
+      ],
+      lexical: [],
+      pageContext: null,
+    })
+
+    expect(result.candidates[0].chunkId).toBe('weak-top')
+    expect(result.evidenceMode).toBe('insufficient')
   })
 })

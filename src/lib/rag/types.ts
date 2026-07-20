@@ -27,7 +27,8 @@ export interface RagRetrievalCandidate {
   sourceType: RagSourceType
   tags: string[]
   similarity: number | null
-  lexicalRank: number | null
+  lexicalScore: number | null
+  exactMatch: boolean
 }
 
 export interface FusedRagCandidate extends RagRetrievalCandidate {

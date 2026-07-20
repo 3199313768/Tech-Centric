@@ -11,7 +11,6 @@ const PAGE_CONTEXT_BOOST = 0.002
 const MAX_RESULTS = 8
 const MAX_CHUNKS_PER_DOCUMENT = 2
 const STRONG_VECTOR_SIMILARITY = 0.7
-const EXPLICIT_LEXICAL_RANK = 3
 const CLOSE_SIMILARITY_GAP = 0.05
 
 interface FuseRagCandidatesInput {
@@ -45,17 +44,14 @@ function matchesPageContext(
   candidate: RagRetrievalCandidate,
   pageContext: RagPageContext,
 ): boolean {
-  return (
-    candidate.sourceType === contextSourceTypes[pageContext] ||
-    candidate.tags.includes(pageContext)
-  )
+  return candidate.sourceType === contextSourceTypes[pageContext]
 }
 
 function hasComparableStrength(
   candidate: RagRetrievalCandidate,
   strongestSimilarity: number | null,
 ): boolean {
-  if (strongestSimilarity === null || candidate.similarity === null) return true
+  if (strongestSimilarity === null || candidate.similarity === null) return false
 
   return candidate.similarity >= strongestSimilarity - CLOSE_SIMILARITY_GAP
 }
@@ -65,13 +61,12 @@ function determineEvidenceMode(
 ): RagEvidenceMode {
   if (candidates.length === 0) return 'insufficient'
 
-  const hasSiteEvidence = candidates.some(
+  const hasSiteEvidence = candidates.slice(0, 2).some(
     (candidate) =>
       candidate.matchedChannels.length === 2 ||
       (candidate.similarity !== null &&
         candidate.similarity >= STRONG_VECTOR_SIMILARITY) ||
-      (candidate.lexicalRank !== null &&
-        candidate.lexicalRank <= EXPLICIT_LEXICAL_RANK),
+      candidate.exactMatch,
   )
 
   return hasSiteEvidence ? 'site' : 'insufficient'
@@ -89,16 +84,18 @@ export function fuseRagCandidates({
     channel: 'vector' | 'lexical',
   ) {
     candidates.forEach((candidate, index) => {
-      const rank =
-        channel === 'lexical' && candidate.lexicalRank !== null
-          ? candidate.lexicalRank
-          : index + 1
+      const rank = index + 1
       const existing = candidatesByChunk.get(candidate.chunkId)
 
       if (existing) {
+        if (existing.matchedChannels.includes(channel)) return
+
         existing.fusedScore += 1 / (RRF_OFFSET + rank)
         existing.matchedChannels.push(channel)
-        if (channel === 'lexical') existing.lexicalRank = candidate.lexicalRank
+        if (channel === 'lexical') {
+          existing.lexicalScore = candidate.lexicalScore
+          existing.exactMatch ||= candidate.exactMatch
+        }
         return
       }
 
