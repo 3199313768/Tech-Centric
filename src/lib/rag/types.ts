@@ -81,6 +81,30 @@ export interface RagSource {
   excerpt: string
 }
 
+export interface RagChatRequest {
+  message: string
+  pageContext: RagPageContext | null
+  sessionId: string | null
+}
+
+export type RagSseEvent =
+  | {
+      type: 'meta'
+      responseId: string
+      sessionId: string
+    }
+  | { type: 'delta'; text: string }
+  | {
+      type: 'done'
+      answer: string
+      sources: RagSource[]
+      evidenceMode: RagEvidenceMode
+      retrievalMs: number
+      firstTokenMs: number
+      totalMs: number
+    }
+  | { type: 'error'; error: string }
+
 export interface MessageAction {
   id: string
   label: string
