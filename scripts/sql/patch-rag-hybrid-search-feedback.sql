@@ -1,4 +1,10 @@
-create or replace function public.match_rag_chunks(
+begin;
+
+-- Rebuild only the RPC function because PostgreSQL cannot replace its return
+-- table shape in place. This does not modify rag_documents or rag_chunks data.
+drop function if exists public.match_rag_chunks(vector, integer, double precision);
+
+create function public.match_rag_chunks(
   query_embedding vector(1536),
   match_count integer default 12,
   min_similarity double precision default 0.2
@@ -135,3 +141,5 @@ revoke all on function public.match_rag_chunks(vector, integer, double precision
 revoke all on function public.match_rag_chunks_lexical(text, integer) from public;
 grant execute on function public.match_rag_chunks(vector, integer, double precision) to service_role;
 grant execute on function public.match_rag_chunks_lexical(text, integer) to service_role;
+
+commit;
