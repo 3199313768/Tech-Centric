@@ -202,4 +202,61 @@ revoke all on function public.match_rag_chunks_lexical(text, integer) from publi
 grant execute on function public.match_rag_chunks(vector, integer, double precision) to service_role;
 grant execute on function public.match_rag_chunks_lexical(text, integer) to service_role;
 
+create table if not exists public.rag_responses (
+  id uuid primary key,
+  session_id uuid not null,
+  question_summary text not null check (char_length(question_summary) <= 500),
+  question_hash text not null check (char_length(question_hash) = 64),
+  answer text not null check (char_length(answer) <= 8000),
+  cited_source_ids text[] not null default '{}',
+  timings jsonb not null default '{}',
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.rag_feedback (
+  id uuid primary key default gen_random_uuid(),
+  response_id uuid not null references public.rag_responses(id) on delete cascade,
+  session_id uuid not null,
+  helpful boolean not null,
+  reason text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint rag_feedback_response_session_unique unique (response_id, session_id),
+  constraint rag_feedback_reason_check check (
+    (helpful = true and reason is null)
+    or (helpful = false and reason in (
+      'inaccurate',
+      'irrelevant_sources',
+      'did_not_answer',
+      'incomplete',
+      'other'
+    ))
+  )
+);
+
+create index if not exists rag_responses_session_id_idx
+  on public.rag_responses (session_id);
+
+alter table public.rag_responses enable row level security;
+alter table public.rag_feedback enable row level security;
+
+drop policy if exists "service role can manage rag responses" on public.rag_responses;
+create policy "service role can manage rag responses"
+  on public.rag_responses
+  for all
+  using (auth.role() = 'service_role')
+  with check (auth.role() = 'service_role');
+
+drop policy if exists "service role can manage rag feedback" on public.rag_feedback;
+create policy "service role can manage rag feedback"
+  on public.rag_feedback
+  for all
+  using (auth.role() = 'service_role')
+  with check (auth.role() = 'service_role');
+
+revoke all on table public.rag_responses from anon, authenticated;
+revoke all on table public.rag_feedback from anon, authenticated;
+grant all on table public.rag_responses to service_role;
+grant all on table public.rag_feedback to service_role;
+
 commit;

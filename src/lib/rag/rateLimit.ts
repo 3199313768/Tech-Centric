@@ -2,10 +2,13 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 export const RAG_RATE_LIMIT_WINDOW_MS = 60_000
 export const RAG_RATE_LIMIT_MAX_REQUESTS = 10
+export const RAG_FEEDBACK_RATE_LIMIT_MAX_REQUESTS = 30
+
+type RagRateLimitNamespace = 'chat' | 'feedback'
 
 const memoryBuckets = new Map<string, { count: number; resetAt: number }>()
 
-function isMemoryRateLimited(bucketKey: string): boolean {
+function isMemoryRateLimited(bucketKey: string, maxRequests: number): boolean {
   const now = Date.now()
   const bucket = memoryBuckets.get(bucketKey)
 
@@ -15,22 +18,35 @@ function isMemoryRateLimited(bucketKey: string): boolean {
   }
 
   bucket.count += 1
-  return bucket.count > RAG_RATE_LIMIT_MAX_REQUESTS
+  return bucket.count > maxRequests
 }
 
-export async function isRagChatRateLimited(bucketKey: string): Promise<boolean> {
+async function isRagRateLimited(
+  namespace: RagRateLimitNamespace,
+  bucketKey: string,
+  maxRequests: number,
+): Promise<boolean> {
+  const namespacedBucketKey = `rag:${namespace}:${bucketKey}`
   const admin = createAdminClient()
-  if (!admin) return isMemoryRateLimited(bucketKey)
+  if (!admin) return isMemoryRateLimited(namespacedBucketKey, maxRequests)
 
   const { data, error } = await admin.rpc('check_rag_rate_limit', {
-    p_bucket_key: bucketKey,
+    p_bucket_key: namespacedBucketKey,
     p_window_ms: RAG_RATE_LIMIT_WINDOW_MS,
-    p_max_requests: RAG_RATE_LIMIT_MAX_REQUESTS,
+    p_max_requests: maxRequests,
   })
 
   if (error || typeof data !== 'boolean') {
-    return isMemoryRateLimited(bucketKey)
+    return isMemoryRateLimited(namespacedBucketKey, maxRequests)
   }
 
   return data
+}
+
+export function isRagChatRateLimited(bucketKey: string): Promise<boolean> {
+  return isRagRateLimited('chat', bucketKey, RAG_RATE_LIMIT_MAX_REQUESTS)
+}
+
+export function isRagFeedbackRateLimited(bucketKey: string): Promise<boolean> {
+  return isRagRateLimited('feedback', bucketKey, RAG_FEEDBACK_RATE_LIMIT_MAX_REQUESTS)
 }
