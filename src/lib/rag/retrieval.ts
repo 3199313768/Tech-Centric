@@ -1,7 +1,34 @@
 import { createClient } from '@supabase/supabase-js'
-import type { RagSearchResult, RagSource } from './types'
+import type {
+  RagRetrievalCandidate,
+  RagSearchResult,
+  RagSource,
+  RagSourceType,
+} from './types'
 
 const SOURCE_EXCERPT_LENGTH = 160
+
+interface VectorMatchRow {
+  chunk_id: string
+  document_id: string
+  source_id: string
+  content: string
+  title: string
+  url: string | null
+  source_type: RagSourceType
+  tags: string[]
+  similarity: number
+}
+
+interface LexicalMatchRow extends Omit<VectorMatchRow, 'similarity'> {
+  lexical_score: number
+  exact_match: boolean
+}
+
+interface RetrievalDependencies {
+  vector: (embedding: number[]) => Promise<RagRetrievalCandidate[]>
+  lexical: (query: string) => Promise<RagRetrievalCandidate[]>
+}
 
 function createServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -19,7 +46,11 @@ function createServiceClient() {
   })
 }
 
-export async function matchRagChunks(queryEmbedding: number[], matchCount = 8, minSimilarity = 0.2) {
+export async function matchRagChunksVector(
+  queryEmbedding: number[],
+  matchCount = 12,
+  minSimilarity = 0.2,
+) {
   const supabase = createServiceClient()
   const { data, error } = await supabase.rpc('match_rag_chunks', {
     query_embedding: queryEmbedding,
@@ -28,10 +59,82 @@ export async function matchRagChunks(queryEmbedding: number[], matchCount = 8, m
   })
 
   if (error) {
-    throw new Error(`RAG retrieval failed: ${error.message}`)
+    throw new Error(`RAG vector retrieval failed: ${error.message}`)
   }
 
-  return (data || []) as RagSearchResult[]
+  return ((data || []) as VectorMatchRow[]).map((row) =>
+    toRetrievalCandidate(row, {
+      similarity: row.similarity,
+      lexicalScore: null,
+      exactMatch: false,
+    }),
+  )
+}
+
+export async function matchRagChunksLexical(query: string, matchCount = 12) {
+  const supabase = createServiceClient()
+  const { data, error } = await supabase.rpc('match_rag_chunks_lexical', {
+    query_text: query,
+    match_count: matchCount,
+  })
+
+  if (error) {
+    throw new Error(`RAG lexical retrieval failed: ${error.message}`)
+  }
+
+  return ((data || []) as LexicalMatchRow[]).map((row) =>
+    toRetrievalCandidate(row, {
+      similarity: null,
+      lexicalScore: row.lexical_score,
+      exactMatch: row.exact_match,
+    }),
+  )
+}
+
+export async function retrieveRagCandidates(
+  query: string,
+  embedding: number[],
+  dependencies: RetrievalDependencies = {
+    vector: matchRagChunksVector,
+    lexical: matchRagChunksLexical,
+  },
+) {
+  const [vectorResult, lexicalResult] = await Promise.allSettled([
+    dependencies.vector(embedding),
+    dependencies.lexical(query),
+  ])
+
+  if (vectorResult.status === 'rejected' && lexicalResult.status === 'rejected') {
+    throw new Error('RAG retrieval failed')
+  }
+
+  return {
+    vector: vectorResult.status === 'fulfilled' ? vectorResult.value : [],
+    lexical: lexicalResult.status === 'fulfilled' ? lexicalResult.value : [],
+  }
+}
+
+// Compatibility adapter for the legacy chat route until it consumes fused candidates.
+export async function matchRagChunks(
+  queryEmbedding: number[],
+  matchCount = 8,
+  minSimilarity = 0.2,
+) {
+  const candidates = await matchRagChunksVector(
+    queryEmbedding,
+    matchCount,
+    minSimilarity,
+  )
+  return candidates.map((candidate): RagSearchResult => ({
+    chunk_id: candidate.chunkId,
+    document_id: candidate.documentId,
+    content: candidate.content,
+    title: candidate.title,
+    url: candidate.url,
+    source_type: candidate.sourceType,
+    tags: candidate.tags,
+    similarity: candidate.similarity ?? 0,
+  }))
 }
 
 export function toPublicSources(results: RagSearchResult[]): RagSource[] {
@@ -62,5 +165,26 @@ function sanitizeSourceUrl(url: string | null) {
     return ['http:', 'https:', 'mailto:'].includes(parsed.protocol) ? parsed.toString() : null
   } catch {
     return null
+  }
+}
+
+function toRetrievalCandidate(
+  row: Omit<VectorMatchRow, 'similarity'>,
+  scores: Pick<
+    RagRetrievalCandidate,
+    'similarity' | 'lexicalScore' | 'exactMatch'
+  >,
+): RagRetrievalCandidate {
+  return {
+    chunkId: row.chunk_id,
+    documentId: row.document_id,
+    sourceId: row.source_id,
+    content: row.content,
+    excerpt: row.content.slice(0, SOURCE_EXCERPT_LENGTH),
+    title: row.title,
+    url: row.url,
+    sourceType: row.source_type,
+    tags: row.tags,
+    ...scores,
   }
 }
