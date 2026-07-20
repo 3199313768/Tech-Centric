@@ -25,16 +25,14 @@ export function SourceList({ sources }: SourceListProps) {
                 className="sg-rag-source-item"
               >
                 <span className="sg-rag-source-item__head">
-                  <span className="sg-rag-source-item__title">
-                    [{source.citation}] {source.title}
-                  </span>
+                  <span className="sg-rag-source-item__title">{source.title}</span>
                   <ExternalLink
                     className="sg-rag-source-item__link-icon"
                     aria-hidden
                   />
                 </span>
                 <span className="sg-rag-source-item__meta">
-                  {source.excerpt}
+                  {formatSourceType(source.sourceType)}
                 </span>
               </Link>
             )
@@ -55,9 +53,7 @@ export function SourceList({ sources }: SourceListProps) {
               className="sg-rag-source-item"
             >
               <span className="sg-rag-source-item__head">
-                <span className="sg-rag-source-item__title">
-                  [{source.citation}] {source.title}
-                </span>
+                <span className="sg-rag-source-item__title">{source.title}</span>
                 {safeUrl ? (
                   <ExternalLink
                     className="sg-rag-source-item__link-icon"
@@ -66,7 +62,7 @@ export function SourceList({ sources }: SourceListProps) {
                 ) : null}
               </span>
               <span className="sg-rag-source-item__meta">
-                {source.excerpt}
+                {formatSourceType(source.sourceType)}
               </span>
             </SourceWrapper>
           )
@@ -74,6 +70,10 @@ export function SourceList({ sources }: SourceListProps) {
       </div>
     </div>
   )
+}
+
+function formatSourceType(sourceType: string) {
+  return sourceType.replace(/_/g, ' ')
 }
 
 function getSafeUrl(url: string | null) {

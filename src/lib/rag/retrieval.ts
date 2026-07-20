@@ -43,6 +43,7 @@ export function toPublicSources(results: RagSearchResult[]): RagSource[] {
       return true
     })
     .map((result, index) => ({
+      // Compatibility shape for the legacy meta event until citation-aware SSE replaces it.
       citation: index + 1,
       sourceId: result.document_id,
       title: result.title,
