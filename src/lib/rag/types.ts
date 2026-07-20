@@ -36,6 +36,10 @@ export interface FusedRagCandidate extends RagRetrievalCandidate {
   matchedChannels: Array<'vector' | 'lexical'>
 }
 
+export interface RagContextSource extends FusedRagCandidate {
+  contextId: `S${number}`
+}
+
 export type RagEvidenceMode = 'site' | 'insufficient' | 'general'
 
 export interface RagDocumentInput {
@@ -69,10 +73,12 @@ export interface RagSearchResult {
 }
 
 export interface RagSource {
+  citation: number
+  sourceId: string
   title: string
   url: string | null
   sourceType: RagSourceType
-  similarity: number
+  excerpt: string
 }
 
 export interface MessageAction {
