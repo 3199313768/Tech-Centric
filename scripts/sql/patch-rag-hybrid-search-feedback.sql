@@ -76,7 +76,7 @@ as $$
         else websearch_to_tsquery('simple', normalized_query)
       end as ts_query
     from input
-  ), scored as (
+  ), content_matches as (
     select
       rag_chunks.id as chunk_id,
       rag_documents.id as document_id,
@@ -86,22 +86,28 @@ as $$
       rag_documents.url,
       rag_documents.source_type,
       rag_documents.tags,
-      (
-        ts_rank_cd(
-          to_tsvector('simple', rag_chunks.content),
-          search_input.ts_query
-        )
-        + case when lower(rag_documents.title) = search_input.normalized_query then 2.0 else 0.0 end
-        + case when strpos(lower(rag_documents.title), search_input.normalized_query) > 0 then 0.75 else 0.0 end
-        + case when tag_matches.exact_match then 1.5 else 0.0 end
-        + case when tag_matches.substring_match then 0.5 else 0.0 end
+      ts_rank_cd(
+        to_tsvector('simple', rag_chunks.content),
+        search_input.ts_query
       )::double precision as lexical_score,
-      (
-        lower(rag_documents.title) = search_input.normalized_query
-        or tag_matches.exact_match
-      ) as exact_match
+      false as exact_match
     from public.rag_chunks
     join public.rag_documents on rag_documents.id = rag_chunks.document_id
+    cross join search_input
+    where rag_documents.is_public = true
+      and search_input.normalized_query <> ''
+      and to_tsvector('simple', rag_chunks.content) @@ search_input.ts_query
+  ), metadata_documents as (
+    select
+      rag_documents.id as document_id,
+      rag_documents.source_id,
+      rag_documents.title,
+      rag_documents.url,
+      rag_documents.source_type,
+      rag_documents.tags,
+      metadata_score.lexical_score,
+      metadata_score.exact_match
+    from public.rag_documents
     cross join search_input
     cross join lateral (
       select
@@ -109,21 +115,70 @@ as $$
         coalesce(bool_or(strpos(lower(tag), search_input.normalized_query) > 0), false) as substring_match
       from unnest(rag_documents.tags) as tag
     ) as tag_matches
+    cross join lateral (
+      select
+        (
+          case when lower(rag_documents.title) = search_input.normalized_query then 2.0 else 0.0 end
+          + case when strpos(lower(rag_documents.title), search_input.normalized_query) > 0 then 0.75 else 0.0 end
+          + case when tag_matches.exact_match then 1.5 else 0.0 end
+          + case when tag_matches.substring_match then 0.5 else 0.0 end
+        )::double precision as lexical_score,
+        (
+          lower(rag_documents.title) = search_input.normalized_query
+          or tag_matches.exact_match
+        ) as exact_match
+    ) as metadata_score
     where rag_documents.is_public = true
       and search_input.normalized_query <> ''
-      and (
-        to_tsvector('simple', rag_chunks.content) @@ search_input.ts_query
-        or strpos(lower(rag_documents.title), search_input.normalized_query) > 0
-        or tag_matches.substring_match
-      )
+      and metadata_score.lexical_score > 0
+  ), metadata_matches as (
+    select
+      rag_chunks.id as chunk_id,
+      metadata_documents.document_id,
+      metadata_documents.source_id,
+      rag_chunks.content,
+      metadata_documents.title,
+      metadata_documents.url,
+      metadata_documents.source_type,
+      metadata_documents.tags,
+      metadata_documents.lexical_score,
+      metadata_documents.exact_match
+    from metadata_documents
+    join public.rag_chunks on rag_chunks.document_id = metadata_documents.document_id
+  ), combined_matches as (
+    select * from content_matches
+    union all
+    select * from metadata_matches
+  ), merged_matches as (
+    select
+      chunk_id,
+      document_id,
+      source_id,
+      content,
+      title,
+      url,
+      source_type,
+      tags,
+      max(lexical_score) as lexical_score,
+      bool_or(exact_match) as exact_match
+    from combined_matches
+    group by
+      chunk_id,
+      document_id,
+      source_id,
+      content,
+      title,
+      url,
+      source_type,
+      tags
   ), ranked as (
     select
-      scored.*,
+      merged_matches.*,
       row_number() over (
         partition by document_id
         order by lexical_score desc, chunk_id
       ) as doc_rank
-    from scored
+    from merged_matches
   )
   select
     chunk_id,

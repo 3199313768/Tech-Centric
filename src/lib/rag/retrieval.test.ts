@@ -80,9 +80,13 @@ describe('hybrid retrieval SQL patch', () => {
 
   it('uses literal substring matching and indexes chunk full-text search', () => {
     expect(sql).not.toContain(' ilike ')
+    expect(sql).not.toContain(' or strpos')
     expect(sql).toContain('strpos(')
     expect(sql).toContain('using gin')
     expect(sql).toContain("to_tsvector('simple', content)")
+    expect(sql).toContain('content_matches')
+    expect(sql).toContain('metadata_documents')
+    expect(sql).toContain('union all')
   })
 
   it('runs both RPCs with invoker privileges restricted to service role', () => {
