@@ -14,7 +14,9 @@
     "sql:resources": "ts-node --project tsconfig.json --compiler-options '{\"module\":\"CommonJS\",\"moduleResolution\":\"node\"}' scripts/codegen/generate-resources-sql.ts",
     "test:e2e": "playwright test",
     "test:e2e:headed": "PLAYWRIGHT_HEADED=1 PLAYWRIGHT_SLOW_MO=600 playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest"
   },
   "dependencies": {
     "@supabase/ssr": "^0.8.0",
@@ -43,6 +45,7 @@
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   }
 }
