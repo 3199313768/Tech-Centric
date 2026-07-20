@@ -17,6 +17,7 @@ import {
   isRagChatRateLimited,
   isRagFeedbackRateLimited,
 } from './rateLimit'
+import { readLimitedRequestBody } from '@/app/api/rag/feedback/route'
 
 const responseId = '11111111-1111-4111-8111-111111111111'
 const sessionId = '22222222-2222-4222-8222-222222222222'
@@ -73,9 +74,13 @@ describe('feedback persistence', () => {
 
   it('bounds and hashes the server-owned response snapshot', async () => {
     const upsert = vi.fn().mockResolvedValue({ error: null })
+    const lt = vi.fn().mockResolvedValue({ error: null })
+    const deleteExpired = vi.fn().mockReturnValue({ lt })
     createAdminClient.mockReturnValue({
-      from: vi.fn().mockReturnValue({ upsert }),
+      from: vi.fn().mockReturnValue({ upsert, delete: deleteExpired }),
     })
+
+    const beforeSave = Date.now()
 
     await saveRagResponseSnapshot({
       responseId,
@@ -83,57 +88,48 @@ describe('feedback persistence', () => {
       question: `  ${'q'.repeat(600)}  `,
       answer: 'a'.repeat(9_000),
       citedSourceIds: Array.from({ length: 25 }, (_, index) => ` source-${index} `),
-      timings: { retrievalMs: -5, generationMs: 999_999_999 },
+      timings: { retrievalMs: -5, firstTokenMs: 2_000, totalMs: 999_999_999 },
     })
 
-    expect(upsert).toHaveBeenCalledWith(expect.objectContaining({
+    const saved = upsert.mock.calls[0][0]
+    expect(saved).toEqual(expect.objectContaining({
       id: responseId,
       session_id: sessionId,
       question_summary: 'q'.repeat(500),
       question_hash: expect.stringMatching(/^[a-f0-9]{64}$/),
       answer: 'a'.repeat(8_000),
       cited_source_ids: Array.from({ length: 20 }, (_, index) => `source-${index}`),
-      timings: { retrievalMs: 0, generationMs: 300_000 },
-    }), { onConflict: 'id' })
+      timings: { retrievalMs: 0, firstTokenMs: 2_000, totalMs: 300_000 },
+      expires_at: expect.any(String),
+    }))
+    expect(upsert).toHaveBeenCalledWith(saved, { onConflict: 'id' })
+    expect(new Date(saved.expires_at).getTime()).toBeGreaterThanOrEqual(
+      beforeSave + 90 * 24 * 60 * 60 * 1_000,
+    )
+    expect(deleteExpired).toHaveBeenCalledOnce()
+    expect(lt).toHaveBeenCalledWith('expires_at', expect.any(String))
   })
 
-  it('checks response ownership before upserting feedback', async () => {
-    const maybeSingle = vi.fn().mockResolvedValue({ data: { id: responseId }, error: null })
-    const eqSession = vi.fn().mockReturnValue({ maybeSingle })
-    const eqResponse = vi.fn().mockReturnValue({ eq: eqSession })
-    const select = vi.fn().mockReturnValue({ eq: eqResponse })
-    const upsert = vi.fn().mockResolvedValue({ error: null })
-    const from = vi.fn((table: string) => table === 'rag_responses'
-      ? { select }
-      : { upsert })
-    createAdminClient.mockReturnValue({ from })
+  it('uses one atomic RPC to upsert feedback for the matching response session', async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: true, error: null })
+    createAdminClient.mockReturnValue({ rpc })
 
     await expect(upsertRagFeedback({ responseId, sessionId, helpful: false, reason: 'incomplete' }))
       .resolves.toBe('saved')
-    expect(upsert).toHaveBeenCalledWith(expect.objectContaining({
-      response_id: responseId,
-      session_id: sessionId,
-      helpful: false,
-      reason: 'incomplete',
-      updated_at: expect.any(String),
-    }), { onConflict: 'response_id,session_id' })
+    expect(rpc).toHaveBeenCalledWith('upsert_rag_feedback', {
+      p_response_id: responseId,
+      p_session_id: sessionId,
+      p_helpful: false,
+      p_reason: 'incomplete',
+    })
   })
 
-  it('does not upsert when the response and session do not match', async () => {
-    const maybeSingle = vi.fn().mockResolvedValue({ data: null, error: null })
-    const eq = vi.fn()
-    eq.mockReturnValueOnce({ eq }).mockReturnValueOnce({ maybeSingle })
-    const select = vi.fn().mockReturnValue({ eq })
-    const feedbackUpsert = vi.fn()
-    createAdminClient.mockReturnValue({
-      from: vi.fn((table: string) => table === 'rag_responses'
-        ? { select }
-        : { upsert: feedbackUpsert }),
-    })
+  it('maps an atomic RPC false result to missing-response', async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: false, error: null })
+    createAdminClient.mockReturnValue({ rpc })
 
     await expect(upsertRagFeedback({ responseId, sessionId, helpful: true, reason: null }))
       .resolves.toBe('missing-response')
-    expect(feedbackUpsert).not.toHaveBeenCalled()
   })
 })
 
@@ -142,12 +138,13 @@ describe('RAG rate-limit namespaces', () => {
 
   it('replaces the raw client identifier with a stable namespace-specific hash', () => {
     const rawIp = '203.0.113.42'
-    const chatKey = createRagRateLimitBucketKey('chat', rawIp)
+    const chatKey = createRagRateLimitBucketKey('chat', rawIp, 'secret-a')
 
     expect(chatKey).toMatch(/^rag:chat:[a-f0-9]{64}$/)
     expect(chatKey).not.toContain(rawIp)
-    expect(createRagRateLimitBucketKey('chat', rawIp)).toBe(chatKey)
-    expect(createRagRateLimitBucketKey('feedback', rawIp)).not.toBe(chatKey)
+    expect(createRagRateLimitBucketKey('chat', rawIp, 'secret-a')).toBe(chatKey)
+    expect(createRagRateLimitBucketKey('feedback', rawIp, 'secret-a')).not.toBe(chatKey)
+    expect(createRagRateLimitBucketKey('chat', rawIp, 'secret-b')).not.toBe(chatKey)
   })
 
   it('isolates chat and feedback buckets and gives feedback 30 requests per minute', async () => {
@@ -170,6 +167,39 @@ describe('RAG rate-limit namespaces', () => {
   })
 })
 
+describe('readLimitedRequestBody', () => {
+  it('cancels and rejects a chunked body as soon as it exceeds the byte cap', async () => {
+    const cancel = vi.fn()
+    const chunks = ['1234', '56789']
+    const stream = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        const chunk = chunks.shift()
+        if (chunk) controller.enqueue(new TextEncoder().encode(chunk))
+        else controller.close()
+      },
+      cancel,
+    })
+    const request = new Request('http://localhost/api/rag/feedback', {
+      method: 'POST',
+      body: stream,
+      duplex: 'half',
+    } as RequestInit)
+
+    await expect(readLimitedRequestBody(request, 8)).resolves.toEqual({ ok: false, tooLarge: true })
+    expect(cancel).toHaveBeenCalledOnce()
+  })
+
+  it('ignores an invalid content-length and reads a body within the cap', async () => {
+    const request = new Request('http://localhost/api/rag/feedback', {
+      method: 'POST',
+      headers: { 'content-length': '-1' },
+      body: '{}',
+    })
+
+    await expect(readLimitedRequestBody(request, 8)).resolves.toEqual({ ok: true, body: '{}' })
+  })
+})
+
 describe('feedback SQL patch', () => {
   const sql = readFileSync(
     join(process.cwd(), 'scripts/sql/patch-rag-hybrid-search-feedback.sql'),
@@ -185,5 +215,12 @@ describe('feedback SQL patch', () => {
     expect(sql).toContain("auth.role() = 'service_role'")
     expect(sql).toContain('revoke all on table public.rag_responses from anon, authenticated')
     expect(sql).toContain('revoke all on table public.rag_feedback from anon, authenticated')
+    expect(sql).toContain('expires_at timestamptz not null')
+    expect(sql).toContain('rag_responses_expires_at_idx')
+    expect(sql).toContain('create or replace function public.upsert_rag_feedback')
+    expect(sql).toContain('insert into public.rag_feedback')
+    expect(sql).toContain('from public.rag_responses')
+    expect(sql).toContain('on conflict (response_id, session_id) do update')
+    expect(sql).toContain('grant execute on function public.upsert_rag_feedback')
   })
 })

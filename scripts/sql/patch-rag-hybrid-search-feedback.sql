@@ -210,8 +210,22 @@ create table if not exists public.rag_responses (
   answer text not null check (char_length(answer) <= 8000),
   cited_source_ids text[] not null default '{}',
   timings jsonb not null default '{}',
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  expires_at timestamptz not null,
+  constraint rag_responses_expiry_check check (expires_at > created_at)
 );
+
+alter table public.rag_responses
+  add column if not exists expires_at timestamptz;
+update public.rag_responses
+  set expires_at = created_at + interval '90 days'
+  where expires_at is null;
+alter table public.rag_responses
+  alter column expires_at set not null;
+alter table public.rag_responses
+  drop constraint if exists rag_responses_expiry_check;
+alter table public.rag_responses
+  add constraint rag_responses_expiry_check check (expires_at > created_at);
 
 create table if not exists public.rag_feedback (
   id uuid primary key default gen_random_uuid(),
@@ -236,6 +250,8 @@ create table if not exists public.rag_feedback (
 
 create index if not exists rag_responses_session_id_idx
   on public.rag_responses (session_id);
+create index if not exists rag_responses_expires_at_idx
+  on public.rag_responses (expires_at);
 
 alter table public.rag_responses enable row level security;
 alter table public.rag_feedback enable row level security;
@@ -258,5 +274,37 @@ revoke all on table public.rag_responses from anon, authenticated;
 revoke all on table public.rag_feedback from anon, authenticated;
 grant all on table public.rag_responses to service_role;
 grant all on table public.rag_feedback to service_role;
+
+create or replace function public.upsert_rag_feedback(
+  p_response_id uuid,
+  p_session_id uuid,
+  p_helpful boolean,
+  p_reason text
+)
+returns boolean
+language plpgsql
+security invoker
+as $$
+declare
+  affected_rows integer;
+begin
+  insert into public.rag_feedback (response_id, session_id, helpful, reason)
+  select p_response_id, p_session_id, p_helpful, p_reason
+  from public.rag_responses
+  where id = p_response_id
+    and session_id = p_session_id
+    and expires_at > now()
+  on conflict (response_id, session_id) do update
+    set helpful = excluded.helpful,
+        reason = excluded.reason,
+        updated_at = now();
+
+  get diagnostics affected_rows = row_count;
+  return affected_rows > 0;
+end;
+$$;
+
+revoke all on function public.upsert_rag_feedback(uuid, uuid, boolean, text) from public;
+grant execute on function public.upsert_rag_feedback(uuid, uuid, boolean, text) to service_role;
 
 commit;

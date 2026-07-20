@@ -15,7 +15,7 @@ const MAX_QUESTION_SUMMARY_LENGTH = 500
 const MAX_ANSWER_LENGTH = 8_000
 const MAX_CITED_SOURCE_IDS = 20
 const MAX_TIMING_MS = 300_000
-const MAX_TIMING_ENTRIES = 20
+const RESPONSE_TTL_MS = 90 * 24 * 60 * 60 * 1_000
 
 export type RagFeedbackReason = typeof FEEDBACK_REASONS[number]
 
@@ -36,7 +36,11 @@ export interface RagResponseSnapshot {
   question: string
   answer: string
   citedSourceIds: string[]
-  timings: Record<string, number>
+  timings: {
+    retrievalMs: number
+    firstTokenMs: number
+    totalMs: number
+  }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -75,13 +79,9 @@ export function parseRagFeedbackPayload(value: unknown): RagFeedbackParseResult 
   }
 }
 
-function normalizeTimings(timings: Record<string, number>) {
-  return Object.fromEntries(
-    Object.entries(timings)
-      .slice(0, MAX_TIMING_ENTRIES)
-      .filter((entry): entry is [string, number] => Number.isFinite(entry[1]))
-      .map(([key, value]) => [key.slice(0, 64), Math.min(MAX_TIMING_MS, Math.max(0, value))]),
-  )
+function boundTiming(value: number) {
+  if (!Number.isFinite(value)) return 0
+  return Math.min(MAX_TIMING_MS, Math.max(0, value))
 }
 
 export async function saveRagResponseSnapshot(snapshot: RagResponseSnapshot): Promise<void> {
@@ -89,6 +89,7 @@ export async function saveRagResponseSnapshot(snapshot: RagResponseSnapshot): Pr
   if (!admin) throw new Error('RAG feedback storage is unavailable')
 
   const question = snapshot.question.trim()
+  const now = Date.now()
   const { error } = await admin.from('rag_responses').upsert({
     id: snapshot.responseId,
     session_id: snapshot.sessionId,
@@ -99,10 +100,24 @@ export async function saveRagResponseSnapshot(snapshot: RagResponseSnapshot): Pr
       .slice(0, MAX_CITED_SOURCE_IDS)
       .map(sourceId => sourceId.trim().slice(0, 200))
       .filter(Boolean),
-    timings: normalizeTimings(snapshot.timings),
+    timings: {
+      retrievalMs: boundTiming(snapshot.timings.retrievalMs),
+      firstTokenMs: boundTiming(snapshot.timings.firstTokenMs),
+      totalMs: boundTiming(snapshot.timings.totalMs),
+    },
+    expires_at: new Date(now + RESPONSE_TTL_MS).toISOString(),
   }, { onConflict: 'id' })
 
   if (error) throw new Error('Failed to save RAG response snapshot')
+
+  try {
+    await admin
+      .from('rag_responses')
+      .delete()
+      .lt('expires_at', new Date(now).toISOString())
+  } catch {
+    // Expiry cleanup is best-effort and cascades to feedback rows.
+  }
 }
 
 export async function upsertRagFeedback(
@@ -111,24 +126,13 @@ export async function upsertRagFeedback(
   const admin = createAdminClient()
   if (!admin) throw new Error('RAG feedback storage is unavailable')
 
-  const { data: response, error: responseError } = await admin
-    .from('rag_responses')
-    .select('id')
-    .eq('id', feedback.responseId)
-    .eq('session_id', feedback.sessionId)
-    .maybeSingle()
-
-  if (responseError) throw new Error('Failed to check RAG response')
-  if (!response) return 'missing-response'
-
-  const { error } = await admin.from('rag_feedback').upsert({
-    response_id: feedback.responseId,
-    session_id: feedback.sessionId,
-    helpful: feedback.helpful,
-    reason: feedback.reason,
-    updated_at: new Date().toISOString(),
-  }, { onConflict: 'response_id,session_id' })
+  const { data, error } = await admin.rpc('upsert_rag_feedback', {
+    p_response_id: feedback.responseId,
+    p_session_id: feedback.sessionId,
+    p_helpful: feedback.helpful,
+    p_reason: feedback.reason,
+  })
 
   if (error) throw new Error('Failed to save RAG feedback')
-  return 'saved'
+  return data === true ? 'saved' : 'missing-response'
 }
