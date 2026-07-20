@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 
-import { NextResponse } from 'next/server'
+import { after, NextResponse } from 'next/server'
 import { assignContextIds, finalizeCitations } from '@/lib/rag/citations'
 import { createEmbedding } from '@/lib/rag/embedding'
 import { streamRagAnswer } from '@/lib/rag/deepseek'
@@ -128,18 +128,20 @@ export async function POST(req: Request) {
             ...timings,
           })
 
-          try {
-            await saveRagResponseSnapshot({
-              responseId,
-              sessionId,
-              question: message,
-              answer: finalized.answer,
-              citedSourceIds: finalized.sources.map(source => source.sourceId),
-              timings,
-            })
-          } catch {
-            console.warn('RAG response snapshot persistence failed')
-          }
+          after(async () => {
+            try {
+              await saveRagResponseSnapshot({
+                responseId,
+                sessionId,
+                question: message,
+                answer: finalized.answer,
+                citedSourceIds: finalized.sources.map(source => source.sourceId),
+                timings,
+              })
+            } catch {
+              console.warn('RAG response snapshot persistence failed')
+            }
+          })
 
           console.info('RAG chat completed', {
             responseId,
