@@ -5,6 +5,38 @@ export type RagSourceType =
   | 'knowledge_record'
   | 'vibe_entry'
 
+export type RagPageContext =
+  | 'projects'
+  | 'skills'
+  | 'knowledge'
+  | 'resources'
+  | 'vibe'
+  | 'about'
+  | 'showcase'
+  | 'search'
+  | 'stats'
+
+export interface RagRetrievalCandidate {
+  chunkId: string
+  documentId: string
+  sourceId: string
+  content: string
+  excerpt: string
+  title: string
+  url: string | null
+  sourceType: RagSourceType
+  tags: string[]
+  similarity: number | null
+  lexicalRank: number | null
+}
+
+export interface FusedRagCandidate extends RagRetrievalCandidate {
+  fusedScore: number
+  matchedChannels: Array<'vector' | 'lexical'>
+}
+
+export type RagEvidenceMode = 'site' | 'insufficient' | 'general'
+
 export interface RagDocumentInput {
   sourceType: RagSourceType
   sourceId: string
