@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import { deepseekChatCompletionStream } from '@/lib/deepseek/client'
 
 vi.mock('@/lib/deepseek/client', () => ({
   deepseekChatCompletion: vi.fn(),
@@ -123,6 +124,9 @@ describe('buildRagMessages', () => {
     const messages = buildRagMessages('解释 React', contexts, 'general')
 
     expect(messages[0].content).toContain('本次可用：无')
+    expect(messages[0].content).toContain('可直接使用通用知识回答')
+    expect(messages[0].content).not.toContain('先明确说明“站内资料没有覆盖这个问题的完整答案”')
+    expect(messages[0].content).not.toContain('先明确说明站内资料不足')
     expect(messages[1].content).toContain('【站内资料 JSON】\n\n[]')
     expect(messages[1].content).toContain('不允许引用任何来源 ID')
     expect(messages[1].content).not.toContain('Tech-Centric 项目说明')
@@ -171,5 +175,49 @@ describe('streamRagAnswer', () => {
     }
 
     expect(chunks).toEqual(['ok'])
+  })
+
+  it('treats weak legacy retrieval as insufficient evidence', () => {
+    const weakResults: RagSearchResult[] = [{
+      chunk_id: 'chunk-weak',
+      document_id: 'document-weak',
+      content: '低相关上下文',
+      title: '低相关标题',
+      url: null,
+      source_type: 'knowledge_record',
+      tags: [],
+      similarity: 0.3,
+    }]
+
+    streamRagAnswer('问题', weakResults)
+
+    const [{ messages }] = vi.mocked(deepseekChatCompletionStream).mock.calls.at(-1)!
+    expect(messages[1].content).toContain('站内资料不足')
+  })
+
+  it('treats empty legacy retrieval as insufficient evidence', () => {
+    streamRagAnswer('问题', [])
+
+    const [{ messages }] = vi.mocked(deepseekChatCompletionStream).mock.calls.at(-1)!
+    expect(messages[1].content).toContain('站内资料不足')
+  })
+
+  it('treats strong legacy retrieval as site evidence', () => {
+    const strongResults: RagSearchResult[] = [{
+      chunk_id: 'chunk-strong',
+      document_id: 'document-strong',
+      content: '高相关上下文',
+      title: '高相关标题',
+      url: null,
+      source_type: 'knowledge_record',
+      tags: [],
+      similarity: 0.8,
+    }]
+
+    streamRagAnswer('问题', strongResults)
+
+    const [{ messages }] = vi.mocked(deepseekChatCompletionStream).mock.calls.at(-1)!
+    expect(messages[1].content).toContain('请仅根据以下站内资料回答')
+    expect(messages[1].content).not.toContain('站内资料不足')
   })
 })
