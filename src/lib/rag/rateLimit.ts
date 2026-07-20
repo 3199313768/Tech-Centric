@@ -68,12 +68,13 @@ async function isRagRateLimited(
   databaseRequestCount += 1
   if (databaseRequestCount % CLEANUP_INTERVAL === 0) {
     try {
-      await admin
+      const { error: cleanupError } = await admin
         .from('rag_rate_limit_buckets')
         .delete()
         .lt('reset_at', new Date().toISOString())
+      if (cleanupError) console.warn('RAG rate-limit bucket cleanup failed')
     } catch {
-      // Cleanup is best-effort; limiting still proceeds through the RPC.
+      console.warn('RAG rate-limit bucket cleanup failed')
     }
   }
 

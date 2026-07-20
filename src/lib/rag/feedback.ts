@@ -111,12 +111,13 @@ export async function saveRagResponseSnapshot(snapshot: RagResponseSnapshot): Pr
   if (error) throw new Error('Failed to save RAG response snapshot')
 
   try {
-    await admin
+    const { error: cleanupError } = await admin
       .from('rag_responses')
       .delete()
       .lt('expires_at', new Date(now).toISOString())
+    if (cleanupError) console.warn('RAG response expiry cleanup failed')
   } catch {
-    // Expiry cleanup is best-effort and cascades to feedback rows.
+    console.warn('RAG response expiry cleanup failed')
   }
 }
 

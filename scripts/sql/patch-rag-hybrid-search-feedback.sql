@@ -1,5 +1,9 @@
 begin;
 
+-- Supabase pg_cron exposes scheduling functions in the cron schema.
+-- Deploy this patch as the database owner so the extension and cron job can be managed.
+create extension if not exists pg_cron;
+
 -- Rebuild only the RPC function because PostgreSQL cannot replace its return
 -- table shape in place. This does not modify rag_documents or rag_chunks data.
 drop function if exists public.match_rag_chunks(vector, integer, double precision);
@@ -306,5 +310,42 @@ $$;
 
 revoke all on function public.upsert_rag_feedback(uuid, uuid, boolean, text) from public;
 grant execute on function public.upsert_rag_feedback(uuid, uuid, boolean, text) to service_role;
+
+create or replace function public.cleanup_expired_rag_data()
+returns bigint
+language plpgsql
+security invoker
+as $$
+declare
+  deleted_rows bigint;
+begin
+  delete from public.rag_responses
+  where expires_at <= now();
+
+  get diagnostics deleted_rows = row_count;
+  return deleted_rows;
+end;
+$$;
+
+revoke all on function public.cleanup_expired_rag_data() from public;
+grant execute on function public.cleanup_expired_rag_data() to service_role;
+
+do $$
+declare
+  existing_job_id bigint;
+begin
+  for existing_job_id in
+    select jobid from cron.job where jobname = 'cleanup-expired-rag-data'
+  loop
+    perform cron.unschedule(existing_job_id);
+  end loop;
+
+  perform cron.schedule(
+    'cleanup-expired-rag-data',
+    '17 3 * * *',
+    'select public.cleanup_expired_rag_data();'
+  );
+end;
+$$;
 
 commit;
