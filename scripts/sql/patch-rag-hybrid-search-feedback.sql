@@ -159,7 +159,7 @@ as $$
       url,
       source_type,
       tags,
-      max(lexical_score) as lexical_score,
+      sum(lexical_score) as lexical_score,
       bool_or(exact_match) as exact_match
     from combined_matches
     group by

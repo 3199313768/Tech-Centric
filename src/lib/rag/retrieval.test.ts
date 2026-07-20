@@ -87,6 +87,7 @@ describe('hybrid retrieval SQL patch', () => {
     expect(sql).toContain('content_matches')
     expect(sql).toContain('metadata_documents')
     expect(sql).toContain('union all')
+    expect(sql).toContain('sum(lexical_score)')
   })
 
   it('runs both RPCs with invoker privileges restricted to service role', () => {
