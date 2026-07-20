@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
 import { describe, expect, it, vi } from 'vitest'
 
 import { retrieveRagCandidates } from '@/lib/rag/retrieval'
@@ -66,5 +69,33 @@ describe('retrieveRagCandidates', () => {
         lexical: vi.fn().mockRejectedValue(new Error('lexical unavailable')),
       }),
     ).rejects.toThrow('RAG retrieval failed')
+  })
+})
+
+describe('hybrid retrieval SQL patch', () => {
+  const sql = readFileSync(
+    join(process.cwd(), 'scripts/sql/patch-rag-hybrid-search-feedback.sql'),
+    'utf8',
+  ).toLowerCase()
+
+  it('uses literal substring matching and indexes chunk full-text search', () => {
+    expect(sql).not.toContain(' ilike ')
+    expect(sql).toContain('strpos(')
+    expect(sql).toContain('using gin')
+    expect(sql).toContain("to_tsvector('simple', content)")
+  })
+
+  it('runs both RPCs with invoker privileges restricted to service role', () => {
+    expect(sql).not.toContain('security definer')
+    expect(sql).not.toContain('set search_path')
+    expect(sql).toContain('from public;')
+    expect(sql).toContain('to service_role;')
+  })
+
+  it('bounds candidate counts and keeps at most two chunks per document', () => {
+    expect(sql).toContain('greatest(1, least(match_count, 50))')
+    expect(sql).toContain('row_number() over')
+    expect(sql).toContain('partition by document_id')
+    expect(sql).toContain('doc_rank <= 2')
   })
 })
