@@ -1820,6 +1820,84 @@ body {
   width: 100%;
 }
 
+.sg-nav-more {
+  display: contents;
+}
+
+.sg-nav-more__trigger {
+  display: block;
+}
+
+.sg-nav-more__trigger--open {
+  color: var(--sg-green-deep);
+}
+
+.sg-nav-more__trigger--open::after {
+  width: 100%;
+}
+
+.sg-nav-more__menu {
+  position: fixed;
+  transform: translateX(-50%);
+  min-width: 8.25rem;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(238, 224, 210, 0.35);
+  background: rgba(255, 248, 243, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 12px 28px -18px rgba(74, 66, 56, 0.28);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 240;
+}
+
+.dark .sg-nav-more__menu {
+  background: rgba(16, 24, 16, 0.82);
+  border-color: rgba(161, 212, 148, 0.16);
+  box-shadow: 0 12px 28px -16px rgba(0, 0, 0, 0.45);
+}
+
+.dark .sg-nav-more__trigger--open {
+  color: var(--sg-green-light);
+}
+
+.sg-nav-more__item {
+  display: block;
+  padding: 5px 4px;
+  text-decoration: none;
+  color: var(--sg-ink);
+  font-size: 14px;
+  line-height: 19.6px;
+  letter-spacing: 0.14px;
+  opacity: 0.8;
+  white-space: nowrap;
+  transition: color var(--sg-motion-fast), opacity var(--sg-motion-fast);
+}
+
+.sg-nav-more__item:hover,
+.sg-nav-more__item:focus-visible {
+  color: var(--sg-green-deep);
+  opacity: 1;
+  outline: none;
+}
+
+.sg-nav-more__item--active {
+  color: var(--sg-green-deep);
+  opacity: 1;
+}
+
+.dark .sg-nav-more__item {
+  color: rgba(232, 245, 228, 0.86);
+}
+
+.dark .sg-nav-more__item:hover,
+.dark .sg-nav-more__item:focus-visible,
+.dark .sg-nav-more__item--active {
+  color: var(--sg-green-light);
+}
+
 .sg-nav-actions {
   display: flex;
   align-items: center;
@@ -6170,10 +6248,10 @@ svg {
   min-height: 44px;
   padding: 8px 16px 8px 8px;
   border-radius: 9999px;
-  border: 1px solid var(--color-card-border);
+  border: 1px solid rgba(238, 224, 210, 0.55);
   background: var(--sg-paper);
-  color: var(--color-text-primary);
-  box-shadow: 0 12px 32px -12px var(--color-card-shadow);
+  color: var(--sg-ink);
+  box-shadow: 0 16px 40px -20px rgba(74, 66, 56, 0.22);
   cursor: pointer;
   transition:
     transform var(--sg-motion-fast),
@@ -6185,8 +6263,8 @@ svg {
 
 .sg-rag-trigger:hover {
   transform: translateY(-2px);
-  border-color: var(--color-cyan-30);
-  box-shadow: 0 16px 40px -12px var(--color-card-shadow-hover);
+  border-color: rgba(188, 240, 174, 0.65);
+  box-shadow: 0 18px 44px -18px rgba(74, 66, 56, 0.28);
 }
 
 .sg-rag-trigger--sprite:hover:not(:disabled) {
@@ -6244,15 +6322,15 @@ svg {
   max-width: 440px;
   overflow: hidden;
   border-radius: 24px;
-  border: 1px solid var(--color-card-border);
+  border: 1px solid rgba(238, 224, 210, 0.45);
   background: var(--sg-paper);
-  box-shadow: 0 24px 64px -24px var(--color-card-shadow);
-  color: var(--color-text-primary);
+  box-shadow: 0 24px 64px -24px rgba(74, 66, 56, 0.22);
+  color: var(--sg-ink);
 }
 
 .dark .sg-rag-panel {
   background: rgba(26, 36, 24, 0.96);
-  border-color: rgba(161, 212, 148, 0.15);
+  border-color: rgba(161, 212, 148, 0.14);
 }
 
 .sg-rag-panel__header {
@@ -6260,7 +6338,11 @@ svg {
   align-items: center;
   gap: 12px;
   padding: 20px;
-  border-bottom: 1px solid var(--color-card-border);
+  border-bottom: 1px solid rgba(238, 224, 210, 0.4);
+}
+
+.dark .sg-rag-panel__header {
+  border-bottom-color: rgba(161, 212, 148, 0.14);
 }
 
 .sg-rag-panel__avatar {
@@ -6269,8 +6351,8 @@ svg {
   width: 44px;
   height: 44px;
   border-radius: 16px;
-  background: var(--color-ai-card-icon-bg);
-  border: 1px solid var(--color-ai-card-icon-border);
+  background: rgba(188, 240, 174, 0.28);
+  border: 1px solid rgba(188, 240, 174, 0.45);
   color: var(--sg-green-deep);
 }
 
@@ -6295,13 +6377,17 @@ svg {
   gap: 8px;
   font-size: 14px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--sg-ink);
 }
 
 .sg-rag-panel__subtitle {
   margin: 4px 0 0;
   font-size: 12px;
-  color: var(--color-text-muted);
+  color: rgba(114, 121, 110, 0.78);
+}
+
+.dark .sg-rag-panel__subtitle {
+  color: rgba(232, 245, 228, 0.68);
 }
 
 .sg-rag-badge {
@@ -6309,12 +6395,14 @@ svg {
   border-radius: 9999px;
   font-size: 10px;
   font-weight: 500;
-  border: 1px solid var(--color-ai-tag-border);
-  background: var(--color-ai-tag-bg);
+  border: 1px solid rgba(188, 240, 174, 0.55);
+  background: rgba(255, 241, 227, 0.72);
   color: var(--sg-green-deep);
 }
 
 .dark .sg-rag-badge {
+  border-color: rgba(161, 212, 148, 0.28);
+  background: rgba(26, 36, 24, 0.72);
   color: var(--sg-green-light);
 }
 
@@ -6326,7 +6414,7 @@ svg {
   flex-direction: column;
   gap: 16px;
   scrollbar-width: thin;
-  scrollbar-color: var(--color-cyan-30) transparent;
+  scrollbar-color: rgba(188, 240, 174, 0.55) transparent;
 }
 
 .sg-rag-welcome-stack {
@@ -6339,12 +6427,18 @@ svg {
   position: relative;
   overflow: hidden;
   border-radius: 16px;
-  border: 1px solid var(--color-card-border);
-  background: var(--color-card-bg);
+  border: 1px solid rgba(238, 224, 210, 0.35);
+  background: rgba(255, 241, 227, 0.55);
   padding: 16px;
   font-size: 14px;
   line-height: 1.6;
-  color: var(--color-text-secondary);
+  color: rgba(114, 121, 110, 0.92);
+}
+
+.dark .sg-rag-welcome {
+  border-color: rgba(161, 212, 148, 0.14);
+  background: rgba(26, 36, 24, 0.55);
+  color: rgba(232, 245, 228, 0.78);
 }
 
 .sg-rag-welcome__illustration {
@@ -6354,7 +6448,7 @@ svg {
   margin-bottom: 14px;
   overflow: hidden;
   border-radius: 12px;
-  background: var(--color-ai-card-icon-bg);
+  background: rgba(188, 240, 174, 0.22);
 }
 
 .sg-rag-welcome__illustration-img {
@@ -6367,7 +6461,7 @@ svg {
   right: 12px;
   padding: 8px;
   border-radius: 50%;
-  background: var(--color-ai-card-icon-bg);
+  background: rgba(188, 240, 174, 0.35);
   color: var(--sg-green-deep);
 }
 
@@ -6384,7 +6478,11 @@ svg {
   margin: 0;
   padding-right: 40px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--sg-ink);
+}
+
+.dark .sg-rag-welcome__title {
+  color: rgba(232, 245, 228, 0.92);
 }
 
 .sg-rag-welcome__text {
@@ -6397,10 +6495,33 @@ svg {
   gap: 8px;
 }
 
-.sg-rag-chip {
+.sg-rag-chip.sg-filter-chip {
   padding: 6px 14px;
   font-size: 12px;
   min-height: auto;
+  border-radius: 9999px;
+  border: 1px solid rgba(238, 224, 210, 0.55);
+  background: rgba(255, 248, 243, 0.72);
+  color: var(--sg-ink);
+  box-shadow: none;
+}
+
+.sg-rag-chip.sg-filter-chip:hover {
+  border-color: rgba(188, 240, 174, 0.7);
+  background: rgba(188, 240, 174, 0.22);
+  color: var(--sg-green-deep);
+}
+
+.dark .sg-rag-chip.sg-filter-chip {
+  border-color: rgba(161, 212, 148, 0.22);
+  background: rgba(26, 36, 24, 0.55);
+  color: rgba(232, 245, 228, 0.86);
+}
+
+.dark .sg-rag-chip.sg-filter-chip:hover {
+  border-color: rgba(161, 212, 148, 0.4);
+  background: rgba(161, 212, 148, 0.14);
+  color: var(--sg-green-light);
 }
 
 .sg-rag-row {
@@ -6417,31 +6538,39 @@ svg {
 
 .sg-rag-bubble {
   max-width: 86%;
-  border-radius: 18px;
+  border-radius: 16px;
   padding: 12px 16px;
   font-size: 14px;
   line-height: 1.6;
 }
 
 .sg-rag-bubble--user {
-  border-bottom-right-radius: 6px;
+  border-bottom-right-radius: 8px;
   background: var(--sg-green-deep);
   color: var(--sg-cream);
-  box-shadow: 0 8px 20px rgba(21, 66, 18, 0.18);
+  box-shadow: 0 12px 28px -18px rgba(21, 66, 18, 0.35);
 }
 
 .sg-rag-bubble--assistant {
-  border-bottom-left-radius: 6px;
-  border: 1px solid var(--color-card-border);
-  background: var(--color-card-bg);
-  color: var(--color-text-primary);
+  border-bottom-left-radius: 8px;
+  border: 1px solid rgba(238, 224, 210, 0.4);
+  background: rgba(255, 241, 227, 0.72);
+  color: var(--sg-ink);
+  box-shadow: 0 12px 28px -18px rgba(74, 66, 56, 0.18);
 }
 
 .sg-rag-bubble--contact {
-  border-bottom-left-radius: 6px;
-  border: 1px solid var(--color-ai-card-border);
-  background: var(--color-ai-card-bg);
-  color: var(--color-text-primary);
+  border-bottom-left-radius: 8px;
+  border: 1px solid rgba(188, 240, 174, 0.45);
+  background: rgba(188, 240, 174, 0.18);
+  color: var(--sg-ink);
+}
+
+.dark .sg-rag-bubble--assistant,
+.dark .sg-rag-bubble--contact {
+  border-color: rgba(161, 212, 148, 0.16);
+  background: rgba(26, 36, 24, 0.72);
+  color: rgba(232, 245, 228, 0.92);
 }
 
 .sg-rag-bubble__text {
@@ -6455,10 +6584,10 @@ svg {
   gap: 8px;
   padding: 8px 12px;
   border-radius: 12px;
-  border: 1px solid var(--color-card-border);
-  background: var(--color-card-bg);
+  border: 1px solid rgba(238, 224, 210, 0.4);
+  background: rgba(255, 241, 227, 0.55);
   font-size: 14px;
-  color: var(--color-text-muted);
+  color: rgba(114, 121, 110, 0.78);
 }
 
 .sg-rag-loading__icon {
@@ -6477,18 +6606,24 @@ svg {
   padding: 4px 12px;
   border-radius: 9999px;
   font-size: 12px;
-  border: 1px solid var(--color-ai-tag-border);
-  background: var(--color-ai-tag-bg);
+  border: 1px solid rgba(188, 240, 174, 0.55);
+  background: rgba(255, 241, 227, 0.72);
   color: var(--sg-green-deep);
 }
 
 .dark .sg-rag-toast {
+  border-color: rgba(161, 212, 148, 0.28);
+  background: rgba(26, 36, 24, 0.72);
   color: var(--sg-green-light);
 }
 
 .sg-rag-panel__footer {
   padding: 16px;
-  border-top: 1px solid var(--color-card-border);
+  border-top: 1px solid rgba(238, 224, 210, 0.4);
+}
+
+.dark .sg-rag-panel__footer {
+  border-top-color: rgba(161, 212, 148, 0.14);
 }
 
 .sg-rag-input-row {
@@ -6496,19 +6631,20 @@ svg {
   align-items: center;
   gap: 8px;
   padding: 6px 6px 6px 14px;
-  border-radius: 14px;
-  border: 1px solid var(--color-ai-card-border);
-  background: rgba(255, 255, 255, 0.72);
+  border-radius: 16px;
+  border: 1px solid rgba(238, 224, 210, 0.5);
+  background: rgba(255, 248, 243, 0.82);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .dark .sg-rag-input-row {
-  background: rgba(16, 24, 16, 0.5);
+  background: rgba(16, 24, 16, 0.55);
+  border-color: rgba(161, 212, 148, 0.18);
 }
 
 .sg-rag-input-row:focus-within {
-  border-color: var(--color-cyan-50);
-  box-shadow: 0 0 0 3px var(--color-cyan-10);
+  border-color: rgba(188, 240, 174, 0.75);
+  box-shadow: 0 0 0 3px rgba(188, 240, 174, 0.28);
 }
 
 .sg-rag-input {
@@ -6517,12 +6653,20 @@ svg {
   border: none;
   background: transparent;
   font-size: 14px;
-  color: var(--color-text-primary);
+  color: var(--sg-ink);
   outline: none;
 }
 
 .sg-rag-input::placeholder {
-  color: var(--color-text-muted);
+  color: rgba(114, 121, 110, 0.55);
+}
+
+.dark .sg-rag-input {
+  color: rgba(232, 245, 228, 0.92);
+}
+
+.dark .sg-rag-input::placeholder {
+  color: rgba(232, 245, 228, 0.45);
 }
 
 .sg-rag-send {
@@ -6530,12 +6674,12 @@ svg {
   place-items: center;
   padding: 10px;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--sg-green-deep);
   color: var(--sg-cream);
   cursor: pointer;
   transition: transform 0.2s ease, background 0.2s ease;
-  box-shadow: 0 4px 12px rgba(21, 66, 18, 0.18);
+  box-shadow: 0 8px 18px -10px rgba(21, 66, 18, 0.4);
 }
 
 .sg-rag-send:hover:not(:disabled) {
@@ -6556,7 +6700,7 @@ svg {
 .sg-rag-source-list {
   margin-top: 16px;
   padding-top: 12px;
-  border-top: 1px solid var(--color-card-border);
+  border-top: 1px solid rgba(238, 224, 210, 0.4);
 }
 
 .sg-rag-source-list__label {
@@ -6565,7 +6709,7 @@ svg {
   font-weight: 600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--color-text-muted);
+  color: rgba(114, 121, 110, 0.72);
 }
 
 .sg-rag-source-items {
@@ -6578,22 +6722,30 @@ svg {
   display: block;
   padding: 8px 12px;
   border-radius: 12px;
-  border: 1px solid var(--color-card-border);
+  border: 1px solid rgba(238, 224, 210, 0.45);
   background: var(--sg-parchment);
   font-size: 12px;
-  color: var(--color-text-secondary);
+  color: rgba(114, 121, 110, 0.92);
   text-decoration: none;
   transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 
 .dark .sg-rag-source-item {
   background: rgba(16, 24, 16, 0.45);
+  border-color: rgba(161, 212, 148, 0.16);
+  color: rgba(232, 245, 228, 0.82);
 }
 
 .sg-rag-source-item:hover {
-  border-color: var(--color-cyan-30);
-  background: var(--color-cyan-10);
-  color: var(--color-text-primary);
+  border-color: rgba(188, 240, 174, 0.65);
+  background: rgba(188, 240, 174, 0.22);
+  color: var(--sg-green-deep);
+}
+
+.dark .sg-rag-source-item:hover {
+  border-color: rgba(161, 212, 148, 0.36);
+  background: rgba(161, 212, 148, 0.14);
+  color: var(--sg-green-light);
 }
 
 .sg-rag-source-item__head {
@@ -6630,28 +6782,34 @@ svg {
   font-size: 10px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--color-text-muted);
+  color: rgba(114, 121, 110, 0.65);
+}
+
+.dark .sg-rag-source-item__meta {
+  color: rgba(232, 245, 228, 0.55);
 }
 
 .sg-rag-source-item__dot {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--color-cyan-40);
+  background: rgba(188, 240, 174, 0.75);
 }
 
 .sg-rag-summary {
   margin-top: 12px;
   padding: 12px;
   border-radius: 12px;
-  border: 1px solid var(--color-card-border);
+  border: 1px solid rgba(238, 224, 210, 0.45);
   background: var(--sg-parchment);
   font-size: 12px;
-  color: var(--color-text-secondary);
+  color: rgba(114, 121, 110, 0.92);
 }
 
 .dark .sg-rag-summary {
   background: rgba(16, 24, 16, 0.45);
+  border-color: rgba(161, 212, 148, 0.16);
+  color: rgba(232, 245, 228, 0.82);
 }
 
 .sg-rag-summary__label {
@@ -6660,7 +6818,11 @@ svg {
   font-weight: 600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--color-text-muted);
+  color: rgba(114, 121, 110, 0.72);
+}
+
+.dark .sg-rag-summary__label {
+  color: rgba(232, 245, 228, 0.55);
 }
 
 .sg-rag-summary__fields {
@@ -6671,7 +6833,11 @@ svg {
 }
 
 .sg-rag-summary__field-label {
-  color: var(--color-text-muted);
+  color: rgba(114, 121, 110, 0.72);
+}
+
+.dark .sg-rag-summary__field-label {
+  color: rgba(232, 245, 228, 0.55);
 }
 
 .sg-rag-summary__body {
@@ -6680,15 +6846,16 @@ svg {
   margin: 0;
   padding: 12px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 248, 243, 0.72);
   font-family: inherit;
   white-space: pre-wrap;
   line-height: 1.4;
-  color: var(--color-text-primary);
+  color: var(--sg-ink);
 }
 
 .dark .sg-rag-summary__body {
   background: rgba(0, 0, 0, 0.2);
+  color: rgba(232, 245, 228, 0.92);
 }
 
 .sg-rag-actions {
@@ -6713,7 +6880,7 @@ svg {
 }
 
 .sg-rag-action-btn--primary {
-  border-color: var(--color-cyan-30);
+  border-color: rgba(188, 240, 174, 0.45);
   background: var(--sg-green-deep);
   color: var(--sg-cream);
 }
@@ -6723,20 +6890,32 @@ svg {
 }
 
 .sg-rag-action-btn--secondary {
-  border-color: var(--color-ai-tag-border);
-  background: transparent;
-  color: var(--color-text-secondary);
+  border-color: rgba(238, 224, 210, 0.55);
+  background: rgba(255, 248, 243, 0.72);
+  color: var(--sg-ink);
 }
 
 .sg-rag-action-btn--secondary:hover {
-  border-color: var(--color-cyan-30);
-  background: var(--color-cyan-10);
-  color: var(--color-text-primary);
+  border-color: rgba(188, 240, 174, 0.65);
+  background: rgba(188, 240, 174, 0.22);
+  color: var(--sg-green-deep);
+}
+
+.dark .sg-rag-action-btn--secondary {
+  border-color: rgba(161, 212, 148, 0.22);
+  background: rgba(26, 36, 24, 0.55);
+  color: rgba(232, 245, 228, 0.86);
+}
+
+.dark .sg-rag-action-btn--secondary:hover {
+  border-color: rgba(161, 212, 148, 0.4);
+  background: rgba(161, 212, 148, 0.14);
+  color: var(--sg-green-light);
 }
 
 .sg-rag-action-btn--ghost {
   background: transparent;
-  color: var(--color-text-muted);
+  color: rgba(114, 121, 110, 0.72);
 }
 
 .sg-rag-action-btn--ghost:hover {
@@ -6816,9 +6995,14 @@ svg {
 }
 
 .sg-rag-welcome-stack--garden .sg-rag-welcome {
-  border-color: var(--sg-border);
-  background: var(--sg-parchment);
-  box-shadow: 0 8px 24px -8px var(--color-card-shadow);
+  border-color: rgba(238, 224, 210, 0.35);
+  background: rgba(255, 241, 227, 0.55);
+  box-shadow: 0 12px 28px -18px rgba(74, 66, 56, 0.16);
+}
+
+.dark .sg-rag-welcome-stack--garden .sg-rag-welcome {
+  border-color: rgba(161, 212, 148, 0.14);
+  background: rgba(26, 36, 24, 0.55);
 }
 
 .sg-rag-welcome__icon-img {
@@ -8031,7 +8215,7 @@ svg {
 
 .sg-rag-bubble--contact,
 .sg-rag-bubble--assistant {
-  box-shadow: 0 10px 24px -14px var(--color-card-shadow-hover);
+  box-shadow: 0 12px 28px -18px rgba(74, 66, 56, 0.18);
 }
 
 .sg-rag-typing {
