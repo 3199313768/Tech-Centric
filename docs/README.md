@@ -18,6 +18,7 @@
 | [../scripts/](../scripts/) | [scripts/README.md](../scripts/README.md) | 站点表 SQL、RAG 索引与 codegen 脚本 |
 | [delivery/](./delivery/) | [knowledge-walkthrough.md](./delivery/knowledge-walkthrough.md) | 知识库 MVP 交付说明与使用指引 |
 | [完成报告/](./完成报告/) | [报告-RAG质量反馈闭环.md](./完成报告/AI/RAG公开助手/20260721/报告-RAG质量反馈闭环.md) | RAG 公开助手混合检索、精确引用、质量评测与匿名反馈交付记录 |
+| [调试记录/](./调试记录/) | [调试-分阶段加载与答案同时显示.md](./调试记录/AI/RAG公开助手/20260721/调试-分阶段加载与答案同时显示.md) | RAG 助手加载阶段与流式答案同时渲染的根因及修复 |
 | [superpowers/](./superpowers/) | `plans/`、`specs/` | AI 工作流实现计划与设计规格 |
 | [archive/](./archive/) | [contact-chat-redesign.md](./archive/contact-chat-redesign.md) | 已完成/归档的设计稿 |
 

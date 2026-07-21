@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Loader2, Send } from 'lucide-react'
+import { Send } from 'lucide-react'
 import type { ChatMessage, RagSource } from '@/lib/rag/types'
 import { applyRagSseEvent } from '@/lib/rag/chatState'
 import { consumeRagChatStream } from '@/lib/rag/chatStream'
@@ -28,6 +28,8 @@ import { MessageBubble } from '@/components/rag/chat/MessageBubble'
 import { TypingIndicator } from '@/components/rag/contact/TypingIndicator'
 import { SuggestedItem, SuggestedQuestions } from '@/components/rag/chat/SuggestedQuestions'
 import { getPageRagContext, getRagPageContextKey } from '@/lib/rag/pageContext'
+import { getLoadingStageForEvent, type RagLoadingStage } from '@/lib/rag/chatUi'
+import { LoadingStatus } from '@/components/rag/chat/LoadingStatus'
 
 interface RagChatResponse {
   answer?: string
@@ -46,12 +48,17 @@ export function ChatPanel() {
   const [contactStage, setContactStage] = useState<ContactStage>('intent')
   const [contactData, setContactData] = useState<ContactData>(() => createEmptyContactData())
   const [copiedLabel, setCopiedLabel] = useState('')
+  const [loadingStage, setLoadingStage] = useState<RagLoadingStage | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const requestAbortRef = useRef<AbortController | null>(null)
   const requestInFlightRef = useRef(false)
+  const loadingStageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  useEffect(() => () => requestAbortRef.current?.abort(), [])
+  useEffect(() => () => {
+    requestAbortRef.current?.abort()
+    if (loadingStageTimerRef.current) clearTimeout(loadingStageTimerRef.current)
+  }, [])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
@@ -151,7 +158,7 @@ export function ChatPanel() {
     }
   }
 
-  async function copyText(value: string, label: string) {
+  async function copyText(value: string, label?: string) {
     try {
       await navigator.clipboard.writeText(value)
     } catch {
@@ -163,8 +170,10 @@ export function ChatPanel() {
       document.body.removeChild(textArea)
     }
 
-    setCopiedLabel(label)
-    setTimeout(() => setCopiedLabel(''), 1800)
+    if (label) {
+      setCopiedLabel(label)
+      setTimeout(() => setCopiedLabel(''), 1800)
+    }
   }
 
   function handleAction(actionId: string) {
@@ -234,6 +243,12 @@ export function ChatPanel() {
     }
 
     setIsLoading(true)
+    setLoadingStage('understanding')
+    if (loadingStageTimerRef.current) clearTimeout(loadingStageTimerRef.current)
+    loadingStageTimerRef.current = setTimeout(() => {
+      setLoadingStage('retrieving')
+      loadingStageTimerRef.current = null
+    }, 500)
     requestInFlightRef.current = true
     const requestController = new AbortController()
     requestAbortRef.current = requestController
@@ -282,6 +297,11 @@ export function ChatPanel() {
       await consumeRagChatStream(
         response,
         (event) => {
+          if (loadingStageTimerRef.current) {
+            clearTimeout(loadingStageTimerRef.current)
+            loadingStageTimerRef.current = null
+          }
+          setLoadingStage(current => getLoadingStageForEvent(current, event.type))
           if (event.type === 'meta' && event.sessionId !== sessionId) {
             persistRagSessionId(event.sessionId)
           }
@@ -315,6 +335,11 @@ export function ChatPanel() {
         }]
       })
     } finally {
+      if (loadingStageTimerRef.current) {
+        clearTimeout(loadingStageTimerRef.current)
+        loadingStageTimerRef.current = null
+      }
+      setLoadingStage(null)
       requestInFlightRef.current = false
       if (requestAbortRef.current === requestController) {
         requestAbortRef.current = null
@@ -393,18 +418,18 @@ export function ChatPanel() {
         ) : null}
 
         {messages.map((message, index) => (
-          <MessageBubble key={`${message.role}-${index}`} message={message} onAction={handleAction} />
+          <MessageBubble
+            key={`${message.role}-${index}`}
+            message={message}
+            onAction={handleAction}
+            onCopy={(content) => void copyText(content)}
+          />
         ))}
 
         {isLoading ? (
           mode === 'contact' ? (
             <TypingIndicator />
-          ) : (
-            <div className="sg-rag-loading">
-              <Loader2 className="sg-rag-loading__icon" aria-hidden />
-              正在检索站内资料...
-            </div>
-          )
+          ) : loadingStage ? <LoadingStatus stage={loadingStage} /> : null
         ) : null}
 
         {copiedLabel ? (

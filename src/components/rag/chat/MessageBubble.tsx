@@ -7,10 +7,12 @@ import { ContactActions } from '@/components/rag/contact/ContactActions'
 import { ContactSummary } from '@/components/rag/contact/ContactSummary'
 import { SourceList } from '@/components/rag/chat/SourceList'
 import { AnswerFeedback } from '@/components/rag/chat/AnswerFeedback'
+import { AnswerActions } from '@/components/rag/chat/AnswerActions'
 
 interface MessageBubbleProps {
   message: ChatMessage
   onAction?: (actionId: string) => void
+  onCopy?: (content: string) => void
 }
 
 function getBubbleClassName(message: ChatMessage) {
@@ -25,7 +27,7 @@ const bubbleMotion = {
   transition: { type: 'spring' as const, stiffness: 260, damping: 22 },
 }
 
-export function MessageBubble({ message, onAction }: MessageBubbleProps) {
+export function MessageBubble({ message, onAction, onCopy }: MessageBubbleProps) {
   const isUser = message.role === 'user'
   const showFeedback = !isUser
     && (message.variant === undefined || message.variant === 'default')
@@ -35,7 +37,7 @@ export function MessageBubble({ message, onAction }: MessageBubbleProps) {
 
   const bubble = (
     <motion.div className={getBubbleClassName(message)} {...bubbleMotion}>
-      <p className="sg-rag-bubble__text">{message.content}</p>
+      <AnswerActions message={message} onAction={onAction} onCopy={onCopy} />
       {!isUser && message.error ? (
         <div className="sg-kb-error sg-kb-error--inline" role="alert">
           回答未完整：{message.error}
@@ -57,13 +59,12 @@ export function MessageBubble({ message, onAction }: MessageBubbleProps) {
   return (
     <div className="sg-rag-row sg-rag-row--assistant">
       <Image
-        src="/spirit-garden/icon-sparkle.png"
+        src="/spirit-garden/rag-guide-sprite.webp"
         alt=""
         width={28}
         height={28}
         className="sg-rag-bubble__avatar"
         aria-hidden
-        unoptimized
       />
       {bubble}
     </div>
