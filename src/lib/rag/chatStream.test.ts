@@ -11,6 +11,52 @@ function responseWith(events: RagSseEvent[]) {
 }
 
 describe('consumeRagChatStream', () => {
+  it('returns and cancels the reader immediately after done without waiting for EOF', async () => {
+    const cancel = vi.fn()
+    const done = {
+      type: 'done' as const,
+      answer: 'complete',
+      sources: [],
+      evidenceMode: 'insufficient' as const,
+      retrievalMs: 1,
+      firstTokenMs: 2,
+      totalMs: 3,
+    }
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode(
+          `data: ${JSON.stringify(done)}\n\n`,
+        ))
+      },
+      cancel,
+    })
+
+    const outcome = await Promise.race([
+      consumeRagChatStream(new Response(stream), vi.fn()).then(() => 'completed'),
+      new Promise<string>(resolve => setTimeout(() => resolve('timed-out'), 50)),
+    ])
+
+    expect(outcome).toBe('completed')
+    expect(cancel).toHaveBeenCalledOnce()
+  })
+
+  it('cancels the reader when the event callback throws', async () => {
+    const cancel = vi.fn()
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode(
+          `data: ${JSON.stringify({ type: 'delta', text: 'partial' })}\n\n`,
+        ))
+      },
+      cancel,
+    })
+
+    await expect(consumeRagChatStream(new Response(stream), () => {
+      throw new Error('render failed')
+    })).rejects.toThrow('render failed')
+    expect(cancel).toHaveBeenCalledOnce()
+  })
+
   it('completes only after receiving done', async () => {
     const onEvent = vi.fn()
     const done = {

@@ -8,6 +8,10 @@ import type { ChatMessage, RagSource } from '@/lib/rag/types'
 import { applyRagSseEvent } from '@/lib/rag/chatState'
 import { consumeRagChatStream } from '@/lib/rag/chatStream'
 import {
+  getOrCreateRagSessionId,
+  persistRagSessionId,
+} from '@/lib/rag/session'
+import {
   buildMailtoUrl,
   CONTACT_EMAIL,
   CONTACT_INTENTS,
@@ -31,24 +35,6 @@ interface RagChatResponse {
   error?: string
 }
 
-const RAG_SESSION_STORAGE_KEY = 'tech-centric-rag-session-id'
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-
-function getOrCreateRagSessionId() {
-  const stored = window.localStorage.getItem(RAG_SESSION_STORAGE_KEY)
-  if (stored && UUID_PATTERN.test(stored)) return stored
-
-  const sessionId = crypto.randomUUID()
-  window.localStorage.setItem(RAG_SESSION_STORAGE_KEY, sessionId)
-  return sessionId
-}
-
-function saveRagSessionId(sessionId: string) {
-  if (UUID_PATTERN.test(sessionId)) {
-    window.localStorage.setItem(RAG_SESSION_STORAGE_KEY, sessionId)
-  }
-}
-
 export function ChatPanel() {
   const pathname = usePathname()
   const pageContext = getPageRagContext(pathname)
@@ -63,6 +49,7 @@ export function ChatPanel() {
   const inputRef = useRef<HTMLInputElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const requestAbortRef = useRef<AbortController | null>(null)
+  const requestInFlightRef = useRef(false)
 
   useEffect(() => () => requestAbortRef.current?.abort(), [])
 
@@ -226,7 +213,7 @@ export function ChatPanel() {
 
   async function submitMessage(nextMessage?: string) {
     const content = (nextMessage || input).trim()
-    if (!content || isLoading) return
+    if (!content || isLoading || requestInFlightRef.current) return
 
     addUserMessage(content)
     setInput('')
@@ -247,6 +234,7 @@ export function ChatPanel() {
     }
 
     setIsLoading(true)
+    requestInFlightRef.current = true
     const requestController = new AbortController()
     requestAbortRef.current = requestController
 
@@ -295,7 +283,7 @@ export function ChatPanel() {
         response,
         (event) => {
           if (event.type === 'meta' && event.sessionId !== sessionId) {
-            saveRagSessionId(event.sessionId)
+            persistRagSessionId(event.sessionId)
           }
           setMessages(prev => applyRagSseEvent(prev, event))
         },
@@ -327,6 +315,7 @@ export function ChatPanel() {
         }]
       })
     } finally {
+      requestInFlightRef.current = false
       if (requestAbortRef.current === requestController) {
         requestAbortRef.current = null
       }

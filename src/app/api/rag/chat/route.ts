@@ -144,7 +144,9 @@ export async function POST(req: Request) {
           if (!rawAnswer) {
             rawAnswer = '我暂时没有生成有效回答。'
             firstTokenMs = Math.round(performance.now() - requestStartedAt)
-            send({ type: 'delta', text: rawAnswer })
+            if (!send({ type: 'delta', text: rawAnswer })) {
+              operation.signal.throwIfAborted()
+            }
           }
 
           const finalized = finalizeCitations(rawAnswer, contexts)
