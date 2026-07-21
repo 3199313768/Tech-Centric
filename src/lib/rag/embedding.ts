@@ -24,15 +24,18 @@ export function getEmbeddingModel() {
 
 function isRetryableEmbeddingError(error: unknown) {
   if (!(error instanceof Error)) return false
-  if (error.name === 'AbortError') return true
+  if (error.name === 'AbortError') return false
   if (/timeout|fetch failed|ECONNRESET|ETIMEDOUT|UND_ERR/i.test(error.message)) return true
   const cause = error.cause as { code?: string } | undefined
   return Boolean(cause?.code && /TIMEOUT|ECONNRESET|UND_ERR|ENOTFOUND/i.test(cause.code))
 }
 
-async function requestEmbedding(apiKey: string, input: string) {
+async function requestEmbedding(apiKey: string, input: string, signal?: AbortSignal) {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), EMBEDDING_TIMEOUT_MS)
+  const abortFromCaller = () => controller.abort(signal?.reason)
+  if (signal?.aborted) abortFromCaller()
+  else signal?.addEventListener('abort', abortFromCaller, { once: true })
 
   try {
     const response = await proxyFetch(getEmbeddingsUrl(), {
@@ -61,16 +64,34 @@ async function requestEmbedding(apiKey: string, input: string) {
 
     return embedding
   } catch (error) {
+    if (signal?.aborted) throw signal.reason
     if (error instanceof Error && error.name === 'AbortError') {
       throw new Error(`Embedding 请求超时（>${EMBEDDING_TIMEOUT_MS / 1000}s）：${getEmbeddingsUrl()}`)
     }
     throw error
   } finally {
     clearTimeout(timeout)
+    signal?.removeEventListener('abort', abortFromCaller)
   }
 }
 
-export async function createEmbedding(input: string) {
+function waitForRetry(delayMs: number, signal?: AbortSignal) {
+  return new Promise<void>((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      signal?.removeEventListener('abort', abort)
+      resolve()
+    }, delayMs)
+    const abort = () => {
+      clearTimeout(timeout)
+      signal?.removeEventListener('abort', abort)
+      reject(signal?.reason)
+    }
+    if (signal?.aborted) abort()
+    else signal?.addEventListener('abort', abort, { once: true })
+  })
+}
+
+export async function createEmbedding(input: string, signal?: AbortSignal) {
   const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) {
     throw new Error('OPENAI_API_KEY is not configured')
@@ -78,14 +99,15 @@ export async function createEmbedding(input: string) {
 
   let lastError: unknown
   for (let attempt = 1; attempt <= EMBEDDING_MAX_ATTEMPTS; attempt++) {
+    signal?.throwIfAborted()
     try {
-      return await requestEmbedding(apiKey, input)
+      return await requestEmbedding(apiKey, input, signal)
     } catch (error) {
       lastError = error
       const retryable = isRetryableEmbeddingError(error)
       if (!retryable || attempt === EMBEDDING_MAX_ATTEMPTS) break
       console.warn(`Embedding attempt ${attempt} failed, retrying…`, error)
-      await new Promise((resolve) => setTimeout(resolve, 300 * attempt))
+      await waitForRetry(300 * attempt, signal)
     }
   }
 

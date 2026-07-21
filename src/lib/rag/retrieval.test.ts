@@ -28,12 +28,38 @@ function candidate(
 }
 
 describe('retrieveRagCandidates', () => {
+  it('passes the operation signal to both retrieval channels', async () => {
+    const controller = new AbortController()
+    const vector = vi.fn().mockResolvedValue([])
+    const lexical = vi.fn().mockResolvedValue([])
+
+    await retrieveRagCandidates('React', [0.1, 0.2], controller.signal, {
+      vector,
+      lexical,
+    })
+
+    expect(vector).toHaveBeenCalledWith([0.1, 0.2], controller.signal)
+    expect(lexical).toHaveBeenCalledWith('React', controller.signal)
+  })
+
+  it('preserves cancellation instead of converting it to retrieval failure', async () => {
+    const controller = new AbortController()
+    const aborted = new DOMException('aborted', 'AbortError')
+    const result = retrieveRagCandidates('React', [0.1], controller.signal, {
+      vector: vi.fn().mockRejectedValue(aborted),
+      lexical: vi.fn().mockRejectedValue(aborted),
+    })
+    controller.abort()
+
+    await expect(result).rejects.toMatchObject({ name: 'AbortError' })
+  })
+
   it('returns candidates from both successful retrieval channels', async () => {
     const vector = [candidate('vector', { similarity: 0.82 })]
     const lexical = [candidate('lexical', { lexicalScore: 1.4 })]
 
     await expect(
-      retrieveRagCandidates('React', [0.1, 0.2], {
+      retrieveRagCandidates('React', [0.1, 0.2], undefined, {
         vector: vi.fn().mockResolvedValue(vector),
         lexical: vi.fn().mockResolvedValue(lexical),
       }),
@@ -44,7 +70,7 @@ describe('retrieveRagCandidates', () => {
     const lexical = [candidate('lexical', { lexicalScore: 1.4 })]
 
     await expect(
-      retrieveRagCandidates('React', [0.1, 0.2], {
+      retrieveRagCandidates('React', [0.1, 0.2], undefined, {
         vector: vi.fn().mockRejectedValue(new Error('vector unavailable')),
         lexical: vi.fn().mockResolvedValue(lexical),
       }),
@@ -55,7 +81,7 @@ describe('retrieveRagCandidates', () => {
     const vector = [candidate('vector', { similarity: 0.82 })]
 
     await expect(
-      retrieveRagCandidates('React', [0.1, 0.2], {
+      retrieveRagCandidates('React', [0.1, 0.2], undefined, {
         vector: vi.fn().mockResolvedValue(vector),
         lexical: vi.fn().mockRejectedValue(new Error('lexical unavailable')),
       }),
@@ -64,7 +90,7 @@ describe('retrieveRagCandidates', () => {
 
   it('throws a safe error when both retrieval channels fail', async () => {
     await expect(
-      retrieveRagCandidates('React', [0.1, 0.2], {
+      retrieveRagCandidates('React', [0.1, 0.2], undefined, {
         vector: vi.fn().mockRejectedValue(new Error('vector unavailable')),
         lexical: vi.fn().mockRejectedValue(new Error('lexical unavailable')),
       }),

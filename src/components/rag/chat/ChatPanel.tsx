@@ -5,8 +5,8 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Loader2, Send } from 'lucide-react'
 import type { ChatMessage, RagSource } from '@/lib/rag/types'
-import type { RagSseEvent } from '@/lib/rag/protocol'
 import { applyRagSseEvent } from '@/lib/rag/chatState'
+import { consumeRagChatStream } from '@/lib/rag/chatStream'
 import {
   buildMailtoUrl,
   CONTACT_EMAIL,
@@ -46,45 +46,6 @@ function getOrCreateRagSessionId() {
 function saveRagSessionId(sessionId: string) {
   if (UUID_PATTERN.test(sessionId)) {
     window.localStorage.setItem(RAG_SESSION_STORAGE_KEY, sessionId)
-  }
-}
-
-async function consumeRagChatStream(
-  response: Response,
-  onEvent: (event: RagSseEvent) => void,
-) {
-  if (!response.body) {
-    throw new Error('AI 助手暂时不可用')
-  }
-
-  const reader = response.body.getReader()
-  const decoder = new TextDecoder()
-  let buffer = ''
-
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-
-    buffer += decoder.decode(value, { stream: true })
-    const lines = buffer.split('\n')
-    buffer = lines.pop() ?? ''
-
-    for (const line of lines) {
-      const trimmed = line.trim()
-      if (!trimmed.startsWith('data:')) continue
-
-      const payload = trimmed.slice(5).trim()
-      if (!payload) continue
-
-      let event: RagSseEvent
-      try {
-        event = JSON.parse(payload) as RagSseEvent
-      } catch {
-        continue
-      }
-
-      onEvent(event)
-    }
   }
 }
 

@@ -46,6 +46,12 @@ function createSseResponse(stream: ReadableStream<Uint8Array>) {
 
 export async function POST(req: Request) {
   const requestStartedAt = performance.now()
+  const operation = new AbortController()
+  let streamOwnsOperation = false
+  const abortOperation = () => operation.abort(req.signal.reason)
+  const cleanupOperation = () => {
+    req.signal.removeEventListener('abort', abortOperation)
+  }
 
   try {
     const contentLength = Number(req.headers.get('content-length') || '0')
@@ -77,33 +83,47 @@ export async function POST(req: Request) {
 
     const responseId = randomUUID()
     const sessionId = requestedSessionId ?? randomUUID()
+    if (req.signal.aborted) abortOperation()
+    else req.signal.addEventListener('abort', abortOperation, { once: true })
     const retrievalStartedAt = performance.now()
-    const embedding = await createEmbedding(message)
-    const retrieval = await retrieveRagCandidates(message, embedding)
+    operation.signal.throwIfAborted()
+    const embedding = await createEmbedding(message, operation.signal)
+    operation.signal.throwIfAborted()
+    const retrieval = await retrieveRagCandidates(
+      message,
+      embedding,
+      operation.signal,
+    )
+    operation.signal.throwIfAborted()
     const { candidates, evidenceMode } = fuseRagCandidates({
       ...retrieval,
       pageContext,
     })
     const contexts = assignContextIds(candidates)
+    operation.signal.throwIfAborted()
     const retrievalMs = Math.round(performance.now() - retrievalStartedAt)
 
     const encoder = new TextEncoder()
     let streamClosed = false
+    streamOwnsOperation = true
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
         const send = (event: RagSseEvent) => {
-          if (streamClosed || req.signal.aborted) return false
+          if (streamClosed || operation.signal.aborted) return false
           try {
             controller.enqueue(encoder.encode(encodeRagSse(event)))
             return true
           } catch {
             streamClosed = true
+            operation.abort()
             return false
           }
         }
 
         try {
-          send({ type: 'meta', responseId, sessionId })
+          if (!send({ type: 'meta', responseId, sessionId })) {
+            operation.signal.throwIfAborted()
+          }
 
           let rawAnswer = ''
           let firstTokenMs: number | null = null
@@ -111,12 +131,14 @@ export async function POST(req: Request) {
             message,
             contexts,
             evidenceMode,
-            req.signal,
+            operation.signal,
           )) {
             if (!text) continue
             firstTokenMs ??= Math.round(performance.now() - requestStartedAt)
             rawAnswer += text
-            send({ type: 'delta', text })
+            if (!send({ type: 'delta', text })) {
+              operation.signal.throwIfAborted()
+            }
           }
 
           if (!rawAnswer) {
@@ -164,7 +186,7 @@ export async function POST(req: Request) {
             ...timings,
           })
         } catch (error) {
-          if (req.signal.aborted || streamClosed) return
+          if (operation.signal.aborted || streamClosed) return
           console.error('RAG chat stream failed', {
             responseId,
             errorName: error instanceof Error ? error.name : 'UnknownError',
@@ -172,6 +194,7 @@ export async function POST(req: Request) {
           send({ type: 'error', error: 'AI 助手暂时不可用，请稍后再试' })
         } finally {
           streamClosed = true
+          cleanupOperation()
           try {
             controller.close()
           } catch {
@@ -181,11 +204,14 @@ export async function POST(req: Request) {
       },
       cancel() {
         streamClosed = true
+        operation.abort()
+        cleanupOperation()
       },
     })
 
     return createSseResponse(stream)
   } catch (error) {
+    if (!streamOwnsOperation) cleanupOperation()
     console.error('RAG chat request failed', {
       errorName: error instanceof Error ? error.name : 'UnknownError',
     })

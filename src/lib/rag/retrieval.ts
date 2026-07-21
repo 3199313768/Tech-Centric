@@ -26,8 +26,8 @@ interface LexicalMatchRow extends Omit<VectorMatchRow, 'similarity'> {
 }
 
 interface RetrievalDependencies {
-  vector: (embedding: number[]) => Promise<RagRetrievalCandidate[]>
-  lexical: (query: string) => Promise<RagRetrievalCandidate[]>
+  vector: (embedding: number[], signal?: AbortSignal) => Promise<RagRetrievalCandidate[]>
+  lexical: (query: string, signal?: AbortSignal) => Promise<RagRetrievalCandidate[]>
 }
 
 function createServiceClient() {
@@ -50,13 +50,17 @@ export async function matchRagChunksVector(
   queryEmbedding: number[],
   matchCount = 12,
   minSimilarity = 0.2,
+  signal?: AbortSignal,
 ) {
   const supabase = createServiceClient()
-  const { data, error } = await supabase.rpc('match_rag_chunks', {
+  const request = supabase.rpc('match_rag_chunks', {
     query_embedding: queryEmbedding,
     match_count: matchCount,
     min_similarity: minSimilarity,
   })
+  const { data, error } = signal
+    ? await request.abortSignal(signal)
+    : await request
 
   if (error) {
     throw new Error(`RAG vector retrieval failed: ${error.message}`)
@@ -71,12 +75,19 @@ export async function matchRagChunksVector(
   )
 }
 
-export async function matchRagChunksLexical(query: string, matchCount = 12) {
+export async function matchRagChunksLexical(
+  query: string,
+  matchCount = 12,
+  signal?: AbortSignal,
+) {
   const supabase = createServiceClient()
-  const { data, error } = await supabase.rpc('match_rag_chunks_lexical', {
+  const request = supabase.rpc('match_rag_chunks_lexical', {
     query_text: query,
     match_count: matchCount,
   })
+  const { data, error } = signal
+    ? await request.abortSignal(signal)
+    : await request
 
   if (error) {
     throw new Error(`RAG lexical retrieval failed: ${error.message}`)
@@ -94,15 +105,20 @@ export async function matchRagChunksLexical(query: string, matchCount = 12) {
 export async function retrieveRagCandidates(
   query: string,
   embedding: number[],
+  signal?: AbortSignal,
   dependencies: RetrievalDependencies = {
-    vector: matchRagChunksVector,
-    lexical: matchRagChunksLexical,
+    vector: (value, operationSignal) =>
+      matchRagChunksVector(value, 12, 0.2, operationSignal),
+    lexical: (value, operationSignal) =>
+      matchRagChunksLexical(value, 12, operationSignal),
   },
 ) {
   const [vectorResult, lexicalResult] = await Promise.allSettled([
-    dependencies.vector(embedding),
-    dependencies.lexical(query),
+    dependencies.vector(embedding, signal),
+    dependencies.lexical(query, signal),
   ])
+
+  signal?.throwIfAborted()
 
   if (vectorResult.status === 'rejected' && lexicalResult.status === 'rejected') {
     throw new Error('RAG retrieval failed')
