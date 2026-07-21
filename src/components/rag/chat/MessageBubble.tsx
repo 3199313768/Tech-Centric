@@ -6,6 +6,7 @@ import type { ChatMessage } from '@/lib/rag/types'
 import { ContactActions } from '@/components/rag/contact/ContactActions'
 import { ContactSummary } from '@/components/rag/contact/ContactSummary'
 import { SourceList } from '@/components/rag/chat/SourceList'
+import { AnswerFeedback } from '@/components/rag/chat/AnswerFeedback'
 
 interface MessageBubbleProps {
   message: ChatMessage
@@ -26,6 +27,11 @@ const bubbleMotion = {
 
 export function MessageBubble({ message, onAction }: MessageBubbleProps) {
   const isUser = message.role === 'user'
+  const showFeedback = !isUser
+    && (message.variant === undefined || message.variant === 'default')
+    && message.isComplete === true
+    && !message.error
+    && Boolean(message.responseId && message.sessionId)
 
   const bubble = (
     <motion.div className={getBubbleClassName(message)} {...bubbleMotion}>
@@ -38,6 +44,9 @@ export function MessageBubble({ message, onAction }: MessageBubbleProps) {
       {message.contactSummary ? <ContactSummary summary={message.contactSummary} /> : null}
       {!isUser ? <SourceList sources={message.sources || []} /> : null}
       {!isUser && onAction ? <ContactActions actions={message.actions || []} onAction={onAction} /> : null}
+      {showFeedback && message.responseId && message.sessionId ? (
+        <AnswerFeedback responseId={message.responseId} sessionId={message.sessionId} />
+      ) : null}
     </motion.div>
   )
 

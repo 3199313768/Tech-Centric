@@ -2,6 +2,14 @@ import Link from 'next/link'
 import { ExternalLink } from 'lucide-react'
 import type { RagSource } from '@/lib/rag/types'
 
+const SOURCE_TYPE_LABELS: Record<RagSource['sourceType'], string> = {
+  static_personal: '个人介绍',
+  static_project: '项目资料',
+  static_resource: '资源分享',
+  knowledge_record: '知识库',
+  vibe_entry: '动态记录',
+}
+
 interface SourceListProps {
   sources: RagSource[]
 }
@@ -25,7 +33,10 @@ export function SourceList({ sources }: SourceListProps) {
                 className="sg-rag-source-item"
               >
                 <span className="sg-rag-source-item__head">
-                  <span className="sg-rag-source-item__title">{source.title}</span>
+                  <span className="sg-rag-source-item__title">
+                    <span className="sg-rag-source-item__citation">[{source.citation}]</span>
+                    {source.title}
+                  </span>
                   <ExternalLink
                     className="sg-rag-source-item__link-icon"
                     aria-hidden
@@ -34,6 +45,7 @@ export function SourceList({ sources }: SourceListProps) {
                 <span className="sg-rag-source-item__meta">
                   {formatSourceType(source.sourceType)}
                 </span>
+                <span className="sg-rag-source-item__excerpt">{source.excerpt}</span>
               </Link>
             )
           }
@@ -53,7 +65,10 @@ export function SourceList({ sources }: SourceListProps) {
               className="sg-rag-source-item"
             >
               <span className="sg-rag-source-item__head">
-                <span className="sg-rag-source-item__title">{source.title}</span>
+                <span className="sg-rag-source-item__title">
+                  <span className="sg-rag-source-item__citation">[{source.citation}]</span>
+                  {source.title}
+                </span>
                 {safeUrl ? (
                   <ExternalLink
                     className="sg-rag-source-item__link-icon"
@@ -64,6 +79,7 @@ export function SourceList({ sources }: SourceListProps) {
               <span className="sg-rag-source-item__meta">
                 {formatSourceType(source.sourceType)}
               </span>
+              <span className="sg-rag-source-item__excerpt">{source.excerpt}</span>
             </SourceWrapper>
           )
         })}
@@ -72,17 +88,17 @@ export function SourceList({ sources }: SourceListProps) {
   )
 }
 
-function formatSourceType(sourceType: string) {
-  return sourceType.replace(/_/g, ' ')
+function formatSourceType(sourceType: RagSource['sourceType']) {
+  return SOURCE_TYPE_LABELS[sourceType]
 }
 
 function getSafeUrl(url: string | null) {
   if (!url) return null
-  if (url.startsWith('/')) return url
+  if (url.startsWith('/') && !url.startsWith('//')) return url
 
   try {
     const parsed = new URL(url)
-    return ['http:', 'https:', 'mailto:'].includes(parsed.protocol) ? parsed.toString() : null
+    return ['http:', 'https:'].includes(parsed.protocol) ? parsed.toString() : null
   } catch {
     return null
   }
