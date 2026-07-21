@@ -104,7 +104,7 @@ export async function matchRagChunksLexical(
 
 export async function retrieveRagCandidates(
   query: string,
-  embedding: number[],
+  embedding: number[] | Promise<number[]>,
   signal?: AbortSignal,
   dependencies: RetrievalDependencies = {
     vector: (value, operationSignal) =>
@@ -113,9 +113,13 @@ export async function retrieveRagCandidates(
       matchRagChunksLexical(value, 12, operationSignal),
   },
 ) {
+  const lexicalTask = dependencies.lexical(query, signal)
+  const vectorTask = Promise.resolve(embedding).then(value =>
+    dependencies.vector(value, signal),
+  )
   const [vectorResult, lexicalResult] = await Promise.allSettled([
-    dependencies.vector(embedding, signal),
-    dependencies.lexical(query, signal),
+    vectorTask,
+    lexicalTask,
   ])
 
   signal?.throwIfAborted()

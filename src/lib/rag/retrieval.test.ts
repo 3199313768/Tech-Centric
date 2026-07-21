@@ -77,6 +77,22 @@ describe('retrieveRagCandidates', () => {
     ).resolves.toEqual({ vector: [], lexical })
   })
 
+  it('falls back to lexical candidates when embedding creation fails', async () => {
+    const lexical = [candidate('lexical', { lexicalScore: 1.4 })]
+
+    await expect(
+      retrieveRagCandidates(
+        'React',
+        Promise.reject(new Error('embedding unavailable')),
+        undefined,
+        {
+          vector: vi.fn().mockResolvedValue([]),
+          lexical: vi.fn().mockResolvedValue(lexical),
+        },
+      ),
+    ).resolves.toEqual({ vector: [], lexical })
+  })
+
   it('falls back to vector candidates when lexical retrieval fails', async () => {
     const vector = [candidate('vector', { similarity: 0.82 })]
 

@@ -87,11 +87,10 @@ export async function POST(req: Request) {
     else req.signal.addEventListener('abort', abortOperation, { once: true })
     const retrievalStartedAt = performance.now()
     operation.signal.throwIfAborted()
-    const embedding = await createEmbedding(message, operation.signal)
-    operation.signal.throwIfAborted()
+    const embeddingPromise = createEmbedding(message, operation.signal)
     const retrieval = await retrieveRagCandidates(
       message,
-      embedding,
+      embeddingPromise,
       operation.signal,
     )
     operation.signal.throwIfAborted()

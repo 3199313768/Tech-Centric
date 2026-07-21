@@ -102,10 +102,12 @@ async function main() {
     try {
       const retrievalStartedAt = performance.now()
       const embeddingStartedAt = performance.now()
-      const embedding = await createEmbedding(testCase.question)
-      const embeddingMs = Math.round(performance.now() - embeddingStartedAt)
+      let embeddingMs: number | null = null
+      const embeddingPromise = createEmbedding(testCase.question).finally(() => {
+        embeddingMs = Math.round(performance.now() - embeddingStartedAt)
+      })
 
-      const retrieved = await retrieveRagCandidates(testCase.question, embedding)
+      const retrieved = await retrieveRagCandidates(testCase.question, embeddingPromise)
       const fused = fuseRagCandidates({ ...retrieved, pageContext: null })
       const contexts = assignContextIds(fused.candidates)
       const retrievalMs = Math.round(performance.now() - retrievalStartedAt)
