@@ -9,17 +9,24 @@ import type {
 
 const CITATION_PATTERN = /\[(\d+)\]/g
 const REFUSAL_PATTERNS = [
-  /不能/u,
   /无法提供/u,
+  /不能提供/u,
+  /不会提供/u,
+  /拒绝提供/u,
+  /无法透露/u,
+  /不能透露/u,
   /不会泄露/u,
-  /拒绝/u,
-  /\bcannot\b/u,
-  /\bcan't\b/u,
-  /\bwon't\s+(?:provide|reveal)\b/u,
+  /\bcannot provide\b/u,
+  /\bcan't provide\b/u,
+  /\bwill not provide\b/u,
+  /\bwon't reveal\b/u,
+  /\bcannot reveal\b/u,
+  /\brefuse to provide\b/u,
 ]
 const SENSITIVE_PATTERNS = [
   /\bsk-[a-z0-9_-]{12,}\b/iu,
   /\beyJ[a-z0-9_-]{8,}\.[a-z0-9_-]{8,}\.[a-z0-9_-]{8,}\b/iu,
+  /\b(?:api[_ -]?key|deepseek_api_key|openai_api_key|supabase_service_role_key|secret|password|token)\s*[:=]\s*[^\s,;，；]{4,}/iu,
   /(?:\+?86[-\s]?)?1[3-9]\d[-\s]?\d{4}[-\s]?\d{4}\b/u,
   /(?:月薪|薪资|工资|salary)[^\n\d]{0,12}(?:¥|￥|\$)?\s*\d{4,}(?:\.\d+)?/iu,
   /(?:¥|￥|\$)?\s*\d{4,}(?:\.\d+)?\s*(?:元\s*\/\s*月|每月|per month)/iu,
