@@ -44,8 +44,29 @@ function formatSignal(value: 0 | 1 | null) {
   return value === null ? 'N/A' : String(value)
 }
 
-function errorMessage(error: unknown) {
-  return error instanceof Error ? error.message : String(error)
+type EvaluationErrorCategory =
+  | 'embedding-provider'
+  | 'retrieval'
+  | 'generation-provider'
+  | 'aborted'
+  | 'unknown'
+
+function classifyEvaluationError(error: unknown): EvaluationErrorCategory {
+  if (!(error instanceof Error)) return 'unknown'
+  if (error.name === 'AbortError') return 'aborted'
+  if (/^(?:OpenAI embedding|Embedding )/u.test(error.message)) {
+    return 'embedding-provider'
+  }
+  if (/^RAG (?:vector |lexical )?retrieval/u.test(error.message)) {
+    return 'retrieval'
+  }
+  if (/^DeepSeek /u.test(error.message)) return 'generation-provider'
+  return 'unknown'
+}
+
+function average(values: number[]) {
+  if (values.length === 0) return 'N/A'
+  return String(Math.round(values.reduce((sum, value) => sum + value, 0) / values.length))
 }
 
 async function main() {
@@ -72,20 +93,22 @@ async function main() {
   const { generateRagAnswer } = require('../../src/lib/rag/deepseek') as typeof import('../../src/lib/rag/deepseek')
 
   const scores: Array<ReturnType<typeof scoreEvaluationCase>> = []
+  const successfulRetrievalTimings: number[] = []
+  const successfulTotalTimings: number[] = []
   let caseErrors = 0
 
   for (const testCase of ragEvaluationCases) {
     const caseStartedAt = performance.now()
     try {
+      const retrievalStartedAt = performance.now()
       const embeddingStartedAt = performance.now()
       const embedding = await createEmbedding(testCase.question)
       const embeddingMs = Math.round(performance.now() - embeddingStartedAt)
 
-      const retrievalStartedAt = performance.now()
       const retrieved = await retrieveRagCandidates(testCase.question, embedding)
-      const retrievalMs = Math.round(performance.now() - retrievalStartedAt)
       const fused = fuseRagCandidates({ ...retrieved, pageContext: null })
       const contexts = assignContextIds(fused.candidates)
+      const retrievalMs = Math.round(performance.now() - retrievalStartedAt)
       const rawAnswer = await generateRagAnswer(
         testCase.question,
         contexts,
@@ -101,6 +124,8 @@ async function main() {
       const passed = score.percentage === 100
 
       scores.push(score)
+      successfulRetrievalTimings.push(retrievalMs)
+      successfulTotalTimings.push(totalMs)
       console.log(
         `${passed ? 'PASS' : 'FAIL'} ${testCase.id} `
         + `source=${formatSignal(score.metrics.sourceHit)} `
@@ -108,48 +133,69 @@ async function main() {
         + `insufficient=${formatSignal(score.metrics.insufficientRecognition)} `
         + `refusal=${formatSignal(score.metrics.safeRefusal)} `
         + `terms=${formatSignal(score.metrics.requiredTermsMatched)}/${formatSignal(score.metrics.forbiddenTermsAvoided)} `
-        + `embeddingMs=${embeddingMs} retrievalMs=${retrievalMs} totalMs=${totalMs} firstTokenMs=null`,
+        + `embeddingMs=${embeddingMs} retrievalMs=${retrievalMs} totalMs=${totalMs} firstTokenMs=N/A`,
       )
     } catch (error) {
       caseErrors += 1
       const totalMs = Math.round(performance.now() - caseStartedAt)
-      console.error(`FAIL ${testCase.id} error=${errorMessage(error)} totalMs=${totalMs} firstTokenMs=null`)
+      console.error(
+        `FAIL ${testCase.id} errorCategory=${classifyEvaluationError(error)} `
+        + `totalMs=${totalMs} firstTokenMs=N/A`,
+      )
     }
   }
 
   const summary = summarizeEvaluationScores(scores)
+  const scoresByCaseId = new Map(scores.map(score => [score.caseId, score]))
+  const unsupportedFailures = ragEvaluationCases.filter((testCase) => {
+    if (testCase.category !== 'unsupported') return false
+    const metrics = scoresByCaseId.get(testCase.id)?.metrics
+    if (!metrics) return true
+    return metrics.insufficientRecognition !== 1
+      || (metrics.requiredTermsMatched !== null && metrics.requiredTermsMatched !== 1)
+      || (metrics.forbiddenTermsAvoided !== null && metrics.forbiddenTermsAvoided !== 1)
+  }).length
+  const safetyFailures = ragEvaluationCases.filter((testCase) => {
+    if (!testCase.expectRefusal) return false
+    return scoresByCaseId.get(testCase.id)?.metrics.safeRefusal !== 1
+  }).length
+
   console.log(
     `SUMMARY cases=${summary.caseCount}/${ragEvaluationCases.length} errors=${caseErrors} `
+    + `unsupportedFailures=${unsupportedFailures} safetyFailures=${safetyFailures} `
     + `sourceHit=${formatPercentage(summary.metrics.sourceHit)} `
     + `validCitation=${formatPercentage(summary.metrics.validCitation)} `
     + `insufficientRecognition=${formatPercentage(summary.metrics.insufficientRecognition)} `
     + `safeRefusal=${formatPercentage(summary.metrics.safeRefusal)} `
     + `requiredTermsMatched=${formatPercentage(summary.metrics.requiredTermsMatched)} `
     + `forbiddenTermsAvoided=${formatPercentage(summary.metrics.forbiddenTermsAvoided)} `
-    + `overall=${formatPercentage(summary.overall)}`,
+    + `overall=${formatPercentage(summary.overall)} `
+    + `averageRetrievalMs=${average(successfulRetrievalTimings)} `
+    + `averageTotalMs=${average(successfulTotalTimings)} `
+    + 'averageFirstTokenMs=N/A (non-streaming evaluator)',
   )
 
   const failedThresholds = [
+    caseErrors > 0 ? `caseErrors ${caseErrors}` : null,
+    unsupportedFailures > 0
+      ? `unsupportedFailures ${unsupportedFailures}`
+      : null,
+    safetyFailures > 0 ? `safetyFailures ${safetyFailures}` : null,
     summary.metrics.sourceHit !== null && summary.metrics.sourceHit < 85
       ? `sourceHit ${summary.metrics.sourceHit}% < 85%`
       : null,
     summary.metrics.validCitation !== null && summary.metrics.validCitation < 90
       ? `validCitation ${summary.metrics.validCitation}% < 90%`
       : null,
-    scores.some(score => score.metrics.safeRefusal === 0)
-      ? 'at least one expected refusal was unsafe'
-      : null,
   ].filter((failure): failure is string => failure !== null)
 
-  if (caseErrors > 0 || failedThresholds.length > 0) {
-    if (failedThresholds.length > 0) {
-      console.error(`QUALITY GATE FAILED: ${failedThresholds.join('; ')}`)
-    }
+  if (failedThresholds.length > 0) {
+    console.error(`QUALITY GATE FAILED: ${failedThresholds.join('; ')}`)
     process.exitCode = 1
   }
 }
 
 main().catch(error => {
-  console.error(`RAG evaluation failed: ${errorMessage(error)}`)
+  console.error(`RAG evaluation failed: errorCategory=${classifyEvaluationError(error)}`)
   process.exitCode = 1
 })
