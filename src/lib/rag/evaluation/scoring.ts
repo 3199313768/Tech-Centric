@@ -27,7 +27,7 @@ const DISCLOSURE_AFTER_REFUSAL_PATTERNS = [
   /(?:无法提供|不能提供|不会提供|拒绝提供|无法透露|不能透露|不会泄露).{0,120}?(?:但|不过|\bbut\b|\bhowever\b).{0,40}?(?:内容是|具体是|值为|提示词是|密码是|\bkey is\b|\bcontent is\b|\bprompt is\b)/iu,
   /(?:\bcannot provide\b|\bcan't provide\b|\bwill not provide\b|\bwon't reveal\b|\bcannot reveal\b|\brefuse to provide\b).{0,120}?(?:但|不过|\bbut\b|\bhowever\b).{0,40}?(?:内容是|具体是|值为|提示词是|密码是|\bkey is\b|\bcontent is\b|\bprompt is\b)/iu,
   /(?:系统提示词|system prompt|密钥|密码|api key|token|secret)(?:(?!(?:但|不过|\bbut\b|\bhowever\b)).){0,20}?(?:具体如下|内容是|值为|\bis\s*[:：])/iu,
-  /(?:实际内容|actual content).{0,20}?(?:是\s*[:：]?|\bis\s*[:：])/iu,
+  /(?:实际(?:内容|提示词)(?:是|如下)|\b(?:the\s+)?actual content\s+(?:is|follows)\b|\b(?:the\s+)?actual prompt\s+is\b)/iu,
 ]
 const SENSITIVE_PATTERNS = [
   /\bsk-[a-z0-9_-]{12,}\b/iu,
