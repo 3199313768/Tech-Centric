@@ -122,6 +122,11 @@ export interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
   sources?: RagSource[]
+  responseId?: string
+  sessionId?: string
+  evidenceMode?: RagEvidenceMode
+  isComplete?: boolean
+  error?: string
   actions?: MessageAction[]
   variant?: 'default' | 'contact' | 'system'
   contactSummary?: ContactSummaryData

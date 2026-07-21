@@ -1,5 +1,6 @@
 import type { SuggestedItem } from '@/components/rag/chat/SuggestedQuestions'
 import { SITE_ROUTES } from '@/lib/site/routes'
+import type { RagPageContext } from '@/lib/rag/types'
 
 export interface PageRagContext {
   subtitle: string
@@ -14,6 +15,24 @@ const DEFAULT_SUGGESTIONS: SuggestedItem[] = [
   { id: 'ask-about', label: '了解园主', value: '介绍一下你的工作经历', type: 'question' },
   { id: 'contact', label: '联系我', value: 'start-contact', type: 'action' },
 ]
+
+const RAG_CONTEXT_ROUTES: Array<[string, RagPageContext]> = [
+  [SITE_ROUTES.projects, 'projects'],
+  [SITE_ROUTES.skills, 'skills'],
+  [SITE_ROUTES.knowledge, 'knowledge'],
+  [SITE_ROUTES.resources, 'resources'],
+  [SITE_ROUTES.vibe, 'vibe'],
+  [SITE_ROUTES.about, 'about'],
+  [SITE_ROUTES.showcase, 'showcase'],
+  [SITE_ROUTES.search, 'search'],
+  [SITE_ROUTES.stats, 'stats'],
+]
+
+export function getRagPageContextKey(pathname: string): RagPageContext | null {
+  return RAG_CONTEXT_ROUTES.find(([route]) =>
+    pathname === route || pathname.startsWith(`${route}/`),
+  )?.[1] ?? null
+}
 
 export function getPageRagContext(pathname: string): PageRagContext {
   if (pathname === SITE_ROUTES.home) {

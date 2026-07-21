@@ -53,13 +53,14 @@ export function finalizeCitations(
       continue
     }
 
-    let citation = citationBySourceId.get(context.sourceId)
+    const publicSourceId = `${context.sourceType}:${context.sourceId}`
+    let citation = citationBySourceId.get(publicSourceId)
     if (citation === undefined) {
       citation = sources.length + 1
-      citationBySourceId.set(context.sourceId, citation)
+      citationBySourceId.set(publicSourceId, citation)
       sources.push({
         citation,
-        sourceId: context.sourceId,
+        sourceId: publicSourceId,
         title: context.title,
         url: context.url,
         sourceType: context.sourceType,

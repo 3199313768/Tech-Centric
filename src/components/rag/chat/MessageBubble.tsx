@@ -30,6 +30,11 @@ export function MessageBubble({ message, onAction }: MessageBubbleProps) {
   const bubble = (
     <motion.div className={getBubbleClassName(message)} {...bubbleMotion}>
       <p className="sg-rag-bubble__text">{message.content}</p>
+      {!isUser && message.error ? (
+        <div className="sg-kb-error sg-kb-error--inline" role="alert">
+          回答未完整：{message.error}
+        </div>
+      ) : null}
       {message.contactSummary ? <ContactSummary summary={message.contactSummary} /> : null}
       {!isUser ? <SourceList sources={message.sources || []} /> : null}
       {!isUser && onAction ? <ContactActions actions={message.actions || []} onAction={onAction} /> : null}

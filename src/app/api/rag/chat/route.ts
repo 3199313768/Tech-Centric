@@ -88,10 +88,18 @@ export async function POST(req: Request) {
     const retrievalMs = Math.round(performance.now() - retrievalStartedAt)
 
     const encoder = new TextEncoder()
+    let streamClosed = false
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
         const send = (event: RagSseEvent) => {
-          controller.enqueue(encoder.encode(encodeRagSse(event)))
+          if (streamClosed || req.signal.aborted) return false
+          try {
+            controller.enqueue(encoder.encode(encodeRagSse(event)))
+            return true
+          } catch {
+            streamClosed = true
+            return false
+          }
         }
 
         try {
@@ -99,7 +107,12 @@ export async function POST(req: Request) {
 
           let rawAnswer = ''
           let firstTokenMs: number | null = null
-          for await (const text of streamRagAnswer(message, contexts, evidenceMode)) {
+          for await (const text of streamRagAnswer(
+            message,
+            contexts,
+            evidenceMode,
+            req.signal,
+          )) {
             if (!text) continue
             firstTokenMs ??= Math.round(performance.now() - requestStartedAt)
             rawAnswer += text
@@ -151,22 +164,23 @@ export async function POST(req: Request) {
             ...timings,
           })
         } catch (error) {
+          if (req.signal.aborted || streamClosed) return
           console.error('RAG chat stream failed', {
             responseId,
             errorName: error instanceof Error ? error.name : 'UnknownError',
           })
-          try {
-            send({ type: 'error', error: 'AI 助手暂时不可用，请稍后再试' })
-          } catch {
-            // The client may have already disconnected.
-          }
+          send({ type: 'error', error: 'AI 助手暂时不可用，请稍后再试' })
         } finally {
+          streamClosed = true
           try {
             controller.close()
           } catch {
             // The stream may already be closed after a client disconnect.
           }
         }
+      },
+      cancel() {
+        streamClosed = true
       },
     })
 

@@ -51,7 +51,7 @@ describe('finalizeCitations', () => {
     expect(result.sources).toEqual([
       {
         citation: 1,
-        sourceId: 'source-second',
+        sourceId: 'static_project:source-second',
         title: 'title-second',
         url: '/second',
         sourceType: 'static_project',
@@ -68,8 +68,8 @@ describe('finalizeCitations', () => {
 
     expect(result.answer).toBe('Third [1], then first [2], and third again [1].')
     expect(result.sources.map(({ sourceId }) => sourceId)).toEqual([
-      'source-third',
-      'source-first',
+      'static_personal:source-third',
+      'static_personal:source-first',
     ])
   })
 
@@ -94,9 +94,27 @@ describe('finalizeCitations', () => {
     expect(result.sources).toHaveLength(1)
     expect(result.sources[0]).toMatchObject({
       citation: 1,
-      sourceId: 'shared-source',
+      sourceId: 'static_personal:shared-source',
       excerpt: 'second excerpt',
     })
+  })
+
+  it('keeps equal source IDs from different source types distinct', () => {
+    const sameIdContexts = assignContextIds([
+      candidate('personal', { sourceId: 'shared' }),
+      candidate('project', {
+        sourceId: 'shared',
+        sourceType: 'static_project',
+      }),
+    ])
+
+    const result = finalizeCitations('Personal [S1], project [S2].', sameIdContexts)
+
+    expect(result.answer).toBe('Personal [1], project [2].')
+    expect(result.sources.map(source => source.sourceId)).toEqual([
+      'static_personal:shared',
+      'static_project:shared',
+    ])
   })
 
   it('removes unknown citation IDs without adding whitespace artifacts', () => {

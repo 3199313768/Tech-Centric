@@ -139,6 +139,7 @@ export function streamRagAnswer(
   message: string,
   sources: RagContextSource[] | RagSearchResult[],
   evidenceMode?: RagEvidenceMode,
+  signal?: AbortSignal,
 ) {
   const contexts = normalizeContexts(sources)
   const resolvedEvidenceMode = resolveEvidenceMode(sources, evidenceMode)
@@ -146,5 +147,6 @@ export function streamRagAnswer(
   return deepseekChatCompletionStream({
     messages: buildRagMessages(message, contexts, resolvedEvidenceMode),
     temperature: 0.3,
+    signal,
   })
 }

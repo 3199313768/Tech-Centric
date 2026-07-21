@@ -5,6 +5,8 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Loader2, Send } from 'lucide-react'
 import type { ChatMessage, RagSource } from '@/lib/rag/types'
+import type { RagSseEvent } from '@/lib/rag/protocol'
+import { applyRagSseEvent } from '@/lib/rag/chatState'
 import {
   buildMailtoUrl,
   CONTACT_EMAIL,
@@ -21,7 +23,7 @@ import {
 import { MessageBubble } from '@/components/rag/chat/MessageBubble'
 import { TypingIndicator } from '@/components/rag/contact/TypingIndicator'
 import { SuggestedItem, SuggestedQuestions } from '@/components/rag/chat/SuggestedQuestions'
-import { getPageRagContext } from '@/lib/rag/pageContext'
+import { getPageRagContext, getRagPageContextKey } from '@/lib/rag/pageContext'
 
 interface RagChatResponse {
   answer?: string
@@ -29,16 +31,27 @@ interface RagChatResponse {
   error?: string
 }
 
-type RagSseEvent =
-  | { type: 'meta'; sources: RagSource[] }
-  | { type: 'delta'; text: string }
-  | { type: 'done' }
-  | { type: 'error'; error: string }
+const RAG_SESSION_STORAGE_KEY = 'tech-centric-rag-session-id'
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+function getOrCreateRagSessionId() {
+  const stored = window.localStorage.getItem(RAG_SESSION_STORAGE_KEY)
+  if (stored && UUID_PATTERN.test(stored)) return stored
+
+  const sessionId = crypto.randomUUID()
+  window.localStorage.setItem(RAG_SESSION_STORAGE_KEY, sessionId)
+  return sessionId
+}
+
+function saveRagSessionId(sessionId: string) {
+  if (UUID_PATTERN.test(sessionId)) {
+    window.localStorage.setItem(RAG_SESSION_STORAGE_KEY, sessionId)
+  }
+}
 
 async function consumeRagChatStream(
   response: Response,
-  onMeta: (sources: RagSource[]) => void,
-  onDelta: (text: string) => void,
+  onEvent: (event: RagSseEvent) => void,
 ) {
   if (!response.body) {
     throw new Error('AI 助手暂时不可用')
@@ -47,7 +60,6 @@ async function consumeRagChatStream(
   const reader = response.body.getReader()
   const decoder = new TextDecoder()
   let buffer = ''
-  let sawError: string | null = null
 
   while (true) {
     const { done, value } = await reader.read()
@@ -71,24 +83,15 @@ async function consumeRagChatStream(
         continue
       }
 
-      if (event.type === 'meta') {
-        onMeta(event.sources)
-      } else if (event.type === 'delta') {
-        onDelta(event.text)
-      } else if (event.type === 'error') {
-        sawError = event.error
-      }
+      onEvent(event)
     }
-  }
-
-  if (sawError) {
-    throw new Error(sawError)
   }
 }
 
 export function ChatPanel() {
   const pathname = usePathname()
   const pageContext = getPageRagContext(pathname)
+  const pageContextKey = getRagPageContextKey(pathname)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -98,6 +101,9 @@ export function ChatPanel() {
   const [copiedLabel, setCopiedLabel] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const requestAbortRef = useRef<AbortController | null>(null)
+
+  useEffect(() => () => requestAbortRef.current?.abort(), [])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
@@ -280,12 +286,20 @@ export function ChatPanel() {
     }
 
     setIsLoading(true)
+    const requestController = new AbortController()
+    requestAbortRef.current = requestController
 
     try {
+      const sessionId = getOrCreateRagSessionId()
       const response = await fetch('/api/rag/chat', {
         method: 'POST',
+        signal: requestController.signal,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: content }),
+        body: JSON.stringify({
+          message: content,
+          sessionId,
+          pageContext: pageContextKey,
+        }),
       })
 
       const contentType = response.headers.get('content-type') || ''
@@ -313,49 +327,32 @@ export function ChatPanel() {
         role: 'assistant',
         content: '',
         sources: [],
+        isComplete: false,
       }])
 
       await consumeRagChatStream(
         response,
-        (sources) => {
-          setMessages((prev) => {
-            const next = [...prev]
-            const last = next[next.length - 1]
-            if (!last || last.role !== 'assistant') return prev
-            next[next.length - 1] = { ...last, sources }
-            return next
-          })
-        },
-        (text) => {
-          setMessages((prev) => {
-            const next = [...prev]
-            const last = next[next.length - 1]
-            if (!last || last.role !== 'assistant') return prev
-            next[next.length - 1] = { ...last, content: last.content + text }
-            return next
-          })
+        (event) => {
+          if (event.type === 'meta' && event.sessionId !== sessionId) {
+            saveRagSessionId(event.sessionId)
+          }
+          setMessages(prev => applyRagSseEvent(prev, event))
         },
       )
-
-      setMessages((prev) => {
-        const next = [...prev]
-        const last = next[next.length - 1]
-        if (!last || last.role !== 'assistant') return prev
-        if (!last.content.trim()) {
-          next[next.length - 1] = { ...last, content: '我暂时没有生成有效回答。' }
-        }
-        return next
-      })
     } catch (error) {
+      if (requestController.signal.aborted) return
       setMessages((prev) => {
         const next = [...prev]
         const last = next[next.length - 1]
         const errorText = error instanceof Error ? error.message : 'AI 助手暂时不可用，请稍后再试。'
 
-        // 流式已插入助手气泡：空内容则写入错误；已有部分内容则保留
+        // 流式已插入助手气泡：保留部分内容并明确标记未完整。
         if (last?.role === 'assistant') {
-          if (!last.content.trim()) {
-            next[next.length - 1] = { ...last, content: errorText, sources: [] }
+          next[next.length - 1] = {
+            ...last,
+            content: last.content.trim() ? last.content : errorText,
+            error: errorText,
+            isComplete: false,
           }
           return next
         }
@@ -364,9 +361,14 @@ export function ChatPanel() {
           role: 'assistant',
           content: errorText,
           sources: [],
+          error: errorText,
+          isComplete: false,
         }]
       })
     } finally {
+      if (requestAbortRef.current === requestController) {
+        requestAbortRef.current = null
+      }
       setIsLoading(false)
       inputRef.current?.focus()
     }

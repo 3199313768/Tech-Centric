@@ -157,6 +157,16 @@ describe('buildRagMessages', () => {
 })
 
 describe('streamRagAnswer', () => {
+  it('forwards the request cancellation signal to the provider', () => {
+    const controller = new AbortController()
+
+    streamRagAnswer('question', contexts, 'site', controller.signal)
+
+    expect(vi.mocked(deepseekChatCompletionStream)).toHaveBeenLastCalledWith(
+      expect.objectContaining({ signal: controller.signal }),
+    )
+  })
+
   it('accepts the legacy two-argument route call', async () => {
     const legacyResults: RagSearchResult[] = [{
       chunk_id: 'chunk-1',

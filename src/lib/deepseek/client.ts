@@ -15,6 +15,7 @@ export type DeepSeekChatOptions = {
   temperature?: number
   responseFormat?: { type: 'json_object' }
   timeoutMs?: number
+  signal?: AbortSignal
 }
 
 interface DeepSeekResponse {
@@ -58,6 +59,16 @@ async function createDeepSeekResponse(options: DeepSeekChatOptions, stream: bool
   const timeoutMs = options.timeoutMs
     ?? (stream ? DEFAULT_STREAM_TIMEOUT_MS : DEFAULT_TIMEOUT_MS)
   const timeout = setTimeout(() => controller.abort(), timeoutMs)
+  const abortFromCaller = () => controller.abort(options.signal?.reason)
+  if (options.signal?.aborted) {
+    abortFromCaller()
+  } else {
+    options.signal?.addEventListener('abort', abortFromCaller, { once: true })
+  }
+  const cleanup = () => {
+    clearTimeout(timeout)
+    options.signal?.removeEventListener('abort', abortFromCaller)
+  }
 
   try {
     const response = await proxyFetch(DEEPSEEK_API_URL, {
@@ -75,15 +86,15 @@ async function createDeepSeekResponse(options: DeepSeekChatOptions, stream: bool
       throw new Error(`DeepSeek request failed: ${response.status} ${detail.slice(0, 200)}`)
     }
 
-    return { response, clearTimeout: () => clearTimeout(timeout) }
+    return { response, cleanup }
   } catch (error) {
-    clearTimeout(timeout)
+    cleanup()
     throw error
   }
 }
 
 export async function deepseekChatCompletion(options: DeepSeekChatOptions): Promise<string> {
-  const { response, clearTimeout: clearRequestTimeout } = await createDeepSeekResponse(options, false)
+  const { response, cleanup } = await createDeepSeekResponse(options, false)
 
   try {
     const result = await response.json() as DeepSeekResponse
@@ -93,7 +104,7 @@ export async function deepseekChatCompletion(options: DeepSeekChatOptions): Prom
     }
     return content
   } finally {
-    clearRequestTimeout()
+    cleanup()
   }
 }
 
@@ -101,14 +112,15 @@ export async function deepseekChatCompletion(options: DeepSeekChatOptions): Prom
 export async function* deepseekChatCompletionStream(
   options: DeepSeekChatOptions,
 ): AsyncGenerator<string> {
-  const { response, clearTimeout: clearRequestTimeout } = await createDeepSeekResponse(options, true)
+  const { response, cleanup } = await createDeepSeekResponse(options, true)
+  let reader: ReadableStreamDefaultReader<Uint8Array> | null = null
 
   try {
     if (!response.body) {
       throw new Error('DeepSeek stream response body is empty')
     }
 
-    const reader = response.body.getReader()
+    reader = response.body.getReader()
     const decoder = new TextDecoder()
     let buffer = ''
 
@@ -139,6 +151,11 @@ export async function* deepseekChatCompletionStream(
       }
     }
   } finally {
-    clearRequestTimeout()
+    try {
+      await reader?.cancel()
+    } catch {
+      // The provider may have already closed the stream.
+    }
+    cleanup()
   }
 }
