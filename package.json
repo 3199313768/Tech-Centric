@@ -10,6 +10,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "rag:index": "ts-node --project tsconfig.json --compiler-options '{\"module\":\"CommonJS\",\"moduleResolution\":\"node\"}' scripts/rag/index-rag.ts",
+    "rag:evaluate": "ts-node --project tsconfig.json --compiler-options '{\"module\":\"CommonJS\",\"moduleResolution\":\"node\"}' scripts/rag/evaluate-rag.ts",
     "rag:check": "ts-node --project tsconfig.json --compiler-options '{\"module\":\"CommonJS\",\"moduleResolution\":\"node\"}' scripts/rag/check-rag-env.ts",
     "sql:resources": "ts-node --project tsconfig.json --compiler-options '{\"module\":\"CommonJS\",\"moduleResolution\":\"node\"}' scripts/codegen/generate-resources-sql.ts",
     "test:e2e": "playwright test",
