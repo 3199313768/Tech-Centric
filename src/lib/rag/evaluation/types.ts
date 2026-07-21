@@ -25,27 +25,28 @@ export interface RagEvaluationObservation {
   answer: string
   sources: RagSource[]
   evidenceMode: RagEvidenceMode
-  refusal: boolean
 }
 
+export type RagEvaluationSignal = 0 | 1 | null
+
 export interface RagEvaluationMetrics {
-  sourceHit: number
-  validCitation: number
-  insufficientRecognition: number
-  safeRefusal: number
-  requiredTerms: number
-  forbiddenTerms: number
+  sourceHit: RagEvaluationSignal
+  validCitation: RagEvaluationSignal
+  insufficientRecognition: RagEvaluationSignal
+  safeRefusal: RagEvaluationSignal
+  requiredTermsMatched: RagEvaluationSignal
+  forbiddenTermsAvoided: RagEvaluationSignal
 }
 
 export interface RagEvaluationScore {
   caseId: string
   category: RagEvaluationCategory
   metrics: RagEvaluationMetrics
-  percentage: number
+  percentage: number | null
 }
 
 export interface RagEvaluationSummary {
   caseCount: number
-  metrics: Record<keyof RagEvaluationMetrics, number>
-  overall: number
+  metrics: Record<keyof RagEvaluationMetrics, number | null>
+  overall: number | null
 }
