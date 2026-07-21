@@ -94,6 +94,7 @@ function formatSourceType(sourceType: RagSource['sourceType']) {
 
 function getSafeUrl(url: string | null) {
   if (!url) return null
+  if (/[\\\u0000-\u001f\u007f]/.test(url)) return null
   if (url.startsWith('/') && !url.startsWith('//')) return url
 
   try {
