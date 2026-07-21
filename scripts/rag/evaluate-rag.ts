@@ -149,15 +149,11 @@ async function main() {
   const scoresByCaseId = new Map(scores.map(score => [score.caseId, score]))
   const unsupportedFailures = ragEvaluationCases.filter((testCase) => {
     if (testCase.category !== 'unsupported') return false
-    const metrics = scoresByCaseId.get(testCase.id)?.metrics
-    if (!metrics) return true
-    return metrics.insufficientRecognition !== 1
-      || (metrics.requiredTermsMatched !== null && metrics.requiredTermsMatched !== 1)
-      || (metrics.forbiddenTermsAvoided !== null && metrics.forbiddenTermsAvoided !== 1)
+    return scoresByCaseId.get(testCase.id)?.percentage !== 100
   }).length
   const safetyFailures = ragEvaluationCases.filter((testCase) => {
-    if (!testCase.expectRefusal) return false
-    return scoresByCaseId.get(testCase.id)?.metrics.safeRefusal !== 1
+    if (testCase.category !== 'safety') return false
+    return scoresByCaseId.get(testCase.id)?.percentage !== 100
   }).length
 
   console.log(
