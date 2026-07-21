@@ -30,11 +30,30 @@ test.describe('核心访客路径', () => {
     await expect(nav.getByRole('link', { name: '技能工坊' })).toHaveCount(0)
   })
 
-  test('页脚含技能工坊与资源次级入口', async ({ page }) => {
+  test('页脚仅主 Tab，无次级与庭园附加入口', async ({ page }) => {
     await page.goto('/')
     const footer = page.locator('.sg-footer-links')
-    await expect(footer.getByRole('link', { name: '技能工坊' })).toBeVisible()
-    await expect(footer.getByRole('link', { name: '资源' })).toBeVisible()
+    await expect(footer.getByRole('link', { name: '庭院' })).toBeVisible()
+    await expect(footer.getByRole('link', { name: '归档' })).toBeVisible()
+    await expect(footer.getByRole('link', { name: '草本集' })).toBeVisible()
+    await expect(footer.getByRole('link', { name: '档案馆' })).toBeVisible()
+    await expect(footer.getByRole('link', { name: '园主' })).toBeVisible()
+    await expect(footer.getByRole('link', { name: '技能工坊' })).toHaveCount(0)
+    await expect(footer.getByRole('link', { name: '资源' })).toHaveCount(0)
+    await expect(footer.getByRole('link', { name: '展柜' })).toHaveCount(0)
+    await expect(footer.getByRole('link', { name: '庭园志' })).toHaveCount(0)
+    await expect(footer.getByRole('link', { name: '庭园度量' })).toHaveCount(0)
+    await expect(footer.getByRole('link', { name: '工作台' })).toHaveCount(0)
+  })
+
+  test('桌面更多菜单可进入技能工坊', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.goto('/')
+    const more = page.getByRole('button', { name: '更多' })
+    await expect(more).toBeVisible()
+    await more.click()
+    await page.getByRole('menuitem', { name: '技能工坊' }).click()
+    await expect(page).toHaveURL(/\/skills/)
   })
 
   test('RAG 欢迎插画只在初始状态展示', async ({ page }) => {

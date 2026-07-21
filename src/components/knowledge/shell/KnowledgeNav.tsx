@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, Search, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { SiteNavMoreMenu } from '@/components/home/shell/SiteNavMoreMenu'
 import { ThemeToggle } from '@/components/spirit/theme/ThemeToggle'
 import { isSiteNavActive, SITE_NAV_SECONDARY, SITE_NAV_TABS, SITE_ROUTES } from '@/lib/site/routes'
 
@@ -56,6 +57,7 @@ export function KnowledgeNav() {
               {tab.label}
             </Link>
           ))}
+          <SiteNavMoreMenu />
         </div>
 
         <div className="sg-nav-actions sg-nav-desktop-only">
