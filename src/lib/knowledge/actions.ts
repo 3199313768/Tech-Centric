@@ -1,16 +1,17 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { requireSuperAdmin } from '@/lib/auth/requireUser'
 import { createClient } from '@/lib/supabase/server'
 import type { KbRecord } from '@/lib/knowledge/types'
 import { scheduleRagReindex } from '@/lib/rag/reindexTrigger'
 import { knowledgePublicRoute } from '@/lib/site/routes'
 
 export async function deleteKbRecord(recordId: string): Promise<{ error: string | null }> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: '未登录' }
+  const { user, error: authError } = await requireSuperAdmin()
+  if (authError || !user) return { error: authError ?? '请先登录' }
 
+  const supabase = await createClient()
   const { error } = await supabase
     .from('kb_records')
     .delete()
@@ -34,10 +35,10 @@ export async function updateKbRecord(
   recordId: string,
   input: UpdateKbRecordInput,
 ): Promise<{ error: string | null }> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: '未登录' }
+  const { user, error: authError } = await requireSuperAdmin()
+  if (authError || !user) return { error: authError ?? '请先登录' }
 
+  const supabase = await createClient()
   const { error } = await supabase
     .from('kb_records')
     .update({
@@ -64,10 +65,10 @@ export async function createKbRecord(input: {
   tags: string[]
   isPublic?: boolean
 }): Promise<{ error: string | null; record?: KbRecord }> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: '未登录' }
+  const { user, error: authError } = await requireSuperAdmin()
+  if (authError || !user) return { error: authError ?? '请先登录' }
 
+  const supabase = await createClient()
   const { data, error } = await supabase
     .from('kb_records')
     .insert({

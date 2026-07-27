@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { requireAuthenticatedUser } from '@/lib/auth/requireUser'
+import { requireSuperAdmin } from '@/lib/auth/requireUser'
 import { createClient } from '@/lib/supabase/server'
 import type { ResourceItem } from '@/data/resources/initialResources'
 import { mapResourceRow, type ResourceRow } from '@/lib/resources/mappers'
@@ -9,11 +9,6 @@ import { SITE_ROUTES } from '@/lib/site/routes'
 
 function revalidateResourcesPath() {
   revalidatePath(SITE_ROUTES.resources)
-}
-
-async function requireOwner(): Promise<{ error: string | null }> {
-  const { error } = await requireAuthenticatedUser()
-  return { error }
 }
 
 function toDbRow(item: ResourceItem) {
@@ -31,7 +26,7 @@ function toDbRow(item: ResourceItem) {
 }
 
 export async function saveResourceItem(item: ResourceItem): Promise<{ error: string | null }> {
-  const { error: authError } = await requireOwner()
+  const { error: authError } = await requireSuperAdmin()
   if (authError) return { error: authError }
 
   const supabase = await createClient()
@@ -43,7 +38,7 @@ export async function saveResourceItem(item: ResourceItem): Promise<{ error: str
 }
 
 export async function insertResourceItem(item: ResourceItem): Promise<{ error: string | null }> {
-  const { error: authError } = await requireOwner()
+  const { error: authError } = await requireSuperAdmin()
   if (authError) return { error: authError }
 
   const supabase = await createClient()
@@ -58,7 +53,7 @@ export async function updateResourceItem(
   id: string,
   patch: Partial<Pick<ResourceItem, 'name' | 'url' | 'description' | 'category' | 'tags' | 'isPinned' | 'clickCount'>>,
 ): Promise<{ error: string | null }> {
-  const { error: authError } = await requireOwner()
+  const { error: authError } = await requireSuperAdmin()
   if (authError) return { error: authError }
 
   const supabase = await createClient()
@@ -80,7 +75,7 @@ export async function updateResourceItem(
 }
 
 export async function deleteResourceItem(id: string): Promise<{ error: string | null }> {
-  const { error: authError } = await requireOwner()
+  const { error: authError } = await requireSuperAdmin()
   if (authError) return { error: authError }
 
   const supabase = await createClient()
@@ -94,7 +89,7 @@ export async function deleteResourceItem(id: string): Promise<{ error: string | 
 export async function deleteResourceItems(ids: string[]): Promise<{ error: string | null }> {
   if (ids.length === 0) return { error: null }
 
-  const { error: authError } = await requireOwner()
+  const { error: authError } = await requireSuperAdmin()
   if (authError) return { error: authError }
 
   const supabase = await createClient()
@@ -106,7 +101,7 @@ export async function deleteResourceItems(ids: string[]): Promise<{ error: strin
 }
 
 export async function upsertResourceItems(items: ResourceItem[]): Promise<{ error: string | null }> {
-  const { error: authError } = await requireOwner()
+  const { error: authError } = await requireSuperAdmin()
   if (authError) return { error: authError }
 
   const supabase = await createClient()

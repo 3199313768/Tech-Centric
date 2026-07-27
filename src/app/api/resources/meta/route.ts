@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
-import { requireApiUser } from '@/lib/auth/apiRequireUser'
+import { requireApiSuperAdmin } from '@/lib/auth/apiRequireUser'
 
 export async function GET(request: Request) {
-  const auth = await requireApiUser()
+  const auth = await requireApiSuperAdmin()
   if (auth.response) return auth.response
 
   const { searchParams } = new URL(request.url)

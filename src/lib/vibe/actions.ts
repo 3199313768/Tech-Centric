@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { requireAuthenticatedUser } from '@/lib/auth/requireUser'
+import { requireSuperAdmin } from '@/lib/auth/requireUser'
 import { createClient } from '@/lib/supabase/server'
 import { buildProjectSlug } from '@/lib/projects/slug'
 import { scheduleRagReindex } from '@/lib/rag/reindexTrigger'
@@ -22,7 +22,7 @@ export interface SaveVibeEntryInput {
 }
 
 export async function saveVibeProject(input: SaveVibeEntryInput): Promise<{ error: string | null }> {
-  const { error: authError } = await requireAuthenticatedUser()
+  const { error: authError } = await requireSuperAdmin()
   if (authError) return { error: authError }
 
   const supabase = await createClient()
@@ -55,7 +55,7 @@ export async function saveVibeProject(input: SaveVibeEntryInput): Promise<{ erro
 }
 
 export async function deleteVibeProject(projectId: string): Promise<{ error: string | null }> {
-  const { error: authError } = await requireAuthenticatedUser()
+  const { error: authError } = await requireSuperAdmin()
   if (authError) return { error: authError }
 
   const supabase = await createClient()

@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { requireAuthenticatedUser } from '@/lib/auth/requireUser'
+import { requireSuperAdmin } from '@/lib/auth/requireUser'
 import { createClient } from '@/lib/supabase/server'
 import type { ProjectCategory } from '@/data/site/allProjects'
 import { assertCompleteProjectOrder } from '@/lib/projects/assertCompleteProjectOrder'
@@ -29,7 +29,7 @@ export interface SaveAllProjectInput {
 }
 
 export async function saveAllProject(input: SaveAllProjectInput): Promise<{ error: string | null }> {
-  const { error: authError } = await requireAuthenticatedUser()
+  const { error: authError } = await requireSuperAdmin()
   if (authError) return { error: authError }
 
   const supabase = await createClient()
@@ -85,7 +85,7 @@ export async function saveAllProject(input: SaveAllProjectInput): Promise<{ erro
 }
 
 export async function deleteAllProject(projectId: string): Promise<{ error: string | null }> {
-  const { error: authError } = await requireAuthenticatedUser()
+  const { error: authError } = await requireSuperAdmin()
   if (authError) return { error: authError }
 
   const supabase = await createClient()
@@ -100,7 +100,7 @@ export async function deleteAllProject(projectId: string): Promise<{ error: stri
 export async function reorderAllProjects(
   orderedIds: string[],
 ): Promise<{ error: string | null }> {
-  const { error: authError } = await requireAuthenticatedUser()
+  const { error: authError } = await requireSuperAdmin()
   if (authError) return { error: authError }
 
   if (!Array.isArray(orderedIds) || orderedIds.length === 0) {

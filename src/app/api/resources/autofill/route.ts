@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
-import { requireApiUser } from '@/lib/auth/apiRequireUser'
+import { requireApiSuperAdmin } from '@/lib/auth/apiRequireUser'
 import { deepseekChatCompletion } from '@/lib/deepseek/client'
 
 export async function POST(req: Request) {
-  const auth = await requireApiUser()
+  const auth = await requireApiSuperAdmin()
   if (auth.response) return auth.response
 
   try {

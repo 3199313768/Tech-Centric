@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { requireApiUser } from '@/lib/auth/apiRequireUser'
+import { requireApiSuperAdmin } from '@/lib/auth/apiRequireUser'
 import { deepseekChatCompletion } from '@/lib/deepseek/client'
 
 function parseJsonContent(raw: string): Record<string, unknown> | Array<Record<string, unknown>> {
@@ -13,7 +13,7 @@ function parseJsonContent(raw: string): Record<string, unknown> | Array<Record<s
 }
 
 export async function POST(req: Request) {
-  const auth = await requireApiUser()
+  const auth = await requireApiSuperAdmin()
   if (auth.response) return auth.response
 
   try {
@@ -76,7 +76,7 @@ export async function POST(req: Request) {
 }
 
 export async function GET() {
-  const auth = await requireApiUser()
+  const auth = await requireApiSuperAdmin()
   if (auth.response) return auth.response
 
   return NextResponse.json([
