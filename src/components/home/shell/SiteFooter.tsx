@@ -1,9 +1,10 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { getMainNavTabsForRole, type SiteRole } from '@/lib/auth/roles'
 import { personalInfo } from '@/data/site/personal'
-import { SITE_NAV_TABS } from '@/lib/site/routes'
 
-export function SiteFooter() {
+export function SiteFooter({ role }: { role: SiteRole }) {
+  const tabs = getMainNavTabsForRole(role)
   const email = personalInfo.socialLinks.email?.replace(/^mailto:/, '') ?? ''
 
   return (
@@ -13,7 +14,7 @@ export function SiteFooter() {
           © {new Date().getFullYear()} SpiritGarden
         </p>
         <nav className="sg-footer-links" aria-label="页脚导航">
-          {SITE_NAV_TABS.map((tab) => (
+          {tabs.map((tab) => (
             <Link key={tab.href} href={tab.href}>
               {tab.label}
             </Link>

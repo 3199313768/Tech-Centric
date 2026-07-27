@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import type { ReactNode } from 'react'
 
 import { SiteFooter } from '@/components/home/shell/SiteFooter'
+import type { SiteRole } from '@/lib/auth/roles'
 
 const FloatingAssistant = dynamic(
   () => import('@/components/rag/shell/FloatingAssistant').then((m) => ({ default: m.FloatingAssistant })),
@@ -22,12 +23,14 @@ interface SpiritAtmosphereShellProps {
   children: ReactNode
   nav: ReactNode
   variant?: 'home' | 'default'
+  role: SiteRole
 }
 
 export function SpiritAtmosphereShell({
   children,
   nav,
   variant = 'default',
+  role,
 }: SpiritAtmosphereShellProps) {
   const isHome = variant === 'home'
 
@@ -42,7 +45,7 @@ export function SpiritAtmosphereShell({
       ) : null}
       {nav}
       {children}
-      <SiteFooter />
+      <SiteFooter role={role} />
       <FloatingAssistant />
     </div>
   )

@@ -5,19 +5,24 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, Search, X } from 'lucide-react'
+import { NavUserMenu } from '@/components/auth/NavUserMenu'
 import { SiteNavMoreMenu } from '@/components/home/shell/SiteNavMoreMenu'
 import { ThemeToggle } from '@/components/spirit/theme/ThemeToggle'
-import { isSiteNavActive, SITE_NAV_SECONDARY, SITE_NAV_TABS, SITE_ROUTES } from '@/lib/site/routes'
+import { getMainNavTabsForRole, type SiteRole } from '@/lib/auth/roles'
+import { isSiteNavActive, SITE_NAV_SECONDARY, SITE_ROUTES } from '@/lib/site/routes'
 
 const COMPACT_NAV_MAX = 1024
 
 interface NavigationProps {
   transparent?: boolean
+  role: SiteRole
+  email: string
 }
 
-export function Navigation({ transparent = false }: NavigationProps) {
+export function Navigation({ transparent = false, role, email }: NavigationProps) {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
+  const tabs = getMainNavTabsForRole(role)
 
   useEffect(() => {
     const mq = window.matchMedia(`(max-width: ${COMPACT_NAV_MAX}px)`)
@@ -59,7 +64,7 @@ export function Navigation({ transparent = false }: NavigationProps) {
         </Link>
 
         <div className="sg-nav-links sg-nav-desktop-only">
-          {SITE_NAV_TABS.map((tab) => (
+          {tabs.map((tab) => (
             <Link
               key={tab.href}
               href={tab.href}
@@ -80,6 +85,7 @@ export function Navigation({ transparent = false }: NavigationProps) {
             <Search size={18} aria-hidden />
           </Link>
           <ThemeToggle />
+          <NavUserMenu email={email} />
         </div>
 
         <div className="sg-nav-actions sg-nav-actions--compact sg-nav-compact-only">
@@ -118,7 +124,7 @@ export function Navigation({ transparent = false }: NavigationProps) {
         aria-hidden={!menuOpen}
       >
         <div className="sg-nav-drawer-links">
-          {SITE_NAV_TABS.map((tab) => (
+          {tabs.map((tab) => (
             <Link
               key={tab.href}
               href={tab.href}
@@ -139,6 +145,10 @@ export function Navigation({ transparent = false }: NavigationProps) {
               {tab.label}
             </Link>
           ))}
+          <div className="sg-nav-drawer-divider" aria-hidden />
+          <div className="sg-nav-drawer-user">
+            <NavUserMenu email={email} />
+          </div>
         </div>
       </div>
     </nav>

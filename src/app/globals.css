@@ -1904,6 +1904,30 @@ body {
   gap: 12px;
 }
 
+.sg-nav-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sg-nav-user__email {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--sg-text-muted);
+}
+
+.sg-nav-user__logout {
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.sg-nav-drawer-user {
+  padding: 8px 0 4px;
+}
+
 @media (max-width: 1024px) {
 
   .sg-main,
