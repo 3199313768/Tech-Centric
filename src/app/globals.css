@@ -7581,6 +7581,147 @@ svg {
   pointer-events: none;
 }
 
+.sg-home-skeleton__hero {
+  min-height: clamp(430px, 56vw, 620px);
+  background: var(--sg-paper);
+}
+
+.sg-home-skeleton__hero-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: min(100% - 48px, 1180px);
+  min-height: inherit;
+  margin: 0 auto;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
+
+.sg-home-skeleton__profile,
+.sg-home-skeleton__actions,
+.sg-home-skeleton__proof,
+.sg-home-skeleton__chips {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sg-home-skeleton__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.sg-home-skeleton__name {
+  width: 88px;
+  height: 14px;
+}
+
+.sg-home-skeleton__badge {
+  width: 132px;
+  height: 26px;
+  border-radius: 999px;
+}
+
+.sg-home-skeleton__title {
+  width: min(86%, 520px);
+  height: clamp(42px, 7vw, 72px);
+}
+
+.sg-home-skeleton__lead {
+  width: min(92%, 640px);
+  height: 16px;
+}
+
+.sg-home-skeleton__lead--short {
+  width: min(64%, 430px);
+}
+
+.sg-home-skeleton__button {
+  width: 108px;
+  height: 42px;
+  border-radius: 999px;
+}
+
+.sg-home-skeleton__proof {
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.sg-home-skeleton__proof-item {
+  width: min(28%, 190px);
+  height: 34px;
+  border-radius: 999px;
+}
+
+.sg-home-skeleton__card {
+  min-height: 230px;
+  padding: 28px;
+  background: var(--sg-paper);
+}
+
+.sg-home-skeleton__featured {
+  min-height: 390px;
+}
+
+.sg-home-skeleton__card-eyebrow {
+  width: 130px;
+  height: 11px;
+}
+
+.sg-home-skeleton__card-title {
+  width: min(72%, 240px);
+  height: 28px;
+  margin-top: 14px;
+}
+
+.sg-home-skeleton__card-line {
+  width: 92%;
+  height: 13px;
+  margin-top: 12px;
+}
+
+.sg-home-skeleton__card-line--short {
+  width: 66%;
+}
+
+.sg-home-skeleton__media {
+  width: 100%;
+  height: 210px;
+  margin-top: 22px;
+  border-radius: 18px;
+}
+
+.sg-home-skeleton__meter {
+  width: 100%;
+  height: 12px;
+  margin-top: 22px;
+  border-radius: 999px;
+}
+
+.sg-home-skeleton__chips {
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.sg-home-skeleton__chip {
+  width: 92px;
+  height: 34px;
+  border-radius: 999px;
+}
+
+@media (max-width: 640px) {
+  .sg-home-skeleton__proof {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .sg-home-skeleton__proof-item {
+    width: 100%;
+  }
+}
+
 .sg-skeleton-hero {
   margin-bottom: clamp(12px, 2vw, 20px);
 }

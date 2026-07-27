@@ -7,7 +7,6 @@ import dynamic from 'next/dynamic'
 import { deleteAiSkill } from '@/lib/skills/actions'
 import { SpiritSubpageHero } from '@/components/spirit/shell/SpiritSubpageHero'
 import { SpiritListCard } from '@/components/spirit/shell/SpiritListCard'
-import { DeleteConfirmBar } from '@/components/spirit/feedback/DeleteConfirmBar'
 import { getPlatformAccent } from '@/utils/platformAccent'
 import { useToast } from '@/components/spirit/feedback/ToastProvider'
 import type { AgentSkill } from '@/lib/skills/queries'
@@ -18,6 +17,10 @@ import { useSyncInitialData } from '@/utils/useSyncInitialData'
 
 const AddSkillModal = dynamic(
   () => import('./AddSkillModal').then((m) => ({ default: m.AddSkillModal })),
+)
+
+const SkillDeleteConfirm = dynamic(
+  () => import('./SkillDeleteConfirm').then((module) => ({ default: module.SkillDeleteConfirm })),
 )
 
 const SKILL_REPO = 'https://github.com/3199313768/SKILL'
@@ -129,8 +132,8 @@ function SkillCard({
             </div>
           ) : null}
           {confirmDeleteId === skill.id ? (
-            <DeleteConfirmBar
-              message={`确定删除「${skill.name}」？不可撤销`}
+            <SkillDeleteConfirm
+              skillName={skill.name}
               onCancel={onCancelDelete}
               onConfirm={() => onConfirmDelete(skill.id)}
               isLoading={deletingId === skill.id}
@@ -437,16 +440,18 @@ export function AiSkills({
         </>
       )}
 
-      <AddSkillModal
-        key={editingSkill?.id ?? 'new-skill'}
-        isOpen={isAddModalOpen}
-        onClose={() => {
-          setIsAddModalOpen(false)
-          setEditingSkill(null)
-        }}
-        onSuccess={refreshSkills}
-        initialData={editingSkill}
-      />
+      {isAddModalOpen ? (
+        <AddSkillModal
+          key={editingSkill?.id ?? 'new-skill'}
+          isOpen
+          onClose={() => {
+            setIsAddModalOpen(false)
+            setEditingSkill(null)
+          }}
+          onSuccess={refreshSkills}
+          initialData={editingSkill}
+        />
+      ) : null}
     </div>
   )
 }

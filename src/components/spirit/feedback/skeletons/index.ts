@@ -5,6 +5,7 @@ export type SitePageSkeletonVariant =
   | 'workshop'
   | 'herb'
   | 'knowledge'
+  | 'home'
 
 export { SpiritHeroSkeleton } from '@/components/spirit/feedback/skeletons/SpiritHeroSkeleton'
 export { ResourcesPageSkeleton } from '@/components/spirit/feedback/skeletons/ResourcesPageSkeleton'
@@ -12,3 +13,4 @@ export { ArchivePageSkeleton } from '@/components/spirit/feedback/skeletons/Arch
 export { WorkshopPageSkeleton } from '@/components/spirit/feedback/skeletons/WorkshopPageSkeleton'
 export { HerbPageSkeleton } from '@/components/spirit/feedback/skeletons/HerbPageSkeleton'
 export { KnowledgePageSkeleton } from '@/components/spirit/feedback/skeletons/KnowledgePageSkeleton'
+export { HomePageSkeleton } from '@/components/spirit/feedback/skeletons/HomePageSkeleton'

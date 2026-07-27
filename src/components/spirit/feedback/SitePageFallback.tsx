@@ -3,6 +3,7 @@ import { SpiritPageSkeleton } from '@/components/spirit/feedback/SpiritPageSkele
 import {
   ArchivePageSkeleton,
   HerbPageSkeleton,
+  HomePageSkeleton,
   KnowledgePageSkeleton,
   ResourcesPageSkeleton,
   WorkshopPageSkeleton,
@@ -16,6 +17,8 @@ interface SitePageFallbackProps {
 
 function renderPageSkeleton(variant: SitePageSkeletonVariant) {
   switch (variant) {
+    case 'home':
+      return <HomePageSkeleton />
     case 'resources':
       return <ResourcesPageSkeleton />
     case 'archive':

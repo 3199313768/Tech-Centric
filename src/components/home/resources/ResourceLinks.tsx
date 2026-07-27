@@ -547,24 +547,28 @@ export function ResourceLinks({ initialItems, initialCategories }: ResourceLinks
         </div>
       ) : null}
 
-      <ResourceConfirmModal
-        isOpen={confirmConfig.isOpen}
-        title={confirmConfig.title}
-        message={confirmConfig.message}
-        onConfirm={confirmConfig.onConfirm}
-        onCancel={() => setConfirmConfig((prev) => ({ ...prev, isOpen: false }))}
-      />
+      {confirmConfig.isOpen ? (
+        <ResourceConfirmModal
+          isOpen
+          title={confirmConfig.title}
+          message={confirmConfig.message}
+          onConfirm={confirmConfig.onConfirm}
+          onCancel={() => setConfirmConfig((prev) => ({ ...prev, isOpen: false }))}
+        />
+      ) : null}
 
-      <ResourceDiscoveryModal
-        isOpen={showDiscoveryModal}
-        isMobile={isMobile}
-        modalPad={modalPad}
-        overlayPad={overlayPad}
-        discoveredItems={discoveredItems}
-        onClose={closeDiscoveryModal}
-        onAddToLibrary={(item) => void addToLibrary(item)}
-        onRemoveItem={handleDiscoveryRemove}
-      />
+      {showDiscoveryModal ? (
+        <ResourceDiscoveryModal
+          isOpen
+          isMobile={isMobile}
+          modalPad={modalPad}
+          overlayPad={overlayPad}
+          discoveredItems={discoveredItems}
+          onClose={closeDiscoveryModal}
+          onAddToLibrary={(item) => void addToLibrary(item)}
+          onRemoveItem={handleDiscoveryRemove}
+        />
+      ) : null}
 
       {toastMessage ? (
         <div className="sg-resource-toast sg-enter" role="status">
@@ -572,21 +576,23 @@ export function ResourceLinks({ initialItems, initialCategories }: ResourceLinks
         </div>
       ) : null}
 
-      <ResourceFormModal
-        isOpen={showForm}
-        isMobile={isMobile}
-        modalPad={modalPad}
-        overlayPad={overlayPad}
-        editingId={editingId}
-        formData={formData}
-        categories={categories}
-        isFetchingMeta={isFetchingMeta}
-        onClose={closeForm}
-        onSubmit={(e) => void handleSubmit(e)}
-        onFormChange={setFormData}
-        onFetchMeta={fetchMeta}
-        onAutoFill={handleAutoFill}
-      />
+      {showForm ? (
+        <ResourceFormModal
+          isOpen
+          isMobile={isMobile}
+          modalPad={modalPad}
+          overlayPad={overlayPad}
+          editingId={editingId}
+          formData={formData}
+          categories={categories}
+          isFetchingMeta={isFetchingMeta}
+          onClose={closeForm}
+          onSubmit={(e) => void handleSubmit(e)}
+          onFormChange={setFormData}
+          onFetchMeta={fetchMeta}
+          onAutoFill={handleAutoFill}
+        />
+      ) : null}
     </div>
   )
 }
