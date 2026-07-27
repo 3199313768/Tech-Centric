@@ -230,19 +230,100 @@ ON CONFLICT (id) DO NOTHING;
 
 - [ ] **Step 2: 写 `patch-super-admin-write.sql`**
 
-用同一 helper 表达式替换 `patch-owner-auth-write.sql` 中各表写策略，并为 `kb_records` 收紧：
-
 ```sql
--- 示例（每张表：DROP 旧 authenticated 全写策略后重建）
--- USING / WITH CHECK:
--- EXISTS (
---   SELECT 1 FROM public.profiles p
---   WHERE p.id = auth.uid() AND p.role = 'super_admin'
--- )
+-- 依赖：public.profiles 已存在
+-- 只替换写策略；保留既有 SELECT / is_public 只读策略（勿误删）
 
--- all_projects / projects / vibe_coding / ai_skills / resources：同上
+DROP POLICY IF EXISTS "Authenticated users can manage all_projects" ON public.all_projects;
+CREATE POLICY "Super admins can manage all_projects"
+  ON public.all_projects
+  FOR ALL
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.id = auth.uid() AND p.role = 'super_admin'
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.id = auth.uid() AND p.role = 'super_admin'
+    )
+  );
 
--- kb_records：替换 "Only owner can manage records"
+DROP POLICY IF EXISTS "Authenticated users can manage projects" ON public.projects;
+CREATE POLICY "Super admins can manage projects"
+  ON public.projects
+  FOR ALL
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.id = auth.uid() AND p.role = 'super_admin'
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.id = auth.uid() AND p.role = 'super_admin'
+    )
+  );
+
+DROP POLICY IF EXISTS "Authenticated users can manage vibe_coding" ON public.vibe_coding;
+CREATE POLICY "Super admins can manage vibe_coding"
+  ON public.vibe_coding
+  FOR ALL
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.id = auth.uid() AND p.role = 'super_admin'
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.id = auth.uid() AND p.role = 'super_admin'
+    )
+  );
+
+DROP POLICY IF EXISTS "Authenticated users can manage ai_skills" ON public.ai_skills;
+CREATE POLICY "Super admins can manage ai_skills"
+  ON public.ai_skills
+  FOR ALL
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.id = auth.uid() AND p.role = 'super_admin'
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.id = auth.uid() AND p.role = 'super_admin'
+    )
+  );
+
+DROP POLICY IF EXISTS "Authenticated users can manage resources" ON public.resources;
+CREATE POLICY "Super admins can manage resources"
+  ON public.resources
+  FOR ALL
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.id = auth.uid() AND p.role = 'super_admin'
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.id = auth.uid() AND p.role = 'super_admin'
+    )
+  );
+
 DROP POLICY IF EXISTS "Only owner can manage records" ON public.kb_records;
 CREATE POLICY "Super admins can manage kb_records"
   ON public.kb_records
@@ -260,11 +341,7 @@ CREATE POLICY "Super admins can manage kb_records"
       WHERE p.id = auth.uid() AND p.role = 'super_admin'
     )
   );
-
--- 若仍有匿名/认证 SELECT 公开记录策略（is_public），按现有 patch-phase-a 保留只读策略，勿误删
 ```
-
-对 `all_projects`、`projects`、`vibe_coding`、`ai_skills`、`resources` 完整写出 DROP+CREATE（镜像 `patch-owner-auth-write.sql` 结构，条件改为超管 EXISTS）。
 
 - [ ] **Step 3: 在目标 Supabase 项目执行两份 SQL**
 
