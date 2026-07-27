@@ -5,6 +5,8 @@ import { personalInfo } from "@/data/site/personal";
 import { ThemeProvider } from '@/components/spirit/theme/ThemeProvider'
 import { QuickRecordModal } from '@/components/knowledge/capture/QuickRecordModal'
 import { ToastProvider } from '@/components/spirit/feedback/ToastProvider'
+import { getSessionProfile } from '@/lib/auth/getSessionProfile'
+import { SITE_ROLE } from '@/lib/auth/roles'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -76,11 +78,13 @@ export const viewport = {
   viewportFit: 'cover',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const profile = await getSessionProfile()
+
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <body
@@ -94,7 +98,7 @@ export default function RootLayout({
         >
           <ToastProvider>
             {children}
-            <QuickRecordModal />
+            {profile?.role === SITE_ROLE.super_admin ? <QuickRecordModal /> : null}
           </ToastProvider>
         </ThemeProvider>
       </body>

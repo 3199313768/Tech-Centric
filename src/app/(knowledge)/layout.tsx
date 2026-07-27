@@ -1,6 +1,7 @@
+import { AccountSetupRequired } from '@/components/auth/AccountSetupRequired'
 import { KnowledgeNav } from '@/components/knowledge/shell/KnowledgeNav'
 import { SpiritAtmosphereShell } from '@/components/spirit/shell/SpiritAtmosphereShell'
-import { getSessionProfile } from '@/lib/auth/getSessionProfile'
+import { getSessionState } from '@/lib/auth/getSessionProfile'
 import { redirect } from 'next/navigation'
 
 export default async function KnowledgeLayout({
@@ -8,13 +9,21 @@ export default async function KnowledgeLayout({
 }: {
   children: React.ReactNode
 }) {
-  const profile = await getSessionProfile()
-  if (!profile) redirect('/login')
+  const state = await getSessionState()
+  if (state.kind === 'anonymous') redirect('/login')
+  if (state.kind === 'incomplete') {
+    return <AccountSetupRequired email={state.email} />
+  }
 
   return (
     <SpiritAtmosphereShell
-      nav={<KnowledgeNav role={profile.role} email={profile.user.email ?? ''} />}
-      role={profile.role}
+      nav={
+        <KnowledgeNav
+          role={state.profile.role}
+          email={state.profile.user.email ?? ''}
+        />
+      }
+      role={state.profile.role}
     >
       {children}
     </SpiritAtmosphereShell>

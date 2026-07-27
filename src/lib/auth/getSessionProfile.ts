@@ -28,3 +28,28 @@ export async function getSessionRole(): Promise<SiteRole | null> {
   const profile = await getSessionProfile()
   return profile?.role ?? null
 }
+
+export type SessionState =
+  | { kind: 'anonymous' }
+  | { kind: 'incomplete'; email: string }
+  | { kind: 'ready'; profile: SessionProfile }
+
+export async function getSessionState(): Promise<SessionState> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { kind: 'anonymous' }
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  if (error || !data || !isSiteRole(data.role)) {
+    return { kind: 'incomplete', email: user.email ?? '' }
+  }
+
+  return { kind: 'ready', profile: { user, role: data.role } }
+}

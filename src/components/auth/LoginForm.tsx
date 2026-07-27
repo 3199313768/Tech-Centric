@@ -3,7 +3,12 @@
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { isSafeNextPath } from '@/lib/auth/roles'
+import {
+  isSiteRole,
+  resolvePostLoginPath,
+  SITE_ROLE,
+  type SiteRole,
+} from '@/lib/auth/roles'
 
 export function LoginForm() {
   const [email, setEmail] = useState('')
@@ -30,8 +35,20 @@ export function LoginForm() {
       return
     }
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    let role: SiteRole = SITE_ROLE.user
+    if (user) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle()
+      if (data && isSiteRole(data.role)) role = data.role
+    }
     const next = searchParams.get('next')
-    router.replace(isSafeNextPath(next) ? next : '/')
+    router.replace(resolvePostLoginPath(next, role))
     router.refresh()
   }
 
