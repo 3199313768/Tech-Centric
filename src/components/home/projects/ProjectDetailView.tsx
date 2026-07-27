@@ -50,18 +50,18 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
       ) : null}
 
       <div className="sg-project-detail__body">
-        <section>
+        <section className="sg-project-detail__panel">
           <h2>业务痛点 / 核心功能</h2>
           <p>{project.description}</p>
         </section>
 
-        <section>
+        <section className="sg-project-detail__panel">
           <h2>主导工作 / 核心贡献</h2>
           <p style={{ whiteSpace: 'pre-line' }}>{project.roleAndContribution}</p>
         </section>
 
         {project.highlights.length > 0 ? (
-          <section>
+          <section className="sg-project-detail__panel">
             <h2>亮点成果</h2>
             <ul className="sg-project-detail__highlights">
               {project.highlights.map((item) => (
@@ -72,7 +72,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
         ) : null}
 
         {project.techStack.length > 0 ? (
-          <section>
+          <section className="sg-project-detail__panel">
             <h2>技术栈</h2>
             <div className="sg-card__tags">
               {project.techStack.map((tech) => (
@@ -85,7 +85,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
         ) : null}
 
         {project.body ? (
-          <section>
+          <section className="sg-project-detail__panel">
             <h2>详细说明</h2>
             <p style={{ whiteSpace: 'pre-wrap' }}>{project.body}</p>
           </section>
@@ -109,7 +109,10 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
         </div>
 
         {email ? (
-          <section className="sg-project-detail__contact" aria-labelledby="project-contact-heading">
+          <section
+            className="sg-project-detail__contact sg-project-detail__panel"
+            aria-labelledby="project-contact-heading"
+          >
             <h2 id="project-contact-heading">合作或内推</h2>
             <p>对这个项目感兴趣？欢迎邮件联系，或通过右下角「庭院导引」发起对话。</p>
             <a href={`mailto:${email}`} className="sg-btn sg-btn--ghost" aria-label={`发送邮件至 ${email}`}>
