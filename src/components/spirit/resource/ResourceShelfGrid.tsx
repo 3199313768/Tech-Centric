@@ -17,6 +17,7 @@ interface ResourceShelfGridProps {
   searchQuery: string
   nowTs: number
   hoveredId: string | null
+  canManage?: boolean
   isManageMode: boolean
   selectedIds: Set<string>
   copyingId: string | null
@@ -36,6 +37,7 @@ function renderCard(
       searchQuery={props.searchQuery}
       nowTs={props.nowTs}
       isHovered={props.hoveredId === item.id}
+      canManage={props.canManage}
       isManageMode={props.isManageMode}
       isSelected={props.selectedIds.has(item.id)}
       copyingId={props.copyingId}
@@ -53,6 +55,7 @@ export function ResourceShelfGrid({
   searchQuery,
   nowTs,
   hoveredId,
+  canManage = false,
   isManageMode,
   selectedIds,
   copyingId,
@@ -64,6 +67,7 @@ export function ResourceShelfGrid({
     searchQuery,
     nowTs,
     hoveredId,
+    canManage,
     isManageMode,
     selectedIds,
     copyingId,

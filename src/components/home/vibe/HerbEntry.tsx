@@ -9,6 +9,7 @@ interface HerbEntryProps {
   entry: VibeEntry
   index: number
   dateLabel: string
+  canManage?: boolean
   hoveredId: string | null
   deletingId: string | null
   confirmDeleteId: string | null
@@ -30,6 +31,7 @@ export function HerbEntry({
   entry,
   index,
   dateLabel,
+  canManage = false,
   hoveredId,
   deletingId,
   confirmDeleteId,
@@ -58,31 +60,33 @@ export function HerbEntry({
         onClick={isExternal ? undefined : () => onOpen(entry)}
         actionsVisible={hoveredId === entry.id || deletingId === entry.id || confirmDeleteId === entry.id}
         actions={
-          <>
-            <button
-              type="button"
-              className="sg-icon-btn"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                onEdit(entry)
-              }}
-              title="修改此手札"
-              aria-label={`修改：${entry.name}`}
-            >
-              ✎
-            </button>
-            <button
-              type="button"
-              className="sg-icon-btn sg-icon-btn--danger"
-              onClick={(e) => onRequestDelete(e, entry.id)}
-              disabled={deletingId === entry.id}
-              title="删除此手札"
-              aria-label={`删除：${entry.name}`}
-            >
-              {deletingId === entry.id ? '...' : '×'}
-            </button>
-          </>
+          canManage ? (
+            <>
+              <button
+                type="button"
+                className="sg-icon-btn"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  onEdit(entry)
+                }}
+                title="修改此手札"
+                aria-label={`修改：${entry.name}`}
+              >
+                ✎
+              </button>
+              <button
+                type="button"
+                className="sg-icon-btn sg-icon-btn--danger"
+                onClick={(e) => onRequestDelete(e, entry.id)}
+                disabled={deletingId === entry.id}
+                title="删除此手札"
+                aria-label={`删除：${entry.name}`}
+              >
+                {deletingId === entry.id ? '...' : '×'}
+              </button>
+            </>
+          ) : undefined
         }
       >
         <div
@@ -96,7 +100,7 @@ export function HerbEntry({
           <h3 className="sg-card__title">{entry.name}</h3>
           <p className="sg-card__desc">{entry.description}</p>
           <span className="sg-herb-link">{linkLabel}</span>
-          {confirmDeleteId === entry.id ? (
+          {canManage && confirmDeleteId === entry.id ? (
             <DeleteConfirmBar
               message={`确定删除「${entry.name}」？不可撤销`}
               onCancel={onCancelDelete}

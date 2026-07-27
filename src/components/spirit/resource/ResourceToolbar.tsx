@@ -9,6 +9,7 @@ import {
 interface ResourceToolbarProps {
   categories: string[]
   filter: string | 'all'
+  canManage?: boolean
   isManageMode: boolean
   isExploring: boolean
   candidateCount: number
@@ -24,6 +25,7 @@ interface ResourceToolbarProps {
 export function ResourceToolbar({
   categories,
   filter,
+  canManage = false,
   isManageMode,
   isExploring,
   candidateCount,
@@ -64,53 +66,55 @@ export function ResourceToolbar({
 
       <div className="sg-resource-toolbar__divider" aria-hidden />
 
-      <div className="sg-resource-toolbar__group">
-        <button
-          type="button"
-          className={`sg-btn sg-btn--ghost${isManageMode ? ' sg-filter-chip--active' : ''}`}
-          onClick={onToggleManage}
-        >
-          {isManageMode ? '退出管理' : '批量管理'}
-        </button>
-        <button type="button" className="sg-btn sg-btn--primary" onClick={onAdd}>
-          + 添加
-        </button>
-        <button
-          type="button"
-          className="sg-btn sg-btn--ghost sg-resource-toolbar__candidates"
-          onClick={onOpenCandidates}
-          disabled={candidateCount === 0}
-          title={candidateCount === 0 ? '暂无待选灵感' : '查看待选灵感'}
-        >
-          💡 灵感待选{candidateCount > 0 ? ` (${candidateCount})` : ''}
-        </button>
-        <motion.button
-          type="button"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.95 }}
-          className="sg-btn sg-resource-toolbar__discover"
-          onClick={onExplore}
-          disabled={isExploring}
-          title="AI 灵感发现"
-        >
-          {isExploring ? '正在扫描趋势...' : '✨ AI 发现'}
-        </motion.button>
-        <button
-          type="button"
-          className="sg-btn sg-btn--ghost sg-resource-toolbar__icon-btn"
-          onClick={onExport}
-          title="导出备份 (JSON)"
-        >
-          📥
-        </button>
-        <label
-          className="sg-btn sg-btn--ghost sg-resource-toolbar__icon-btn"
-          title="导入备份"
-        >
-          📤
-          <input type="file" accept=".json" onChange={onImport} style={{ display: 'none' }} />
-        </label>
-      </div>
+      {canManage ? (
+        <div className="sg-resource-toolbar__group">
+          <button
+            type="button"
+            className={`sg-btn sg-btn--ghost${isManageMode ? ' sg-filter-chip--active' : ''}`}
+            onClick={onToggleManage}
+          >
+            {isManageMode ? '退出管理' : '批量管理'}
+          </button>
+          <button type="button" className="sg-btn sg-btn--primary" onClick={onAdd}>
+            + 添加
+          </button>
+          <button
+            type="button"
+            className="sg-btn sg-btn--ghost sg-resource-toolbar__candidates"
+            onClick={onOpenCandidates}
+            disabled={candidateCount === 0}
+            title={candidateCount === 0 ? '暂无待选灵感' : '查看待选灵感'}
+          >
+            💡 灵感待选{candidateCount > 0 ? ` (${candidateCount})` : ''}
+          </button>
+          <motion.button
+            type="button"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.95 }}
+            className="sg-btn sg-resource-toolbar__discover"
+            onClick={onExplore}
+            disabled={isExploring}
+            title="AI 灵感发现"
+          >
+            {isExploring ? '正在扫描趋势...' : '✨ AI 发现'}
+          </motion.button>
+          <button
+            type="button"
+            className="sg-btn sg-btn--ghost sg-resource-toolbar__icon-btn"
+            onClick={onExport}
+            title="导出备份 (JSON)"
+          >
+            📥
+          </button>
+          <label
+            className="sg-btn sg-btn--ghost sg-resource-toolbar__icon-btn"
+            title="导入备份"
+          >
+            📤
+            <input type="file" accept=".json" onChange={onImport} style={{ display: 'none' }} />
+          </label>
+        </div>
+      ) : null}
     </motion.div>
   )
 }

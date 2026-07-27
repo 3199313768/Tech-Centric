@@ -51,9 +51,14 @@ const emptyForm: ResourceFormData = {
 interface ResourceLinksProps {
   initialItems: ResourceItem[]
   initialCategories: string[]
+  canManage?: boolean
 }
 
-export function ResourceLinks({ initialItems, initialCategories }: ResourceLinksProps) {
+export function ResourceLinks({
+  initialItems,
+  initialCategories,
+  canManage = false,
+}: ResourceLinksProps) {
   const { isMobile, isTablet } = useBreakpoint()
   const modalPad = isMobile ? '20px' : isTablet ? '28px' : '40px'
   const overlayPad = isMobile ? '12px' : '20px'
@@ -484,7 +489,8 @@ export function ResourceLinks({ initialItems, initialCategories }: ResourceLinks
       <ResourceToolbar
         categories={categories}
         filter={filter}
-        isManageMode={isManageMode}
+        canManage={canManage}
+        isManageMode={canManage && isManageMode}
         isExploring={isExploring}
         candidateCount={candidateItems.length}
         onFilterChange={setFilter}
@@ -505,12 +511,14 @@ export function ResourceLinks({ initialItems, initialCategories }: ResourceLinks
         <div className="sg-state sg-state--empty sg-enter">
           <p className="sg-state__message">
             {items.length === 0
-              ? '暂无资源，点击上方「添加」添加第一个'
+              ? canManage
+                ? '暂无资源，点击上方「添加」添加第一个'
+                : '暂无资源'
               : searchQuery.trim()
                 ? '未找到匹配的资源，尝试调整搜索关键词'
                 : '当前分类暂无资源'}
           </p>
-          {items.length === 0 ? (
+          {canManage && items.length === 0 ? (
             <button type="button" className="sg-btn sg-btn--ghost" onClick={() => openForm()}>
               添加第一个
             </button>
@@ -524,7 +532,8 @@ export function ResourceLinks({ initialItems, initialCategories }: ResourceLinks
           searchQuery={searchQuery}
           nowTs={nowTs}
           hoveredId={hoveredId}
-          isManageMode={isManageMode}
+          canManage={canManage}
+          isManageMode={canManage && isManageMode}
           selectedIds={selectedIds}
           copyingId={copyingId}
           deleteConfirmId={deleteConfirmId}
@@ -533,7 +542,7 @@ export function ResourceLinks({ initialItems, initialCategories }: ResourceLinks
         />
       )}
 
-      {isManageMode && selectedIds.size > 0 ? (
+      {canManage && isManageMode && selectedIds.size > 0 ? (
         <div className="sg-resource-batch-bar sg-enter">
           <span className="sg-resource-batch-bar__label">
             已选择 <strong>{selectedIds.size}</strong> 项
@@ -557,7 +566,7 @@ export function ResourceLinks({ initialItems, initialCategories }: ResourceLinks
         />
       ) : null}
 
-      {showDiscoveryModal ? (
+      {canManage && showDiscoveryModal ? (
         <ResourceDiscoveryModal
           isOpen
           isMobile={isMobile}
@@ -576,7 +585,7 @@ export function ResourceLinks({ initialItems, initialCategories }: ResourceLinks
         </div>
       ) : null}
 
-      {showForm ? (
+      {canManage && showForm ? (
         <ResourceFormModal
           isOpen
           isMobile={isMobile}

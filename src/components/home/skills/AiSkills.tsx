@@ -32,6 +32,7 @@ interface SkillCardProps {
   hoveredId: string | null
   deletingId: string | null
   confirmDeleteId: string | null
+  canManage?: boolean
   onHover: (id: string | null) => void
   onOpen: (skill: AgentSkill) => void
   onEdit: (skill: AgentSkill) => void
@@ -47,6 +48,7 @@ function SkillCard({
   hoveredId,
   deletingId,
   confirmDeleteId,
+  canManage = false,
   onHover,
   onOpen,
   onEdit,
@@ -62,30 +64,32 @@ function SkillCard({
         actionsVisible={hoveredId === skill.id || deletingId === skill.id || confirmDeleteId === skill.id}
         onClick={() => onOpen(skill)}
         actions={
-          <>
-            <button
-              type="button"
-              className="sg-icon-btn"
-              onClick={(event) => {
-                event.stopPropagation()
-                onEdit(skill)
-              }}
-              title="修改此技能"
-              aria-label={`修改技能 ${skill.name}`}
-            >
-              ✎
-            </button>
-            <button
-              type="button"
-              className="sg-icon-btn sg-icon-btn--danger"
-              onClick={(event) => onRequestDelete(event, skill.id)}
-              disabled={deletingId === skill.id}
-              title="删除此技能"
-              aria-label={`删除技能 ${skill.name}`}
-            >
-              {deletingId === skill.id ? '...' : '×'}
-            </button>
-          </>
+          canManage ? (
+            <>
+              <button
+                type="button"
+                className="sg-icon-btn"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onEdit(skill)
+                }}
+                title="修改此技能"
+                aria-label={`修改技能 ${skill.name}`}
+              >
+                ✎
+              </button>
+              <button
+                type="button"
+                className="sg-icon-btn sg-icon-btn--danger"
+                onClick={(event) => onRequestDelete(event, skill.id)}
+                disabled={deletingId === skill.id}
+                title="删除此技能"
+                aria-label={`删除技能 ${skill.name}`}
+              >
+                {deletingId === skill.id ? '...' : '×'}
+              </button>
+            </>
+          ) : undefined
         }
       >
         <div
@@ -131,7 +135,7 @@ function SkillCard({
               </div>
             </div>
           ) : null}
-          {confirmDeleteId === skill.id ? (
+          {canManage && confirmDeleteId === skill.id ? (
             <SkillDeleteConfirm
               skillName={skill.name}
               onCancel={onCancelDelete}
@@ -174,9 +178,11 @@ function SkillGrid({
 export function AiSkills({
   initialSkills,
   skillProjectMap = {},
+  canManage = false,
 }: {
   initialSkills: AgentSkill[]
   skillProjectMap?: Record<string, SkillProjectLink[]>
+  canManage?: boolean
 }) {
   const { toast } = useToast()
   const router = useRouter()
@@ -270,6 +276,7 @@ export function AiSkills({
     hoveredId,
     deletingId,
     confirmDeleteId,
+    canManage,
     onHover: setHoveredId,
     onOpen: openSkill,
     onEdit: (skill) => {
@@ -296,12 +303,14 @@ export function AiSkills({
           { label: '标签维度', value: allTags.length },
         ]}
         actions={
-          <button type="button" className="sg-btn sg-btn--primary" onClick={openAddModal}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            新增技能
-          </button>
+          canManage ? (
+            <button type="button" className="sg-btn sg-btn--primary" onClick={openAddModal}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              新增技能
+            </button>
+          ) : undefined
         }
       />
 
@@ -309,11 +318,13 @@ export function AiSkills({
         <SpiritEmptyState
           imageSrc="/spirit-garden/icon-sparkle.png"
           title="卷轴工房尚空"
-          description="通过上方按钮收录第一条 Agent Skill。"
+          description={canManage ? '通过上方按钮收录第一条 Agent Skill。' : '暂无收录的 Agent Skill。'}
           action={
-            <button type="button" className="sg-btn sg-btn--primary" onClick={openAddModal}>
-              新增技能
-            </button>
+            canManage ? (
+              <button type="button" className="sg-btn sg-btn--primary" onClick={openAddModal}>
+                新增技能
+              </button>
+            ) : undefined
           }
         />
       ) : (
@@ -440,7 +451,7 @@ export function AiSkills({
         </>
       )}
 
-      {isAddModalOpen ? (
+      {canManage && isAddModalOpen ? (
         <AddSkillModal
           key={editingSkill?.id ?? 'new-skill'}
           isOpen

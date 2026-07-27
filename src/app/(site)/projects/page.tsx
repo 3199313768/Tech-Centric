@@ -1,8 +1,9 @@
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { SitePageFallback } from '@/components/spirit/feedback/SitePageFallback'
+import { getSessionProfile } from '@/lib/auth/getSessionProfile'
+import { SITE_ROLE } from '@/lib/auth/roles'
 import { fetchAllProjectsPageData } from '@/lib/projects/queries'
-import { createClient } from '@/lib/supabase/server'
 
 const AllProjects = dynamic(
   () => import('@/components/home/projects/AllProjects').then((m) => ({ default: m.AllProjects })),
@@ -15,17 +16,24 @@ export const metadata = {
 }
 
 async function ProjectsPageContent() {
-  const supabase = await createClient()
-  const [{ projects, error }, { data: { user } }] = await Promise.all([
+  const [{ projects, error }, profile] = await Promise.all([
     fetchAllProjectsPageData(),
-    supabase.auth.getUser(),
+    getSessionProfile(),
   ])
 
   if (error) {
     return <div className="sg-kb-error">加载项目失败：{error.message}</div>
   }
 
-  return <AllProjects initialProjects={projects} canReorder={Boolean(user)} />
+  const canManage = profile?.role === SITE_ROLE.super_admin
+
+  return (
+    <AllProjects
+      initialProjects={projects}
+      canManage={canManage}
+      canReorder={canManage}
+    />
+  )
 }
 
 export default function ProjectsPage() {

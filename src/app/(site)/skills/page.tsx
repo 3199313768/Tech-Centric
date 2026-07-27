@@ -1,6 +1,8 @@
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { SitePageFallback } from '@/components/spirit/feedback/SitePageFallback'
+import { getSessionProfile } from '@/lib/auth/getSessionProfile'
+import { SITE_ROLE } from '@/lib/auth/roles'
 import { fetchAllProjectsPageData } from '@/lib/projects/queries'
 import { fetchAiSkillsPageData } from '@/lib/skills/queries'
 import { buildSkillProjectMap } from '@/lib/skills/relatedProjects'
@@ -16,9 +18,10 @@ export const metadata = {
 }
 
 async function SkillsPageContent() {
-  const [{ skills, error }, { projects }] = await Promise.all([
+  const [{ skills, error }, { projects }, profile] = await Promise.all([
     fetchAiSkillsPageData(),
     fetchAllProjectsPageData(),
+    getSessionProfile(),
   ])
 
   if (error) {
@@ -26,8 +29,9 @@ async function SkillsPageContent() {
   }
 
   const skillProjectMap = buildSkillProjectMap(skills, projects)
+  const canManage = profile?.role === SITE_ROLE.super_admin
 
-  return <AiSkills initialSkills={skills} skillProjectMap={skillProjectMap} />
+  return <AiSkills initialSkills={skills} skillProjectMap={skillProjectMap} canManage={canManage} />
 }
 
 export default function SkillsPage() {

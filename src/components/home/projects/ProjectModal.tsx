@@ -10,12 +10,13 @@ import { DeleteConfirmBar } from '@/components/spirit/feedback/DeleteConfirmBar'
 
 interface ProjectModalProps {
   project: AllProjectItem
+  canManage?: boolean
   onClose: () => void
   onDeleteSuccess?: () => void
   onEdit?: () => void
 }
 
-export function ProjectModal({ project, onClose, onDeleteSuccess, onEdit }: ProjectModalProps) {
+export function ProjectModal({ project, canManage = false, onClose, onDeleteSuccess, onEdit }: ProjectModalProps) {
   const { toast } = useToast()
   const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -108,28 +109,32 @@ export function ProjectModal({ project, onClose, onDeleteSuccess, onEdit }: Proj
             </div>
 
             <div className="sg-modal-detail-actions">
-              {showDeleteConfirm ? (
-                <DeleteConfirmBar
-                  message={`确定删除「${project.name}」？不可撤销`}
-                  onCancel={() => setShowDeleteConfirm(false)}
-                  onConfirm={handleDelete}
-                  isLoading={isDeleting}
-                />
-              ) : (
-                <button
-                  type="button"
-                  className="sg-btn sg-btn--ghost sg-icon-btn--danger"
-                  onClick={() => setShowDeleteConfirm(true)}
-                  disabled={isDeleting}
-                  style={{ width: 'auto', height: 'auto', borderRadius: '8px', padding: '10px 16px' }}
-                >
-                  删除项目
-                </button>
-              )}
+              {canManage ? (
+                <>
+                  {showDeleteConfirm ? (
+                    <DeleteConfirmBar
+                      message={`确定删除「${project.name}」？不可撤销`}
+                      onCancel={() => setShowDeleteConfirm(false)}
+                      onConfirm={handleDelete}
+                      isLoading={isDeleting}
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      className="sg-btn sg-btn--ghost sg-icon-btn--danger"
+                      onClick={() => setShowDeleteConfirm(true)}
+                      disabled={isDeleting}
+                      style={{ width: 'auto', height: 'auto', borderRadius: '8px', padding: '10px 16px' }}
+                    >
+                      删除项目
+                    </button>
+                  )}
 
-              <button type="button" className="sg-btn sg-btn--ghost" onClick={onEdit} style={{ padding: '10px 16px' }}>
-                ✎ 修改信息
-              </button>
+                  <button type="button" className="sg-btn sg-btn--ghost" onClick={onEdit} style={{ padding: '10px 16px' }}>
+                    ✎ 修改信息
+                  </button>
+                </>
+              ) : null}
 
               {project.isPublic ? (
                 <a href={project.url} target="_blank" rel="noreferrer" className="sg-btn sg-btn--primary" style={{ textDecoration: 'none' }}>

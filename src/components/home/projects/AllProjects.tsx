@@ -150,6 +150,7 @@ const ProjectCard = ({
   onManage,
   onOpen,
   dragHandle,
+  canManage = false,
 }: {
   project: AllProjectItem
   index: number
@@ -159,6 +160,7 @@ const ProjectCard = ({
     attributes: HTMLAttributes<HTMLButtonElement>
     listeners?: HTMLAttributes<HTMLButtonElement>
   }
+  canManage?: boolean
 }) => {
   const { isHovered, currentImageIndex, bindHover } = useProjectCarousel(project.screenshots.length)
   const accent = getArchiveAccent(project.category)
@@ -192,17 +194,19 @@ const ProjectCard = ({
           ⋮⋮
         </button>
       ) : null}
-      <button
-        type="button"
-        className="sg-project-card__manage"
-        aria-label={`管理项目：${project.name}`}
-        onClick={(event) => {
-          event.stopPropagation()
-          onManage(project)
-        }}
-      >
-        管理
-      </button>
+      {canManage ? (
+        <button
+          type="button"
+          className="sg-project-card__manage"
+          aria-label={`管理项目：${project.name}`}
+          onClick={(event) => {
+            event.stopPropagation()
+            onManage(project)
+          }}
+        >
+          管理
+        </button>
+      ) : null}
       <span className="sg-project-card__code">{getArchiveCode(project.category, index)}</span>
       <div className={`sg-project-card__badge ${project.isPublic ? 'sg-project-card__badge--public' : 'sg-project-card__badge--private'}`}>
         {project.isPublic ? '公网可见' : '内部系统'}
@@ -247,11 +251,13 @@ function SortableProjectCard({
   index,
   onManage,
   onOpen,
+  canManage = false,
 }: {
   project: AllProjectItem
   index: number
   onManage: (project: AllProjectItem) => void
   onOpen: (project: AllProjectItem) => void
+  canManage?: boolean
 }) {
   const {
     attributes,
@@ -277,6 +283,7 @@ function SortableProjectCard({
         index={index}
         onManage={onManage}
         onOpen={onOpen}
+        canManage={canManage}
         dragHandle={{
           attributes: attributes as HTMLAttributes<HTMLButtonElement>,
           listeners: listeners as HTMLAttributes<HTMLButtonElement> | undefined,
@@ -291,9 +298,11 @@ function SortableProjectCard({
 // ==========================================
 export function AllProjects({
   initialProjects,
+  canManage = false,
   canReorder = false,
 }: {
   initialProjects: AllProjectItem[]
+  canManage?: boolean
   canReorder?: boolean
 }) {
   const router = useRouter()
@@ -389,6 +398,7 @@ export function AllProjects({
               index={idx}
               onManage={setSelectedProject}
               onOpen={openProject}
+              canManage={canManage}
             />
           ))
         : filteredProjects.map((project, idx) => (
@@ -398,6 +408,7 @@ export function AllProjects({
               index={idx}
               onManage={setSelectedProject}
               onOpen={openProject}
+              canManage={canManage}
             />
           ))}
       {filteredProjects.length === 0 ? (
@@ -405,7 +416,11 @@ export function AllProjects({
           className="sg-empty-state--grid"
           imageSrc="/spirit-garden/icon-book.png"
           title="暂无该分类下的项目"
-          description="切换其他分类，或通过上方按钮新增归档。"
+          description={
+            canManage
+              ? '切换其他分类，或通过上方按钮新增归档。'
+              : '切换其他分类浏览已有归档。'
+          }
         />
       ) : null}
     </div>
@@ -424,19 +439,21 @@ export function AllProjects({
           { label: '分类维度', value: categoryCount },
         ]}
         actions={
-          <button
-            type="button"
-            className="sg-btn sg-btn--primary"
-            onClick={() => {
-              setEditingProject(null)
-              setIsAddModalOpen(true)
-            }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            新增项目
-          </button>
+          canManage ? (
+            <button
+              type="button"
+              className="sg-btn sg-btn--primary"
+              onClick={() => {
+                setEditingProject(null)
+                setIsAddModalOpen(true)
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              新增项目
+            </button>
+          ) : undefined
         }
       />
 
@@ -481,6 +498,7 @@ export function AllProjects({
         {selectedProject ? (
           <ProjectModal
             project={selectedProject}
+            canManage={canManage}
             onClose={() => setSelectedProject(null)}
             onDeleteSuccess={refreshProjects}
             onEdit={() => {
@@ -491,7 +509,7 @@ export function AllProjects({
         ) : null}
       </AnimatePresence>
 
-      {isAddModalOpen ? (
+      {canManage && isAddModalOpen ? (
         <AddAllProjectModal
           key={editingProject?.id ?? 'new-all-project'}
           isOpen

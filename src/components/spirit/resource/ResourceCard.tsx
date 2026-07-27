@@ -24,6 +24,7 @@ interface ResourceCardProps {
   searchQuery: string
   nowTs: number
   isHovered: boolean
+  canManage?: boolean
   isManageMode: boolean
   isSelected: boolean
   copyingId: string | null
@@ -37,6 +38,7 @@ export const ResourceCard = memo(function ResourceCard({
   searchQuery,
   nowTs,
   isHovered,
+  canManage = false,
   isManageMode,
   isSelected,
   copyingId,
@@ -58,7 +60,7 @@ export const ResourceCard = memo(function ResourceCard({
       {item.isPinned ? <span className="sg-resource-card__ribbon">PINNED</span> : null}
       {isNew ? <span className="sg-resource-card__new">NEW</span> : null}
 
-      {isManageMode ? (
+      {canManage && isManageMode ? (
         <input
           type="checkbox"
           className="sg-resource-card__checkbox"
@@ -80,51 +82,55 @@ export const ResourceCard = memo(function ResourceCard({
         >
           {copyingId === item.id ? '✓' : '📄'}
         </button>
-        <button
-          type="button"
-          className={`sg-resource-card__action-btn${item.isPinned ? ' sg-resource-card__action-btn--pinned' : ''}`}
-          onClick={(e) => handlers.onTogglePin(e, item.id)}
-          title={item.isPinned ? '取消置顶' : '置顶'}
-        >
-          📌
-        </button>
-        <button
-          type="button"
-          className="sg-resource-card__action-btn"
-          onClick={(e) => handlers.onEdit(e, item)}
-          title="编辑"
-        >
-          ✎
-        </button>
-        {deleteConfirmId === item.id ? (
+        {canManage ? (
           <>
             <button
               type="button"
-              className="sg-resource-card__action-btn sg-resource-card__action-btn--danger"
-              onClick={(e) => handlers.onDeleteConfirm(e, item.id)}
-              title="确认删除"
+              className={`sg-resource-card__action-btn${item.isPinned ? ' sg-resource-card__action-btn--pinned' : ''}`}
+              onClick={(e) => handlers.onTogglePin(e, item.id)}
+              title={item.isPinned ? '取消置顶' : '置顶'}
             >
-              ✓
+              📌
             </button>
             <button
               type="button"
               className="sg-resource-card__action-btn"
-              onClick={handlers.onDeleteCancel}
-              title="取消"
+              onClick={(e) => handlers.onEdit(e, item)}
+              title="编辑"
             >
-              ×
+              ✎
             </button>
+            {deleteConfirmId === item.id ? (
+              <>
+                <button
+                  type="button"
+                  className="sg-resource-card__action-btn sg-resource-card__action-btn--danger"
+                  onClick={(e) => handlers.onDeleteConfirm(e, item.id)}
+                  title="确认删除"
+                >
+                  ✓
+                </button>
+                <button
+                  type="button"
+                  className="sg-resource-card__action-btn"
+                  onClick={handlers.onDeleteCancel}
+                  title="取消"
+                >
+                  ×
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="sg-resource-card__action-btn"
+                onClick={(e) => handlers.onDeleteRequest(e, item.id)}
+                title="删除"
+              >
+                🗑
+              </button>
+            )}
           </>
-        ) : (
-          <button
-            type="button"
-            className="sg-resource-card__action-btn"
-            onClick={(e) => handlers.onDeleteRequest(e, item.id)}
-            title="删除"
-          >
-            🗑
-          </button>
-        )}
+        ) : null}
       </div>
 
       <div className="sg-resource-card__head">

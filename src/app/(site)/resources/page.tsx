@@ -1,6 +1,8 @@
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { SitePageFallback } from '@/components/spirit/feedback/SitePageFallback'
+import { getSessionProfile } from '@/lib/auth/getSessionProfile'
+import { SITE_ROLE } from '@/lib/auth/roles'
 import { fetchResourcesPageData } from '@/lib/resources/queries'
 
 const ResourceLinks = dynamic(
@@ -14,13 +16,20 @@ export const metadata = {
 }
 
 async function ResourcesPageContent() {
-  const { items, categories, error } = await fetchResourcesPageData()
+  const [{ items, categories, error }, profile] = await Promise.all([
+    fetchResourcesPageData(),
+    getSessionProfile(),
+  ])
 
   if (error) {
     return <div className="sg-kb-error">加载资源失败：{error.message}</div>
   }
 
-  return <ResourceLinks initialItems={items} initialCategories={categories} />
+  const canManage = profile?.role === SITE_ROLE.super_admin
+
+  return (
+    <ResourceLinks initialItems={items} initialCategories={categories} canManage={canManage} />
+  )
 }
 
 export default function ResourcesPage() {

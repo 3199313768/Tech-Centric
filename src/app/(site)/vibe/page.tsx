@@ -1,6 +1,8 @@
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { SitePageFallback } from '@/components/spirit/feedback/SitePageFallback'
+import { getSessionProfile } from '@/lib/auth/getSessionProfile'
+import { SITE_ROLE } from '@/lib/auth/roles'
 import { fetchVibePageData } from '@/lib/vibe/queries'
 
 const VibeCoding = dynamic(
@@ -14,13 +16,18 @@ export const metadata = {
 }
 
 async function VibePageContent() {
-  const { entries, error } = await fetchVibePageData()
+  const [{ entries, error }, profile] = await Promise.all([
+    fetchVibePageData(),
+    getSessionProfile(),
+  ])
 
   if (error) {
     return <div className="sg-kb-error">加载手札失败：{error.message}</div>
   }
 
-  return <VibeCoding initialEntries={entries} />
+  const canManage = profile?.role === SITE_ROLE.super_admin
+
+  return <VibeCoding initialEntries={entries} canManage={canManage} />
 }
 
 export default function VibePage() {
