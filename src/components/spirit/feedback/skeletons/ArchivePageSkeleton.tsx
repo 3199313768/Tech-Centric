@@ -1,23 +1,5 @@
 import { SpiritHeroSkeleton } from '@/components/spirit/feedback/skeletons/SpiritHeroSkeleton'
 
-function ArchiveFeaturedSkeleton() {
-  return (
-    <div className="sg-skeleton-archive-featured sg-bento-archive__featured">
-      <div className="sg-skeleton-shimmer sg-skeleton-archive-featured__media" />
-      <div className="sg-skeleton-archive-featured__body">
-        <div className="sg-skeleton-shimmer sg-skeleton-archive-featured__eyebrow" />
-        <div className="sg-skeleton-shimmer sg-skeleton-archive-featured__title" />
-        <div className="sg-skeleton-shimmer sg-skeleton-archive-featured__line" />
-        <div className="sg-skeleton-shimmer sg-skeleton-archive-featured__line sg-skeleton-archive-featured__line--short" />
-        <div className="sg-skeleton-archive-featured__tags">
-          <div className="sg-skeleton-shimmer sg-skeleton-archive-featured__tag" />
-          <div className="sg-skeleton-shimmer sg-skeleton-archive-featured__tag" />
-        </div>
-      </div>
-    </div>
-  )
-}
-
 function ArchiveCardSkeleton() {
   return (
     <div className="sg-skeleton-archive-card sg-bento-archive__item">
@@ -42,9 +24,8 @@ export function ArchivePageSkeleton() {
         ))}
       </div>
 
-      <div className="sg-archive-shelf sg-bento-archive">
-        <ArchiveFeaturedSkeleton />
-        {[0, 1, 2].map((index) => (
+      <div className="sg-archive-shelf sg-bento-archive sg-bento-archive--uniform">
+        {[0, 1, 2, 3].map((index) => (
           <ArchiveCardSkeleton key={index} />
         ))}
       </div>

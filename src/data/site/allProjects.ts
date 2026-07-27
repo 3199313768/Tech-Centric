@@ -1,4 +1,4 @@
-export type ProjectCategory = '数字孪生' | '后台与管理系统' | '门户与展现' | '未分类';
+export type ProjectCategory = '数字孪生' | '门户与展现' | '未分类';
 
 export interface AllProjectItem {
   id: string;
@@ -17,4 +17,5 @@ export interface AllProjectItem {
   period: string;
   role: string;
   isFeatured: boolean;
+  sortOrder: number;
 }

@@ -3,14 +3,12 @@ import { type ProjectCategory } from '@/data/site/allProjects'
 export const ARCHIVE_CATEGORY_ACCENTS: Record<ProjectCategory | '全部', string> = {
   全部: 'var(--sg-archive-all)',
   数字孪生: 'var(--sg-archive-twin)',
-  后台与管理系统: 'var(--sg-archive-admin)',
   门户与展现: 'var(--sg-archive-portal)',
   未分类: 'var(--sg-archive-other)',
 }
 
 export const ARCHIVE_CATEGORY_PREFIX: Record<ProjectCategory, string> = {
   数字孪生: 'DT',
-  后台与管理系统: 'ADM',
   门户与展现: 'WEB',
   未分类: 'MISC',
 }

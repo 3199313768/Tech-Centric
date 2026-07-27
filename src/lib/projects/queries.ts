@@ -12,6 +12,7 @@ export async function fetchAllProjectsPageData(): Promise<AllProjectsPageData> {
   const { data, error } = await supabase
     .from('all_projects')
     .select('*')
+    .order('sort_order', { ascending: true })
     .order('created_at', { ascending: false })
 
   if (error) {

@@ -10,14 +10,14 @@ async function gotoArchiveList(page: Page) {
 }
 
 async function openFirstProjectDetail(page: Page) {
-  const card = page.locator('.sg-archive-featured, .sg-project-card').first()
+  const card = page.locator('.sg-project-card').first()
   await expect(card).toBeVisible()
-  const titleEl = card.locator('.sg-archive-featured__title, .sg-project-card__title')
+  const titleEl = card.locator('.sg-project-card__title')
   const projectTitle = (await titleEl.innerText()).trim()
 
   // Next.js 客户端路由不会触发 load；点击 body 避开「管理」按钮的 stopPropagation
   await expect(async () => {
-    await card.locator('.sg-archive-featured__body, .sg-project-card__body').click()
+    await card.locator('.sg-project-card__body').click()
     await expect(page).toHaveURL(/\/projects\/[^/?#]+/)
     await expect(page.locator('.sg-project-detail__hero')).toBeVisible()
   }).toPass()
@@ -43,28 +43,32 @@ test.describe('归档模块', () => {
 
     const filterBar = page.locator('.sg-toolbar-row .sg-filter-bar')
     const allChip = filterBar.getByRole('button', { name: '全部', exact: true })
-    const featuredChip = filterBar.getByRole('button', { name: '精选', exact: true })
+    const twinChip = filterBar.getByRole('button', { name: '门户与展现', exact: true })
     const archiveShelf = page.locator('.sg-bento-archive')
 
     await expect(allChip).toHaveClass(/sg-filter-chip--active/)
-    await expect(archiveShelf).not.toHaveClass(/sg-bento-archive--uniform/)
+    await expect(filterBar.getByRole('button', { name: '精选', exact: true })).toHaveCount(0)
+    await expect(filterBar.getByRole('button', { name: '未分类', exact: true })).toHaveCount(0)
+    await expect(filterBar.getByRole('button', { name: '后台与管理系统', exact: true })).toHaveCount(0)
+    await expect(archiveShelf).toHaveClass(/sg-bento-archive--uniform/)
+    await expect(page.locator('.sg-archive-featured')).toHaveCount(0)
 
     await expect(async () => {
-      await featuredChip.click()
-      await expect(featuredChip).toHaveClass(/sg-filter-chip--active/)
+      await twinChip.click()
+      await expect(twinChip).toHaveClass(/sg-filter-chip--active/)
       await expect(allChip).not.toHaveClass(/sg-filter-chip--active/)
     }).toPass()
 
     await expect(archiveShelf).toHaveClass(/sg-bento-archive--uniform/)
     await expect(
-      page.getByText('暂无该分类下的项目').or(page.locator('.sg-project-card, .sg-archive-featured').first()),
+      page.getByText('暂无该分类下的项目').or(page.locator('.sg-project-card').first()),
     ).toBeVisible()
   })
 
   test('A3：项目卡片进入详情并返回', async ({ page }) => {
     await gotoArchiveList(page)
 
-    const hasProject = (await page.locator('.sg-project-card, .sg-archive-featured').count()) > 0
+    const hasProject = (await page.locator('.sg-project-card').count()) > 0
     test.skip(!hasProject, '当前无公开项目数据，跳过详情路径')
 
     const projectTitle = await openFirstProjectDetail(page)
@@ -78,16 +82,17 @@ test.describe('归档模块', () => {
     await expect(page.getByRole('heading', { name: '全部项目', level: 1 })).toBeVisible()
   })
 
-  test('A4：详情页元数据与联系区块', async ({ page, request }) => {
+  test('A4：详情页元数据与访问入口', async ({ page, request }) => {
     await gotoArchiveList(page)
 
-    const hasProject = (await page.locator('.sg-project-card, .sg-archive-featured').count()) > 0
+    const hasProject = (await page.locator('.sg-project-card').count()) > 0
     test.skip(!hasProject, '当前无公开项目数据，跳过详情元数据')
 
     await openFirstProjectDetail(page)
 
     await expect(page.locator('.sg-project-detail__hero')).toBeVisible()
-    await expect(page.getByRole('heading', { name: '合作或内推' })).toBeVisible()
+    await expect(page.locator('.sg-project-detail__hero-top .sg-project-detail__actions')).toBeVisible()
+    await expect(page.getByRole('heading', { name: '合作或内推' })).toHaveCount(0)
 
     const slug = page.url().split('/projects/')[1]?.replace(/\/$/, '')
     expect(slug).toBeTruthy()

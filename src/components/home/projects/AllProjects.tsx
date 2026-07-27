@@ -1,13 +1,33 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, type HTMLAttributes } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  arrayMove,
+  rectSortingStrategy,
+  sortableKeyboardCoordinates,
+  useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { type AllProjectItem, type ProjectCategory } from '@/data/site/allProjects'
+import { reorderAllProjects } from '@/lib/projects/actions'
+import { mergeVisibleOrder } from '@/lib/projects/mergeVisibleOrder'
 import { projectRoute } from '@/lib/site/routes'
 import { SpiritSubpageHero } from '@/components/spirit/shell/SpiritSubpageHero'
+import { useToast } from '@/components/spirit/feedback/ToastProvider'
 import { getArchiveAccent, getArchiveCode } from '@/utils/archiveCategory'
 import { handleWatercolorHover } from '@/utils/watercolorHover'
 import { ScrollReveal } from '@/components/spirit/feedback/ScrollReveal'
@@ -121,68 +141,6 @@ function useProjectCarousel(screenshotCount: number) {
   }
 }
 
-const FeaturedProjectCard = ({
-  project,
-  onManage,
-  onOpen,
-}: {
-  project: AllProjectItem
-  onManage: (project: AllProjectItem) => void
-  onOpen: (project: AllProjectItem) => void
-}) => {
-  const { isHovered, currentImageIndex, bindHover } = useProjectCarousel(project.screenshots.length)
-  const accent = getArchiveAccent(project.category)
-
-  return (
-    <ScrollReveal index={0} className="sg-bento-archive__featured">
-      <article
-        {...bindHover}
-        onMouseMove={handleWatercolorHover}
-        onClick={() => onOpen(project)}
-        className="sg-card sg-card--watercolor sg-card--exhibit sg-card--archive sg-archive-featured"
-        style={{ ['--archive-accent' as string]: accent }}
-      >
-      <button
-        type="button"
-        className="sg-project-card__manage"
-        aria-label={`管理项目：${project.name}`}
-        onClick={(event) => {
-          event.stopPropagation()
-          onManage(project)
-        }}
-      >
-        管理
-      </button>
-      <span className="sg-project-card__code">{getArchiveCode(project.category, 0)}</span>
-      <div className={`sg-project-card__badge ${project.isPublic ? 'sg-project-card__badge--public' : 'sg-project-card__badge--private'}`}>
-        {project.isPublic ? '公网可见' : '内部系统'}
-      </div>
-      <div className="sg-archive-featured__media">
-        <ProjectMedia
-          project={project}
-          isHovered={isHovered}
-          currentImageIndex={currentImageIndex}
-          priority
-          sizes="(max-width: 768px) 100vw, 720px"
-        />
-      </div>
-      <div className="sg-archive-featured__body">
-        <p className="sg-archive-featured__eyebrow">最新归档 · {project.category}</p>
-        <h2 className="sg-archive-featured__title">{project.name}</h2>
-        <p className="sg-card-desc">{project.description}</p>
-        <div className="sg-card__tags">
-          {project.tags.slice(0, 4).map((tag) => (
-            <span key={tag} className="sg-tag sg-tag--platform">
-              {tag}
-            </span>
-          ))}
-        </div>
-      </div>
-      </article>
-    </ScrollReveal>
-  )
-}
-
 // ==========================================
 // 卡片组件
 // ==========================================
@@ -191,11 +149,16 @@ const ProjectCard = ({
   index,
   onManage,
   onOpen,
+  dragHandle,
 }: {
   project: AllProjectItem
   index: number
   onManage: (project: AllProjectItem) => void
   onOpen: (project: AllProjectItem) => void
+  dragHandle?: {
+    attributes: HTMLAttributes<HTMLButtonElement>
+    listeners?: HTMLAttributes<HTMLButtonElement>
+  }
 }) => {
   const { isHovered, currentImageIndex, bindHover } = useProjectCarousel(project.screenshots.length)
   const accent = getArchiveAccent(project.category)
@@ -217,6 +180,18 @@ const ProjectCard = ({
         className="sg-card sg-card--watercolor sg-card--exhibit sg-card--archive sg-project-card sg-project-card--accent"
         style={{ ['--archive-accent' as string]: accent }}
       >
+      {dragHandle ? (
+        <button
+          type="button"
+          className="sg-project-card__drag"
+          aria-label="拖动排序"
+          onClick={(event) => event.stopPropagation()}
+          {...dragHandle.attributes}
+          {...dragHandle.listeners}
+        >
+          ⋮⋮
+        </button>
+      ) : null}
       <button
         type="button"
         className="sg-project-card__manage"
@@ -267,17 +242,74 @@ const ProjectCard = ({
   )
 }
 
+function SortableProjectCard({
+  project,
+  index,
+  onManage,
+  onOpen,
+}: {
+  project: AllProjectItem
+  index: number
+  onManage: (project: AllProjectItem) => void
+  onOpen: (project: AllProjectItem) => void
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: project.id })
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.85 : undefined,
+        zIndex: isDragging ? 2 : undefined,
+      }}
+    >
+      <ProjectCard
+        project={project}
+        index={index}
+        onManage={onManage}
+        onOpen={onOpen}
+        dragHandle={{
+          attributes: attributes as HTMLAttributes<HTMLButtonElement>,
+          listeners: listeners as HTMLAttributes<HTMLButtonElement> | undefined,
+        }}
+      />
+    </div>
+  )
+}
+
 // ==========================================
 // 主页面组件
 // ==========================================
-export function AllProjects({ initialProjects }: { initialProjects: AllProjectItem[] }) {
+export function AllProjects({
+  initialProjects,
+  canReorder = false,
+}: {
+  initialProjects: AllProjectItem[]
+  canReorder?: boolean
+}) {
   const router = useRouter()
+  const { toast } = useToast()
   const [allProjectsList, setAllProjectsList] = useState(initialProjects)
   useSyncInitialData(initialProjects, setAllProjectsList)
-  const [activeCategory, setActiveCategory] = useState<ProjectCategory | '全部' | '精选'>('全部')
+  const [activeCategory, setActiveCategory] = useState<ProjectCategory | '全部'>('全部')
   const [selectedProject, setSelectedProject] = useState<AllProjectItem | null>(null)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [editingProject, setEditingProject] = useState<AllProjectItem | null>(null)
+  const [isReordering, setIsReordering] = useState(false)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
 
   const refreshProjects = useCallback(() => {
     router.refresh()
@@ -290,14 +322,49 @@ export function AllProjects({ initialProjects }: { initialProjects: AllProjectIt
     [router],
   )
 
-  const categories: Array<ProjectCategory | '全部' | '精选'> = ['全部', '精选', '数字孪生', '后台与管理系统', '门户与展现', '未分类']
+  const categories: Array<ProjectCategory | '全部'> = ['全部', '门户与展现', '数字孪生']
 
   const filteredProjects =
     activeCategory === '全部'
       ? allProjectsList
-      : activeCategory === '精选'
-        ? allProjectsList.filter((p) => p.isFeatured)
-        : allProjectsList.filter((p) => p.category === activeCategory)
+      : allProjectsList.filter((p) => p.category === activeCategory)
+
+  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id || isReordering) return
+
+    const oldIndex = filteredProjects.findIndex((project) => project.id === active.id)
+    const newIndex = filteredProjects.findIndex((project) => project.id === over.id)
+    if (oldIndex < 0 || newIndex < 0) return
+
+    const visibleOrderedIds = arrayMove(filteredProjects, oldIndex, newIndex).map((project) => project.id)
+    const fullIds = allProjectsList.map((project) => project.id)
+    let nextFullIds: string[]
+    try {
+      nextFullIds = mergeVisibleOrder(fullIds, visibleOrderedIds)
+    } catch (error) {
+      toast(error instanceof Error ? error.message : '排序失败', 'error')
+      return
+    }
+
+    const previous = allProjectsList
+    const byId = new Map(allProjectsList.map((project) => [project.id, project]))
+    setAllProjectsList(
+      nextFullIds.map((id, index) => ({
+        ...byId.get(id)!,
+        sortOrder: index,
+      })),
+    )
+
+    setIsReordering(true)
+    const { error } = await reorderAllProjects(nextFullIds)
+    setIsReordering(false)
+
+    if (error) {
+      setAllProjectsList(previous)
+      toast(error, 'error')
+    }
+  }, [allProjectsList, filteredProjects, isReordering, toast])
 
   // 处理溢出滚动锁定
   useEffect(() => {
@@ -311,13 +378,38 @@ export function AllProjects({ initialProjects }: { initialProjects: AllProjectIt
 
   const publicCount = allProjectsList.filter((p) => p.isPublic).length
   const categoryCount = new Set(allProjectsList.map((p) => p.category)).size
-  const showBento = activeCategory === '全部' && filteredProjects.length > 0
-  const featuredProject = showBento
-    ? (allProjectsList.find((p) => p.isFeatured) ?? filteredProjects[0])
-    : null
-  const gridProjects = showBento && featuredProject
-    ? filteredProjects.filter((p) => p.id !== featuredProject.id)
-    : filteredProjects
+
+  const shelf = (
+    <div className="sg-archive-shelf sg-bento-archive sg-bento-archive--uniform">
+      {canReorder
+        ? filteredProjects.map((project, idx) => (
+            <SortableProjectCard
+              key={project.id}
+              project={project}
+              index={idx}
+              onManage={setSelectedProject}
+              onOpen={openProject}
+            />
+          ))
+        : filteredProjects.map((project, idx) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              index={idx}
+              onManage={setSelectedProject}
+              onOpen={openProject}
+            />
+          ))}
+      {filteredProjects.length === 0 ? (
+        <SpiritEmptyState
+          className="sg-empty-state--grid"
+          imageSrc="/spirit-garden/icon-book.png"
+          title="暂无该分类下的项目"
+          description="切换其他分类，或通过上方按钮新增归档。"
+        />
+      ) : null}
+    </div>
+  )
 
   return (
     <div className="sg-page">
@@ -359,7 +451,7 @@ export function AllProjects({ initialProjects }: { initialProjects: AllProjectIt
             >
               <span
                 className="sg-filter-chip__dot"
-                style={{ background: cat === '精选' ? 'var(--sg-accent)' : getArchiveAccent(cat as ProjectCategory | '全部') }}
+                style={{ background: getArchiveAccent(cat) }}
                 aria-hidden
               />
               {cat}
@@ -368,32 +460,22 @@ export function AllProjects({ initialProjects }: { initialProjects: AllProjectIt
         </div>
       </div>
 
-      <div className={`sg-archive-shelf sg-bento-archive${showBento ? '' : ' sg-bento-archive--uniform'}`}>
-        {featuredProject ? (
-          <FeaturedProjectCard
-            project={featuredProject}
-            onManage={setSelectedProject}
-            onOpen={openProject}
-          />
-        ) : null}
-        {gridProjects.map((project, idx) => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            index={showBento ? idx + 1 : idx}
-            onManage={setSelectedProject}
-            onOpen={openProject}
-          />
-        ))}
-        {filteredProjects.length === 0 ? (
-          <SpiritEmptyState
-            className="sg-empty-state--grid"
-            imageSrc="/spirit-garden/icon-book.png"
-            title="暂无该分类下的项目"
-            description="切换其他分类，或通过上方按钮新增归档。"
-          />
-        ) : null}
-      </div>
+      {canReorder ? (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={(event) => {
+            void handleDragEnd(event)
+          }}
+        >
+          <SortableContext
+            items={filteredProjects.map((project) => project.id)}
+            strategy={rectSortingStrategy}
+          >
+            {shelf}
+          </SortableContext>
+        </DndContext>
+      ) : shelf}
 
       <AnimatePresence>
         {selectedProject ? (

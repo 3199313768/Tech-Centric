@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { requireAuthenticatedUser } from '@/lib/auth/requireUser'
 import { createClient } from '@/lib/supabase/server'
 import type { ProjectCategory } from '@/data/site/allProjects'
+import { assertCompleteProjectOrder } from '@/lib/projects/assertCompleteProjectOrder'
 import { buildProjectSlug } from '@/lib/projects/slug'
 import { scheduleRagReindex } from '@/lib/rag/reindexTrigger'
 import { SITE_ROUTES, projectRoute } from '@/lib/site/routes'
@@ -53,11 +54,28 @@ export async function saveAllProject(input: SaveAllProjectInput): Promise<{ erro
     is_featured: input.isFeatured ?? false,
   }
 
-  const { error } = input.id
-    ? await supabase.from('all_projects').update(row).eq('id', input.id)
-    : await supabase.from('all_projects').insert([{ id: projectId, ...row }])
+  if (input.id) {
+    const { error } = await supabase.from('all_projects').update(row).eq('id', input.id)
+    if (error) return { error: error.message }
+  } else {
+    const { data: maxRow, error: maxError } = await supabase
+      .from('all_projects')
+      .select('sort_order')
+      .order('sort_order', { ascending: false })
+      .limit(1)
+      .maybeSingle()
 
-  if (error) return { error: error.message }
+    if (maxError) return { error: maxError.message }
+
+    const nextSortOrder = (maxRow?.sort_order ?? -1) + 1
+    const { error } = await supabase.from('all_projects').insert([{
+      id: projectId,
+      ...row,
+      sort_order: nextSortOrder,
+    }])
+    if (error) return { error: error.message }
+  }
+
   revalidatePath(SITE_ROUTES.projects)
   revalidatePath(projectRoute(slug))
   if (input.isPublic) {
@@ -76,5 +94,39 @@ export async function deleteAllProject(projectId: string): Promise<{ error: stri
   if (error) return { error: error.message }
   revalidatePath(SITE_ROUTES.projects)
   scheduleRagReindex('project_delete')
+  return { error: null }
+}
+
+export async function reorderAllProjects(
+  orderedIds: string[],
+): Promise<{ error: string | null }> {
+  const { error: authError } = await requireAuthenticatedUser()
+  if (authError) return { error: authError }
+
+  if (!Array.isArray(orderedIds) || orderedIds.length === 0) {
+    return { error: '排序列表无效' }
+  }
+
+  const supabase = await createClient()
+  const { data, error: listError } = await supabase
+    .from('all_projects')
+    .select('id')
+
+  if (listError) return { error: listError.message }
+
+  const existingIds = (data ?? []).map((row) => row.id)
+  const validationError = assertCompleteProjectOrder(orderedIds, existingIds)
+  if (validationError) return { error: validationError }
+
+  const results = await Promise.all(
+    orderedIds.map((id, index) =>
+      supabase.from('all_projects').update({ sort_order: index }).eq('id', id),
+    ),
+  )
+
+  const failed = results.find((result) => result.error)
+  if (failed?.error) return { error: failed.error.message }
+
+  revalidatePath(SITE_ROUTES.projects)
   return { error: null }
 }

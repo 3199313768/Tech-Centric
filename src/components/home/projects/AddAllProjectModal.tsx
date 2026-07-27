@@ -123,9 +123,8 @@ export function AddAllProjectModal({ isOpen, onClose, onSuccess, initialData }: 
           <div className="sg-form-field">
             <label className="sg-form-label" htmlFor="ap-category">分类 *</label>
             <select required id="ap-category" className="sg-form-select" name="category" value={formData.category} onChange={handleChange}>
-              <option value="数字孪生">数字孪生</option>
-              <option value="后台与管理系统">后台与管理系统</option>
               <option value="门户与展现">门户与展现</option>
+              <option value="数字孪生">数字孪生</option>
               <option value="未分类">未分类</option>
             </select>
           </div>
