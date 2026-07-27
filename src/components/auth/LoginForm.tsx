@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { resolveLoginEmail } from '@/lib/auth/loginIdentity'
 import {
   isSiteRole,
   resolvePostLoginPath,
@@ -11,7 +12,7 @@ import {
 } from '@/lib/auth/roles'
 
 export function LoginForm() {
-  const [email, setEmail] = useState('')
+  const [account, setAccount] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -25,7 +26,7 @@ export function LoginForm() {
     setError(null)
 
     const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
+      email: resolveLoginEmail(account),
       password,
     })
 
@@ -53,23 +54,24 @@ export function LoginForm() {
   }
 
   return (
-    <div className="sg-modal-panel sg-kb-login-panel">
-      <h2 className="sg-modal-title">登录 SpiritGarden</h2>
-      <p className="sg-modal-subtitle">使用管理员下发的账号</p>
+    <div className="sg-login-form">
+      <h1 className="sg-login-form__title">登录</h1>
+      <p className="sg-login-form__subtitle">使用管理员下发的账号进入庭院</p>
 
-      <form onSubmit={handleLogin}>
+      <form className="sg-login-form__fields" onSubmit={handleLogin}>
         <div className="sg-form-field">
-          <label className="sg-form-label" htmlFor="login-email">
-            邮箱
+          <label className="sg-form-label" htmlFor="login-account">
+            账号
           </label>
           <input
-            id="login-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            id="login-account"
+            type="text"
+            value={account}
+            onChange={(e) => setAccount(e.target.value)}
             className="sg-form-input"
             required
-            autoComplete="email"
+            autoComplete="username"
+            placeholder="admin 或完整邮箱"
           />
         </div>
         <div className="sg-form-field">
@@ -88,20 +90,18 @@ export function LoginForm() {
         </div>
 
         {error ? (
-          <div className="sg-kb-error sg-kb-error--inline">
+          <div className="sg-kb-error sg-kb-error--inline" role="alert">
             <p>{error}</p>
           </div>
         ) : null}
 
-        <div className="sg-modal-actions">
-          <button
-            type="submit"
-            disabled={loading}
-            className="sg-btn sg-btn--primary"
-          >
-            {loading ? '登录中...' : '登录'}
-          </button>
-        </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="sg-btn sg-btn--primary sg-login-form__submit"
+        >
+          {loading ? '登录中...' : '进入庭院'}
+        </button>
       </form>
     </div>
   )

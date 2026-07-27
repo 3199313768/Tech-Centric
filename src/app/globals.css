@@ -5349,6 +5349,208 @@ svg {
   margin: 0 auto;
 }
 
+/* —— 全站登录页（左右分栏） —— */
+.sg-login {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(20rem, 1fr);
+  min-height: 100dvh;
+  background: var(--sg-cream);
+}
+
+.sg-login-brand {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 42vh;
+  color: var(--sg-cream);
+}
+
+.sg-login-brand__image {
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
+
+.sg-login-brand__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15, 42, 14, 0.28) 0%,
+      rgba(21, 66, 18, 0.55) 48%,
+      rgba(21, 66, 18, 0.82) 100%
+    );
+  pointer-events: none;
+}
+
+.sg-login-brand__content {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 2;
+  padding: clamp(1.5rem, 4vw, 2.75rem);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.sg-login-brand__logo {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(15, 42, 14, 0.35);
+}
+
+.sg-login-brand__name {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-quicksand), var(--font-plus-jakarta), sans-serif;
+  font-size: clamp(1.75rem, 3.5vw, 2.35rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  color: var(--sg-cream);
+}
+
+.sg-login-brand__lead {
+  margin: 0;
+  max-width: 18rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--sg-cream) 82%, transparent);
+}
+
+.sg-login-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  background:
+    radial-gradient(ellipse at 80% 0%, color-mix(in srgb, var(--sg-green-light) 22%, transparent), transparent 55%),
+    var(--sg-cream);
+}
+
+.sg-login-panel__inner {
+  width: 100%;
+  max-width: 22.5rem;
+}
+
+.sg-login-form__title {
+  margin: 0 0 0.4rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--sg-ink-strong);
+}
+
+.sg-login-form__subtitle {
+  margin: 0 0 1.75rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--sg-ink);
+}
+
+.sg-login-form__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.sg-login-form__submit {
+  width: 100%;
+  margin-top: 0.85rem;
+  justify-content: center;
+  transition:
+    transform var(--sg-motion-fast),
+    box-shadow var(--sg-motion-base),
+    opacity var(--sg-motion-fast);
+}
+
+.sg-login-form__submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.sg-login-form__submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.sg-login-form__skeleton {
+  height: 14rem;
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--sg-parchment) 80%, transparent);
+}
+
+.sg-login-enter {
+  animation: sg-login-enter var(--sg-motion-base) both;
+}
+
+.sg-login-enter--0 {
+  animation-delay: 40ms;
+}
+
+.sg-login-enter--1 {
+  animation-delay: calc(40ms + var(--sg-motion-stagger));
+}
+
+@keyframes sg-login-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dark .sg-login {
+  background: var(--sg-cream);
+}
+
+.dark .sg-login-brand__veil {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(8, 16, 8, 0.45) 0%,
+      rgba(10, 20, 10, 0.72) 55%,
+      rgba(10, 20, 10, 0.9) 100%
+    );
+}
+
+.dark .sg-login-panel {
+  background:
+    radial-gradient(ellipse at 80% 0%, color-mix(in srgb, var(--sg-green-mid) 18%, transparent), transparent 55%),
+    var(--sg-cream);
+}
+
+@media (max-width: 767px) {
+  .sg-login {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(36vh, 42vh) 1fr;
+  }
+
+  .sg-login-brand__content {
+    padding: 1.25rem 1.25rem 1.5rem;
+  }
+
+  .sg-login-brand__name {
+    font-size: 1.65rem;
+  }
+
+  .sg-login-panel {
+    align-items: flex-start;
+    padding-top: 1.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sg-login-enter,
+  .sg-login-form__submit {
+    animation: none;
+    transition: none;
+  }
+}
+
 .sg-kb-kbd {
   display: inline-block;
   padding: 2px 6px;
