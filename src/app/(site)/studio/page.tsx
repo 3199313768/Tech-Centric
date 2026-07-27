@@ -1,7 +1,8 @@
-import { LoginForm } from '@/components/knowledge/auth/LoginForm'
+import { ForbiddenPanel } from '@/components/auth/ForbiddenPanel'
 import { StudioDashboard } from '@/components/home/studio/StudioDashboard'
+import { getSessionProfile } from '@/lib/auth/getSessionProfile'
+import { SITE_ROLE } from '@/lib/auth/roles'
 import { fetchPublicContentStats, fetchStudioStats } from '@/lib/studio/queries'
-import { createClient } from '@/lib/supabase/server'
 
 export const metadata = {
   title: '工作台 · SpiritGarden',
@@ -9,20 +10,14 @@ export const metadata = {
 }
 
 export default async function StudioPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return (
-      <div className="spirit-garden-content sg-subpage sg-subpage--workshop sg-kb-login-wrap">
-        <LoginForm />
-      </div>
-    )
+  const profile = await getSessionProfile()
+  if (!profile || profile.role !== SITE_ROLE.super_admin) {
+    return <ForbiddenPanel />
   }
 
   const [stats, publicStats] = await Promise.all([
-    fetchStudioStats(user.id),
-    fetchPublicContentStats(user.id),
+    fetchStudioStats(profile.user.id),
+    fetchPublicContentStats(profile.user.id),
   ])
 
   return (

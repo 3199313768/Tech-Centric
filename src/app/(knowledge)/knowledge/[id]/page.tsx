@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { ForbiddenPanel } from '@/components/auth/ForbiddenPanel'
 import { PublicRecordView } from '@/components/knowledge/browse/PublicRecordView'
+import { getSessionProfile } from '@/lib/auth/getSessionProfile'
+import { SITE_ROLE } from '@/lib/auth/roles'
 import { fetchPublicKbRecord } from '@/lib/knowledge/queries'
 import { fetchRelatedPublicKbRecords } from '@/lib/knowledge/relatedRecords'
 
@@ -24,6 +27,11 @@ export async function generateMetadata({ params }: KnowledgePublicPageProps): Pr
 }
 
 export default async function KnowledgePublicPage({ params }: KnowledgePublicPageProps) {
+  const profile = await getSessionProfile()
+  if (!profile || profile.role !== SITE_ROLE.super_admin) {
+    return <ForbiddenPanel />
+  }
+
   const { id } = await params
   const record = await fetchPublicKbRecord(id)
 

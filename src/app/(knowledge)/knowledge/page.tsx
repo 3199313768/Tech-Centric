@@ -1,7 +1,8 @@
 import { Suspense } from 'react'
-import { createClient } from '@/lib/supabase/server'
+import { ForbiddenPanel } from '@/components/auth/ForbiddenPanel'
 import { SearchBar } from '@/components/knowledge/browse/SearchBar'
-import { LoginForm } from '@/components/knowledge/auth/LoginForm'
+import { getSessionProfile } from '@/lib/auth/getSessionProfile'
+import { SITE_ROLE } from '@/lib/auth/roles'
 import { RecordList } from '@/components/knowledge/browse/RecordList'
 import { MobileFab } from '@/components/knowledge/capture/MobileFab'
 import { TagFilterBar } from '@/components/knowledge/browse/TagFilterBar'
@@ -20,20 +21,14 @@ interface PageProps {
 }
 
 async function KnowledgePageContent({ searchParams }: PageProps) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return (
-      <div className="spirit-garden-content sg-subpage sg-subpage--archive sg-kb-login-wrap">
-        <LoginForm />
-      </div>
-    )
+  const profile = await getSessionProfile()
+  if (!profile || profile.role !== SITE_ROLE.super_admin) {
+    return <ForbiddenPanel />
   }
 
   const resolvedParams = await searchParams
   const { query, tagsFilter, typeFilter } = parseKnowledgeSearchParams(resolvedParams)
-  const { records, uniqueTags, hasMore, recordsError } = await fetchKnowledgePageData(user.id, {
+  const { records, uniqueTags, hasMore, recordsError } = await fetchKnowledgePageData(profile.user.id, {
     query,
     tagsFilter,
     typeFilter,
