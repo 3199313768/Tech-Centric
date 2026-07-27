@@ -42,3 +42,6 @@ next-env.d.ts
 
 # cursor agent session state
 .superpowers/
+
+# git worktrees
+.worktrees/
