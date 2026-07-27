@@ -9150,7 +9150,14 @@ svg {
 }
 
 .sg-project-detail__hero {
-  padding: 2rem 0 1.5rem;
+  padding: 2.25rem 0 1.75rem;
+}
+
+.sg-project-detail__hero h1 {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.75rem, 3.2vw, 2.25rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
 }
 
 .sg-project-detail__back {
@@ -9176,9 +9183,10 @@ svg {
 }
 
 .sg-project-detail__media {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   border-radius: var(--sg-radius-lg, 12px);
   overflow: hidden;
+  box-shadow: 0 8px 24px -12px var(--color-card-shadow);
 }
 
 .sg-project-detail__img {
@@ -9187,16 +9195,28 @@ svg {
   display: block;
 }
 
-.sg-project-detail__body section {
-  margin-bottom: 1.75rem;
+.sg-project-detail__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
 }
 
-.sg-project-detail__body h2 {
-  font-size: 1.1rem;
+.sg-project-detail__panel {
+  margin: 0;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--sg-radius-lg, 12px);
+  border: 1px solid var(--sg-border-subtle);
+  background: var(--sg-surface-elevated);
+}
+
+.sg-project-detail__panel h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
   margin: 0 0 0.75rem;
+  color: var(--sg-text-primary, var(--sg-ink, inherit));
 }
 
-.sg-project-detail__body p {
+.sg-project-detail__panel p {
   line-height: 1.7;
   color: var(--sg-text-secondary);
   margin: 0;
@@ -9207,6 +9227,23 @@ svg {
   padding-left: 1.25rem;
   line-height: 1.65;
   color: var(--sg-text-secondary);
+}
+
+.sg-project-detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0.25rem 0 0;
+}
+
+.sg-project-detail__contact.sg-project-detail__panel {
+  margin-top: 0.25rem;
+  padding-top: 1.25rem;
+  border-top: none;
+}
+
+.sg-project-detail__contact .sg-btn {
+  margin-top: 1rem;
 }
 
 .sg-project-card__manage {
@@ -9824,23 +9861,6 @@ svg {
 .sg-nav-drawer-link--secondary {
   font-size: 0.9375rem;
   opacity: 0.9;
-}
-
-.sg-project-detail__contact {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px dashed var(--sg-border-subtle);
-}
-
-.sg-project-detail__contact h2 {
-  margin: 0 0 0.5rem;
-  font-size: 1.125rem;
-}
-
-.sg-project-detail__contact p {
-  margin: 0 0 1rem;
-  color: var(--sg-text-secondary);
-  line-height: 1.6;
 }
 
 .sg-studio-reindex {
